@@ -4,12 +4,34 @@ import chess
 import chess.engine
 import random
 import os
+from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend
 
 # Global Stockfish engine
 engine = None
+
+# OpenAI client
+openai_client = None
+
+def init_openai():
+    """Initialize OpenAI client"""
+    global openai_client
+    try:
+        api_key = os.environ.get('OPENAI_API_KEY')
+        print(f"Debug: API key exists: {bool(api_key)}")
+        if api_key:
+            # Initialize OpenAI client with minimal parameters
+            openai_client = OpenAI()  # Will use OPENAI_API_KEY from environment
+            print("OpenAI client initialized successfully")
+            return True
+        else:
+            print("Warning: OPENAI_API_KEY not found in environment variables")
+            return False
+    except Exception as e:
+        print(f"Error initializing OpenAI: {e}")
+        return False
 
 def init_stockfish():
     """Initialize Stockfish engine"""
@@ -126,67 +148,123 @@ def get_move():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+def get_position_info(fen):
+    """Get detailed position information for GPT context"""
+    try:
+        board = chess.Board(fen)
+        
+        # Basic position info
+        turn = "White" if board.turn else "Black"
+        move_number = board.fullmove_number
+        
+        # Game phase
+        pieces = len([p for p in board.piece_map().values()])
+        if move_number <= 10:
+            phase = "opening"
+        elif pieces <= 10:
+            phase = "endgame"  
+        else:
+            phase = "middlegame"
+            
+        # Checks and threats
+        in_check = board.is_check()
+        legal_moves = list(board.legal_moves)
+        
+        # Material count
+        material = {"white": 0, "black": 0}
+        piece_values = {"p": 1, "n": 3, "b": 3, "r": 5, "q": 9}
+        
+        for square, piece in board.piece_map().items():
+            color = "white" if piece.color else "black"
+            material[color] += piece_values.get(piece.symbol().lower(), 0)
+        
+        return {
+            "turn": turn,
+            "move_number": move_number,
+            "phase": phase,
+            "in_check": in_check,
+            "legal_moves_count": len(legal_moves),
+            "material_white": material["white"],
+            "material_black": material["black"],
+            "material_balance": material["white"] - material["black"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_gpt_chess_response(message, fen):
+    """Get intelligent chess response from GPT-4o"""
+    try:
+        if not openai_client:
+            return None
+            
+        # Get position analysis
+        pos_info = get_position_info(fen)
+        
+        # Create context-rich prompt
+        system_prompt = f"""You are a world-class chess coach and analyst. You help players understand positions, strategy, and tactics.
+
+**Current Position Analysis:**
+- **Turn to move:** {pos_info.get('turn', 'Unknown')}
+- **Move number:** {pos_info.get('move_number', 'Unknown')}
+- **Game phase:** {pos_info.get('phase', 'Unknown')}
+- **In check:** {pos_info.get('in_check', False)}
+- **Legal moves:** {pos_info.get('legal_moves_count', 0)}
+- **Material balance:** {pos_info.get('material_balance', 0)} (positive favors White)
+
+**FEN:** {fen}
+
+**Formatting Instructions:**
+- Use **Opening Name** format for chess openings (e.g., **Italian Game**, **Sicilian Defense**, **Queen's Gambit**)
+- Use `move` format for all chess moves (e.g., `1.e4`, `Nf3`, `O-O`, `Bxf7+`)
+- Use **bold** for important chess concepts and terms
+- Use • for bullet points
+- Keep responses concise and well-formatted
+
+Provide helpful, accurate chess advice. Be concise but well-formatted.
+Only answer the question asked. Keep responses under 150 words."""
+
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
+            max_tokens=200,
+            temperature=0.2
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        print(f"OpenAI API error: {e}")
+        return None
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """Handle chat messages and provide chess advice"""
+    """Handle chat messages and provide chess advice using GPT-4o"""
     try:
         data = request.json
-        message = data.get('message', '').lower()
+        message = data.get('message', '')
         fen = data.get('fen', '')
         
-        # Simple chess advice based on keywords
-        if 'position' in message or 'analyze' in message:
-            if fen:
-                board = chess.Board(fen)
-                turn = "White" if board.turn else "Black"
-                moves_count = len(list(board.legal_moves))
-                response = f"Current position: {turn} to move with {moves_count} legal moves available."
-            else:
-                response = "Please make a move first so I can analyze the position!"
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
         
-        elif 'strategy' in message or 'plan' in message:
-            responses = [
-                "Focus on piece development and center control in the opening.",
-                "Look for tactical opportunities and improve piece coordination.",
-                "In chess, always consider your opponent's threats before making a move.",
-                "Good chess strategy involves controlling key squares and improving piece activity."
-            ]
-            response = random.choice(responses)
+        # Try to get GPT-4o response first
+        gpt_response = None
+        if fen and openai_client:
+            gpt_response = get_gpt_chess_response(message, fen)
         
-        elif 'move' in message or 'suggest' in message:
-            if fen:
-                board = chess.Board(fen)
-                moves = list(board.legal_moves)
-                if moves:
-                    suggested_move = random.choice(moves)
-                    response = f"Consider playing {str(suggested_move)}. Always look for checks, captures, and threats!"
-                else:
-                    response = "No legal moves available in this position."
-            else:
-                response = "Show me the current position and I can suggest moves!"
-        
-        elif 'help' in message or 'learn' in message:
-            responses = [
-                "I can help analyze positions, suggest moves, and explain chess concepts!",
-                "Ask me about strategy, tactics, or specific positions you'd like to understand.",
-                "Chess improvement comes from practice and understanding patterns. What would you like to learn?",
-                "I'm here to help with opening principles, middlegame tactics, and endgame technique!"
-            ]
-            response = random.choice(responses)
-        
+        # Use GPT response if available, otherwise show agent not working
+        if gpt_response:
+            response = gpt_response
         else:
-            responses = [
-                "That's interesting! Chess is a game of infinite possibilities.",
-                "Feel free to ask about strategy, tactics, or any position you'd like me to analyze.",
-                "I'm here to help improve your chess understanding. What would you like to know?",
-                "Every chess position tells a story. What aspect of the game interests you most?",
-                "Chess mastery comes through practice and study. How can I assist your learning today?"
-            ]
-            response = random.choice(responses)
+            response = "Agent not working"
         
         return jsonify({
             'response': response,
-            'status': 'success'
+            'status': 'success',
+            'source': 'gpt-4o' if gpt_response else 'fallback'
         })
         
     except Exception as e:
@@ -202,6 +280,49 @@ def health():
         'stockfish_available': engine is not None
     })
 
+@app.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    """Handle feedback submissions"""
+    try:
+        data = request.json
+        feedback_type = data.get('type', '')
+        title = data.get('title', '')
+        message = data.get('message', '')
+        email = data.get('email', '')
+        
+        if not title or not message:
+            return jsonify({'error': 'Title and message are required'}), 400
+        
+        # For now, just log the feedback
+        # You can later save to database, send email, etc.
+        feedback_data = {
+            'type': feedback_type,
+            'title': title,
+            'message': message,
+            'email': email,
+            'timestamp': data.get('timestamp'),
+            'user_agent': data.get('userAgent'),
+            'url': data.get('url')
+        }
+        
+        print(f"Feedback received: {feedback_data}")
+        
+        # TODO: Implement actual feedback storage/notification
+        # Options:
+        # 1. Save to database
+        # 2. Send email notification
+        # 3. Post to Discord webhook
+        # 4. Save to file
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Feedback received successfully!'
+        })
+        
+    except Exception as e:
+        print(f"Feedback submission error: {e}")
+        return jsonify({'error': 'Failed to submit feedback'}), 500
+
 def cleanup():
     """Clean up resources"""
     global engine
@@ -212,8 +333,9 @@ def cleanup():
             pass
 
 if __name__ == '__main__':
-    # Initialize Stockfish on startup
+    # Initialize Stockfish and OpenAI on startup
     init_stockfish()
+    init_openai()
     
     try:
         app.run(debug=True, host='0.0.0.0', port=5100)

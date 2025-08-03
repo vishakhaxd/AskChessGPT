@@ -76,13 +76,52 @@ class ChessGame {
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
-        contentDiv.textContent = message;
+        
+        // Parse markdown for AI messages, plain text for user messages
+        if (sender === 'ai') {
+            contentDiv.innerHTML = this.parseChessMarkdown(message);
+        } else {
+            contentDiv.textContent = message;
+        }
         
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
         
         // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    parseChessMarkdown(text) {
+        // Escape HTML first to prevent XSS
+        const escapeHtml = (str) => {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        };
+        
+        let parsed = escapeHtml(text);
+        
+        // Parse opening names (text between **opening** markers)
+        parsed = parsed.replace(/\*\*(.*?(?:Game|Defense|Opening|Attack|Variation|System|Gambit).*?)\*\*/gi, 
+            '<span class="chess-opening">$1</span>');
+        
+        // Parse other bold text
+        parsed = parsed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Parse chess moves in backticks (including numbers, letters, symbols)
+        parsed = parsed.replace(/`([^`]+)`/g, '<span class="chess-move">$1</span>');
+        
+        // Parse bullet points
+        parsed = parsed.replace(/• /g, '<li>');
+        parsed = parsed.replace(/\n• /g, '</li>\n<li>');
+        
+        // Wrap consecutive bullet points in ul tags
+        parsed = parsed.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>');
+        
+        // Parse line breaks
+        parsed = parsed.replace(/\n/g, '<br>');
+        
+        return parsed;
     }
     
     generateAIResponse(userMessage) {
@@ -786,4 +825,113 @@ class ChessGame {
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     new ChessGame();
+    initializeFeedback();
 });
+
+// Feedback System
+function initializeFeedback() {
+    const feedbackTrigger = document.getElementById('feedbackTrigger');
+    const feedbackSection = document.getElementById('feedbackSection');
+    const closeFeedback = document.getElementById('closeFeedback');
+    const feedbackForm = document.getElementById('feedbackForm');
+
+    // Show feedback modal
+    feedbackTrigger.addEventListener('click', () => {
+        feedbackSection.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    });
+
+    // Close feedback modal
+    closeFeedback.addEventListener('click', closeFeedbackModal);
+    
+    // Close on backdrop click
+    feedbackSection.addEventListener('click', (e) => {
+        if (e.target === feedbackSection) {
+            closeFeedbackModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && feedbackSection.style.display === 'flex') {
+            closeFeedbackModal();
+        }
+    });
+
+    function closeFeedbackModal() {
+        feedbackSection.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Handle feedback form submission
+    feedbackForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        submitFeedback();
+    });
+
+    function submitFeedback() {
+        const formData = {
+            type: document.getElementById('feedbackType').value,
+            title: document.getElementById('feedbackTitle').value,
+            message: document.getElementById('feedbackMessage').value,
+            email: document.getElementById('feedbackEmail').value,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        };
+
+        // Show loading state
+        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+
+        // Submit to backend API
+        fetch('http://localhost:5100/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showFeedbackSuccess();
+                feedbackForm.reset();
+                setTimeout(() => {
+                    closeFeedbackModal();
+                }, 2000);
+            } else {
+                throw new Error(data.error || 'Failed to submit feedback');
+            }
+        })
+        .catch(error => {
+            console.error('Feedback submission error:', error);
+            showFeedbackError();
+        })
+        .finally(() => {
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.style.background = '';
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+    }
+
+    function showFeedbackSuccess() {
+        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+        
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Feedback Sent!';
+        submitBtn.style.background = 'var(--accent-color)';
+        submitBtn.disabled = true;
+    }
+
+    function showFeedbackError() {
+        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
+        
+        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to Send';
+        submitBtn.style.background = 'var(--danger-color)';
+        submitBtn.disabled = true;
+    }
+}

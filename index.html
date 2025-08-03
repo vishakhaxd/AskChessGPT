@@ -13,6 +13,9 @@
         <header class="header">
             <h1><i class="fas fa-chess"></i> Talk to Chess</h1>
             <div class="header-controls">
+                <button id="feedbackTrigger" class="btn btn-secondary">
+                    <i class="fas fa-comment-dots"></i> Feedback
+                </button>
                 <button id="newGame" class="btn btn-primary"><i class="fas fa-plus"></i> New Game</button>
                 <div class="elo-display">Elo: <span id="eloValue">1500</span></div>
             </div>
@@ -77,6 +80,63 @@
                         <button id="sendMessage" class="btn btn-chat">
                             <i class="fas fa-paper-plane"></i>
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback-section" id="feedbackSection" style="display: none;">
+            <div class="feedback-container">
+                <div class="feedback-header">
+                    <h2><i class="fas fa-comments"></i> Feedback & Community</h2>
+                    <button id="closeFeedback" class="btn btn-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="feedback-content">
+                    <div class="community-section">
+                        <h3><i class="fas fa-users"></i> Join Our Community</h3>
+                        <p>Connect with other chess enthusiasts, share strategies, and get the latest updates!</p>
+                        <a href="https://discord.gg/your-discord-link" target="_blank" class="btn btn-discord">
+                            <i class="fab fa-discord"></i> Join Discord Community
+                        </a>
+                    </div>
+                    
+                    <div class="feedback-form-section">
+                        <h3><i class="fas fa-lightbulb"></i> Share Your Feedback</h3>
+                        <form id="feedbackForm" class="feedback-form">
+                            <div class="form-group">
+                                <label for="feedbackType">Type:</label>
+                                <select id="feedbackType" required>
+                                    <option value="">Select feedback type</option>
+                                    <option value="bug">🐛 Bug Report</option>
+                                    <option value="feature">💡 Feature Request</option>
+                                    <option value="improvement">🚀 Improvement Suggestion</option>
+                                    <option value="general">💬 General Feedback</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackTitle">Title:</label>
+                                <input type="text" id="feedbackTitle" placeholder="Brief title for your feedback" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackMessage">Message:</label>
+                                <textarea id="feedbackMessage" rows="4" placeholder="Describe your feedback in detail..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="feedbackEmail">Email (optional):</label>
+                                <input type="email" id="feedbackEmail" placeholder="your@email.com (for follow-up)">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Feedback
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
