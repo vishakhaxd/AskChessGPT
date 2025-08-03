@@ -11,13 +11,15 @@ class ChessGame {
         this.validMoves = [];
         
         this.initializeEventListeners();
+        this.initializeChat();
     }
     
     initializeEventListeners() {
         // Game setup
         document.getElementById('stockfishElo').addEventListener('input', (e) => {
             const elo = e.target.value;
-            document.getElementById('eloValue').textContent = elo;
+            const eloValueSpans = document.querySelectorAll('#eloValue');
+            eloValueSpans.forEach(span => span.textContent = elo);
             this.aiElo = parseInt(elo);
         });
         
@@ -32,6 +34,161 @@ class ChessGame {
         document.getElementById('undoMove').addEventListener('click', () => {
             this.undoLastMove();
         });
+    }
+    
+    initializeChat() {
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendMessage');
+        
+        // Send message on button click
+        sendButton.addEventListener('click', () => {
+            this.sendChatMessage();
+        });
+        
+        // Send message on Enter key
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.sendChatMessage();
+            }
+        });
+    }
+    
+    sendChatMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        
+        if (!message) return;
+        
+        // Add user message to chat
+        this.addChatMessage(message, 'user');
+        chatInput.value = '';
+        
+        // Generate AI response
+        setTimeout(() => {
+            this.generateAIResponse(message);
+        }, 500);
+    }
+    
+    addChatMessage(message, sender) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = message;
+        
+        messageDiv.appendChild(contentDiv);
+        chatMessages.appendChild(messageDiv);
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    generateAIResponse(userMessage) {
+        // Call the backend API for intelligent responses
+        fetch('http://localhost:5100/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: userMessage,
+                fen: this.chess.fen()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.response) {
+                this.addChatMessage(data.response, 'ai');
+            } else {
+                // Fallback to local responses
+                const responses = this.getContextualResponse(userMessage.toLowerCase());
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                this.addChatMessage(response, 'ai');
+            }
+        })
+        .catch(error => {
+            console.error('Chat API error:', error);
+            // Fallback to local responses
+            const responses = this.getContextualResponse(userMessage.toLowerCase());
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            this.addChatMessage(response, 'ai');
+        });
+    }
+    
+    getContextualResponse(message) {
+        const position = this.chess.fen();
+        const turn = this.chess.turn() === 'w' ? 'White' : 'Black';
+        const gamePhase = this.getGamePhase();
+        
+        // Check if message is about current position
+        if (message.includes('position') || message.includes('analyze') || message.includes('evaluation')) {
+            return [
+                `Current position: ${turn} to move. We're in the ${gamePhase} phase.`,
+                `This position shows typical ${gamePhase} characteristics. ${turn} has the initiative.`,
+                `Let me analyze: ${turn} to move in this ${gamePhase} position.`
+            ];
+        }
+        
+        // Check if message is about strategy
+        if (message.includes('strategy') || message.includes('plan') || message.includes('what should')) {
+            if (gamePhase === 'opening') {
+                return [
+                    "In the opening, focus on controlling the center, developing pieces, and castling for king safety.",
+                    "Key opening principles: develop knights before bishops, castle early, and control central squares.",
+                    "Good opening moves prioritize piece development and center control over material gain."
+                ];
+            } else if (gamePhase === 'middlegame') {
+                return [
+                    "In the middlegame, look for tactical opportunities and improve piece coordination.",
+                    "Focus on piece activity, pawn structure, and king safety. Look for tactical motifs.",
+                    "The middlegame is about improving piece placement and creating threats."
+                ];
+            } else {
+                return [
+                    "In the endgame, king activity becomes crucial. Centralize your king!",
+                    "Endgame principles: activate your king, push passed pawns, and simplify when ahead.",
+                    "Focus on king and pawn endgames - they're the foundation of endgame knowledge."
+                ];
+            }
+        }
+        
+        // Check if message is about moves
+        if (message.includes('move') || message.includes('suggest') || message.includes('recommend')) {
+            const moves = this.chess.moves();
+            if (moves.length > 0) {
+                const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                return [
+                    `Consider moves like ${randomMove}. Look for tactics and piece development.`,
+                    `You have ${moves.length} legal moves. Focus on piece activity and center control.`,
+                    `Think about moves that improve your position, like ${randomMove}.`
+                ];
+            }
+        }
+        
+        // General responses
+        const generalResponses = [
+            "That's an interesting question! Chess is all about pattern recognition and planning.",
+            "Great question! Remember the key principles: development, center control, and king safety.",
+            "Chess is a beautiful game of strategy and tactics. What specific aspect interests you?",
+            "Every position tells a story. What would you like to know about this position?",
+            "I'm here to help with your chess understanding! Feel free to ask about any position or concept.",
+            "Chess improvement comes from understanding patterns and practicing regularly!"
+        ];
+        
+        return generalResponses;
+    }
+    
+    getGamePhase() {
+        const moves = this.chess.history();
+        if (moves.length < 10) return 'opening';
+        
+        const pieces = this.chess.board().flat().filter(p => p !== null);
+        const majorPieces = pieces.filter(p => ['q', 'r'].includes(p.type.toLowerCase())).length;
+        
+        if (majorPieces <= 4) return 'endgame';
+        return 'middlegame';
     }
     
     startNewGame() {
@@ -597,11 +754,16 @@ class ChessGame {
     undoLastMove() {
         if (!this.gameActive || this.chess.history().length === 0) return;
         
-        // Undo the last move (or two moves if it's player's turn)
-        this.chess.undo();
+        // Simple approach: Always undo two moves (player + AI) to get back to player's turn
+        // If there's only one move, just undo that one
+        const historyLength = this.chess.history().length;
         
-        // If it's currently player's turn, undo one more move (the AI's move)
-        if (!this.isPlayerTurn && this.chess.history().length > 0) {
+        if (historyLength >= 2) {
+            // Undo both AI's move and player's move
+            this.chess.undo(); // Undo AI's move
+            this.chess.undo(); // Undo player's move
+        } else if (historyLength === 1) {
+            // Only one move exists, just undo it
             this.chess.undo();
         }
         
@@ -610,6 +772,7 @@ class ChessGame {
         this.updateMoveHistory();
         this.isPlayerTurn = true;
         this.updateGameStatus();
+        this.deselectSquare(); // Clear any selection
     }
     
     showGameSetup() {

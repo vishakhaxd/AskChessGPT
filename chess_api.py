@@ -126,6 +126,72 @@ def get_move():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """Handle chat messages and provide chess advice"""
+    try:
+        data = request.json
+        message = data.get('message', '').lower()
+        fen = data.get('fen', '')
+        
+        # Simple chess advice based on keywords
+        if 'position' in message or 'analyze' in message:
+            if fen:
+                board = chess.Board(fen)
+                turn = "White" if board.turn else "Black"
+                moves_count = len(list(board.legal_moves))
+                response = f"Current position: {turn} to move with {moves_count} legal moves available."
+            else:
+                response = "Please make a move first so I can analyze the position!"
+        
+        elif 'strategy' in message or 'plan' in message:
+            responses = [
+                "Focus on piece development and center control in the opening.",
+                "Look for tactical opportunities and improve piece coordination.",
+                "In chess, always consider your opponent's threats before making a move.",
+                "Good chess strategy involves controlling key squares and improving piece activity."
+            ]
+            response = random.choice(responses)
+        
+        elif 'move' in message or 'suggest' in message:
+            if fen:
+                board = chess.Board(fen)
+                moves = list(board.legal_moves)
+                if moves:
+                    suggested_move = random.choice(moves)
+                    response = f"Consider playing {str(suggested_move)}. Always look for checks, captures, and threats!"
+                else:
+                    response = "No legal moves available in this position."
+            else:
+                response = "Show me the current position and I can suggest moves!"
+        
+        elif 'help' in message or 'learn' in message:
+            responses = [
+                "I can help analyze positions, suggest moves, and explain chess concepts!",
+                "Ask me about strategy, tactics, or specific positions you'd like to understand.",
+                "Chess improvement comes from practice and understanding patterns. What would you like to learn?",
+                "I'm here to help with opening principles, middlegame tactics, and endgame technique!"
+            ]
+            response = random.choice(responses)
+        
+        else:
+            responses = [
+                "That's interesting! Chess is a game of infinite possibilities.",
+                "Feel free to ask about strategy, tactics, or any position you'd like me to analyze.",
+                "I'm here to help improve your chess understanding. What would you like to know?",
+                "Every chess position tells a story. What aspect of the game interests you most?",
+                "Chess mastery comes through practice and study. How can I assist your learning today?"
+            ]
+            response = random.choice(responses)
+        
+        return jsonify({
+            'response': response,
+            'status': 'success'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
