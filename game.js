@@ -3,9 +3,8 @@ class ChessGame {
     constructor() {
         this.chess = new Chess();
         this.board = null;
-        this.stockfishWorker = null;
         this.playerColor = 'white';
-        this.stockfishElo = 1500;
+        this.aiElo = 1500;
         this.isPlayerTurn = true;
         this.gameActive = false;
         this.selectedSquare = null;
@@ -19,7 +18,7 @@ class ChessGame {
         document.getElementById('stockfishElo').addEventListener('input', (e) => {
             const elo = e.target.value;
             document.getElementById('eloValue').textContent = elo;
-            this.stockfishElo = parseInt(elo);
+            this.aiElo = parseInt(elo);
         });
         
         document.getElementById('startGame').addEventListener('click', () => {
@@ -37,7 +36,7 @@ class ChessGame {
     
     startNewGame() {
         this.playerColor = document.getElementById('playerColor').value;
-        this.stockfishElo = parseInt(document.getElementById('stockfishElo').value);
+        this.aiElo = parseInt(document.getElementById('stockfishElo').value);
         
         // Hide setup, show game
         document.getElementById('gameSetup').style.display = 'none';
@@ -45,17 +44,14 @@ class ChessGame {
         
         // Initialize chess and board
         this.chess = new Chess();
-        console.log('Chess initialized:', this.chess.ascii());
         
         // Wait for DOM to update before initializing board
         setTimeout(() => {
             this.initializeBoard();
-            this.initializeStockfish();
             this.gameActive = true;
             
             // Set initial turn
             this.isPlayerTurn = this.playerColor === 'white';
-            console.log('Game started - Player color:', this.playerColor, 'Player turn:', this.isPlayerTurn);
             this.updateGameStatus();
             
             // Clear any selection
@@ -64,8 +60,9 @@ class ChessGame {
             // If player is black, let AI move first
             if (this.playerColor === 'black') {
                 setTimeout(() => {
-                    this.makeRandomMove();
+                    this.makeAIMove();
                 }, 500);
+            } else {
             }
             
             this.updateMoveHistory();
@@ -94,9 +91,7 @@ class ChessGame {
             return;
         }
         
-        console.log('Creating chessboard with config:', config);
         this.board = Chessboard('chessboard', config);
-        console.log('Board created:', this.board);
         
         // Explicitly set the starting position
         this.board.position('start');
@@ -108,7 +103,6 @@ class ChessGame {
         setTimeout(() => {
             this.board.position('start'); // Set position again to ensure pieces load
             this.resizeBoard();
-            console.log('Board position set to start');
         }, 100);
         
         window.addEventListener('resize', () => this.resizeBoard());
@@ -139,7 +133,6 @@ class ChessGame {
     }
     
     handleSquareClick(square) {
-        console.log('Square clicked:', square);
         
         // If no piece is selected
         if (!this.selectedSquare) {
@@ -184,8 +177,6 @@ class ChessGame {
         this.selectedSquare = square;
         this.validMoves = moves;
         
-        console.log('Selected square:', square, 'Valid moves:', moves.length);
-        
         // Highlight the selected square and valid moves
         this.highlightSelectedSquare(square);
         this.highlightValidMoves(moves);
@@ -195,7 +186,6 @@ class ChessGame {
         this.selectedSquare = null;
         this.validMoves = [];
         this.removeHighlights();
-        console.log('Deselected square');
     }
     
     isValidMove(targetSquare) {
@@ -203,7 +193,6 @@ class ChessGame {
     }
     
     makeMove(from, to) {
-        console.log('Making move:', from, 'to', to);
         
         const move = this.chess.move({
             from: from,
@@ -212,7 +201,6 @@ class ChessGame {
         });
         
         if (!move) {
-            console.log('Invalid move');
             return;
         }
         
@@ -237,8 +225,8 @@ class ChessGame {
         
         // Make AI move after a short delay
         setTimeout(() => {
-            this.makeRandomMove();
-        }, 500);
+            this.makeAIMove();
+        }, 200); // Reduced from 500ms to 200ms
     }
     
     highlightSelectedSquare(square) {
@@ -263,63 +251,263 @@ class ChessGame {
         }
     }
     
-    initializeStockfish() {
-        // Temporarily disable Stockfish worker due to security restrictions
-        // We'll use a simple random AI instead
-        console.log('Using simple random AI instead of Stockfish');
-        this.stockfishWorker = null;
+    async makeAIMove() {
+        if (!this.gameActive || this.isPlayerTurn) return;
+        
+        this.updateGameStatus('AI is thinking...');
+        
+        try {
+            const response = await fetch('http://localhost:5100/api/move', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fen: this.chess.fen(),
+                    elo: this.aiElo
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to get AI move');
+            }
+            
+            const data = await response.json();
+            console.log('Backend response:', data); // Debug log
+            console.log('Frontend FEN:', this.chess.fen()); // Debug log
+            
+            // Try different ways to apply the move
+            let move = null;
+            
+            // Method 1: Direct string move
+            try {
+                move = this.chess.move(data.move);
+                console.log('Method 1 (direct string) result:', move);
+            } catch (e) {
+                console.log('Method 1 failed:', e.message);
+            }
+            
+            // Method 2: Parse move string and use object format
+            if (!move && data.move.length === 4) {
+                try {
+                    const from = data.move.substring(0, 2);
+                    const to = data.move.substring(2, 4);
+                    move = this.chess.move({ from: from, to: to });
+                    console.log('Method 2 (object format) result:', move);
+                } catch (e) {
+                    console.log('Method 2 failed:', e.message);
+                }
+            }
+            
+            console.log('Final move result:', move); // Debug log
+            if (move) {
+                this.finishAIMove();
+            } else {
+                console.log('Invalid move:', data.move, 'for position:', this.chess.fen()); // Debug log
+                this.updateGameStatus('AI error occurred');
+            }
+            
+        } catch (error) {
+            this.updateGameStatus('AI connection failed');
+        }
     }
     
-    // Simple random AI as fallback
-    makeRandomMove() {
-        const possibleMoves = this.chess.moves();
+
+    
+    getDepthForElo(elo) {
+        if (elo < 1200) return 5;
+        if (elo < 1600) return 8;
+        if (elo < 2000) return 10;
+        if (elo < 2400) return 12;
+        return 15;
+    }
+    
+    // Simple AI fallback (optimized version of previous AI)
+    makeSimpleAIMove() {
+        const possibleMoves = this.chess.moves({ verbose: true });
         if (possibleMoves.length === 0) {
             this.updateGameStatus('AI has no moves');
             return;
         }
         
-        const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-        const move = this.chess.move(randomMove);
+        let selectedMove;
+        const skillLevel = this.eloToSkillLevel(this.aiElo);
+        
+        if (skillLevel >= 8) {
+            selectedMove = this.getBestMove(2);
+        } else if (skillLevel >= 5) {
+            const bestMoves = this.getTopMoves(3, 2);
+            selectedMove = bestMoves[Math.floor(Math.random() * Math.min(2, bestMoves.length))];
+        } else if (skillLevel >= 2) {
+            if (Math.random() < 0.4) {
+                selectedMove = this.getBestMove(1);
+            } else {
+                selectedMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+            }
+        } else {
+            const captures = possibleMoves.filter(move => move.captured);
+            if (captures.length > 0 && Math.random() < 0.3) {
+                selectedMove = captures[Math.floor(Math.random() * captures.length)];
+            } else {
+                selectedMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+            }
+        }
+        
+        const move = this.chess.move(selectedMove);
         
         if (move) {
-            console.log('AI played:', randomMove);
-            // Update board position
-            this.board.position(this.chess.fen());
-            this.updateMoveHistory();
-            
-            // Check for game end
-            if (this.chess.game_over()) {
-                this.handleGameEnd();
-                return;
-            }
-            
-            // Switch back to player
-            this.isPlayerTurn = true;
-            this.updateGameStatus();
+            this.finishAIMove();
         }
     }
     
-    handleStockfishMessage(e) {
-        const { type, move, message } = e.data;
+    finishAIMove() {
+        // Update board position
+        this.board.position(this.chess.fen());
+        this.updateMoveHistory();
         
-        switch (type) {
-            case 'ready':
-                console.log('Stockfish ready');
-                break;
-                
-            case 'bestmove':
-                if (move && move !== '(none)') {
-                    this.executeStockfishMove(move);
-                } else {
-                    this.updateGameStatus('Stockfish has no moves');
-                }
-                break;
-                
-            case 'error':
-                console.error('Stockfish error:', message);
-                this.updateGameStatus('AI error occurred');
-                break;
+        // Check for game end
+        if (this.chess.game_over()) {
+            this.handleGameEnd();
+            return;
         }
+        
+        // Switch back to player
+        this.isPlayerTurn = true;
+        this.updateGameStatus();
+    }
+    
+    eloToSkillLevel(elo) {
+        // Convert Elo to skill level (0-10)
+        if (elo < 900) return 0;
+        if (elo < 1100) return 1;
+        if (elo < 1300) return 2;
+        if (elo < 1500) return 3;
+        if (elo < 1700) return 4;
+        if (elo < 1900) return 5;
+        if (elo < 2100) return 6;
+        if (elo < 2300) return 7;
+        if (elo < 2500) return 8;
+        if (elo < 2700) return 9;
+        return 10;
+    }
+    
+    // Minimax algorithm with alpha-beta pruning
+    minimax(depth, alpha, beta, maximizingPlayer) {
+        if (depth === 0 || this.chess.game_over()) {
+            return this.evaluatePosition();
+        }
+        
+        const moves = this.chess.moves({ verbose: true });
+        
+        if (maximizingPlayer) {
+            let maxEval = -Infinity;
+            for (let move of moves) {
+                this.chess.move(move);
+                const evaluation = this.minimax(depth - 1, alpha, beta, false);
+                this.chess.undo();
+                maxEval = Math.max(maxEval, evaluation);
+                alpha = Math.max(alpha, evaluation);
+                if (beta <= alpha) break; // Alpha-beta pruning
+            }
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            for (let move of moves) {
+                this.chess.move(move);
+                const evaluation = this.minimax(depth - 1, alpha, beta, true);
+                this.chess.undo();
+                minEval = Math.min(minEval, evaluation);
+                beta = Math.min(beta, evaluation);
+                if (beta <= alpha) break; // Alpha-beta pruning
+            }
+            return minEval;
+        }
+    }
+    
+    getBestMove(depth) {
+        const moves = this.chess.moves({ verbose: true });
+        let bestMove = moves[0];
+        let bestValue = -Infinity;
+        const isAIWhite = this.playerColor === 'black';
+        
+        for (let move of moves) {
+            this.chess.move(move);
+            const value = this.minimax(depth - 1, -Infinity, Infinity, !isAIWhite);
+            this.chess.undo();
+            
+            if ((isAIWhite && value > bestValue) || (!isAIWhite && value < bestValue)) {
+                bestValue = value;
+                bestMove = move;
+            }
+        }
+        
+        return bestMove;
+    }
+    
+    getTopMoves(numMoves, depth) {
+        const moves = this.chess.moves({ verbose: true });
+        const evaluatedMoves = [];
+        const isAIWhite = this.playerColor === 'black';
+        
+        for (let move of moves) {
+            this.chess.move(move);
+            const value = this.minimax(depth - 1, -Infinity, Infinity, !isAIWhite);
+            this.chess.undo();
+            evaluatedMoves.push({ move, value });
+        }
+        
+        // Sort moves by value
+        evaluatedMoves.sort((a, b) => {
+            return isAIWhite ? b.value - a.value : a.value - b.value;
+        });
+        
+        return evaluatedMoves.slice(0, numMoves).map(item => item.move);
+    }
+    
+    // Fast position evaluation function - OPTIMIZED FOR SPEED
+    evaluatePosition() {
+        if (this.chess.in_checkmate()) {
+            return this.chess.turn() === 'w' ? -9999 : 9999;
+        }
+        
+        if (this.chess.in_draw()) {
+            return 0;
+        }
+        
+        let evaluation = 0;
+        const board = this.chess.board();
+        
+        // Simple piece values (faster than complex positional evaluation)
+        const pieceValues = {
+            'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000
+        };
+        
+        // Quick material count
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                const piece = board[i][j];
+                if (piece) {
+                    const value = pieceValues[piece.type];
+                    const sign = piece.color === 'w' ? 1 : -1;
+                    evaluation += sign * value;
+                    
+                    // Simple center bonus (much faster than full positional tables)
+                    if ((i === 3 || i === 4) && (j === 3 || j === 4)) {
+                        evaluation += sign * 10;
+                    }
+                }
+            }
+        }
+        
+        // Simple mobility bonus (count moves for current player only)
+        evaluation += this.chess.moves().length * 2;
+        
+        return evaluation;
+    }
+    
+    // Remove old random move function
+    makeRandomMove() {
+        this.makeAIMove();
     }
     
     removeHighlights() {
@@ -327,34 +515,13 @@ class ChessGame {
         $('#chessboard .square-55d63').removeClass('highlight-source highlight-destination');
     }
     
-    makeStockfishMove() {
-        if (!this.stockfishWorker || !this.gameActive) return;
-        
-        this.stockfishWorker.postMessage({
-            type: 'getMove',
-            fen: this.chess.fen(),
-            elo: this.stockfishElo,
-            depth: 15
-        });
-    }
-    
     executeStockfishMove(moveStr) {
         const move = this.chess.move(moveStr);
         
         if (move) {
-            // Update board position
-            this.board.position(this.chess.fen());
-            this.updateMoveHistory();
-            
-            // Check for game end
-            if (this.chess.game_over()) {
-                this.handleGameEnd();
-                return;
-            }
-            
-            // Switch back to player
-            this.isPlayerTurn = true;
-            this.updateGameStatus();
+            this.finishAIMove();
+        } else {
+            this.makeSimpleAIMove(); // Fallback
         }
     }
     
@@ -446,11 +613,7 @@ class ChessGame {
     }
     
     showGameSetup() {
-        // Terminate worker and reset game
-        if (this.stockfishWorker) {
-            this.stockfishWorker.terminate();
-        }
-        
+        // Reset game
         this.gameActive = false;
         document.getElementById('gameSetup').style.display = 'block';
         document.getElementById('gameArea').style.display = 'none';
