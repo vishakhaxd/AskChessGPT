@@ -8,7 +8,7 @@ import requests
 from datetime import datetime
 from openai import OpenAI
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)  # Enable CORS for frontend
 
 # Global Stockfish engine
@@ -18,7 +18,7 @@ engine = None
 openai_client = None
 
 # Telegram Bot Configuration
-TELEGRAM_BOT_TOKEN = "8258171703:AAGwa9xh8DT1ng8AKULZjE_UoXfQrMEnJHY"
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = None  # Will be set when bot receives first message
 
 def send_telegram_message(message):
@@ -87,20 +87,43 @@ def init_stockfish():
     """Initialize Stockfish engine"""
     global engine
     try:
-        # Try common Stockfish binary names and locations
-        stockfish_paths = [
-            '/Users/ninad/Personal_project/chess-ai/stockfish-macos-m1-apple-silicon'
-        ]
+        import platform
+        system = platform.system().lower()
+        
+        # Auto-detect platform and set appropriate Stockfish paths
+        stockfish_paths = []
+        
+        if system == 'linux':
+            stockfish_paths = [
+                './stockfish-android-armv8',
+                './stockfish',
+                'stockfish'
+            ]
+        elif system == 'darwin':  # macOS
+            stockfish_paths = [
+                './stockfish-macos-m1-apple-silicon',
+                './stockfish',
+                'stockfish'
+            ]
+        else:  # Windows or other
+            stockfish_paths = [
+                './stockfish-android-armv8',
+                './stockfish',
+                'stockfish'
+            ]
+        
+        print(f"Platform detected: {system}")
+        print(f"Trying Stockfish paths: {stockfish_paths}")
         
         for path in stockfish_paths:
-            if os.path.exists(path) or path == 'stockfish':
-                try:
+            try:
+                if os.path.exists(path) or path == 'stockfish':
                     engine = chess.engine.SimpleEngine.popen_uci(path)
                     print(f"Stockfish initialized successfully from: {path}")
                     return True
-                except Exception as e:
-                    print(f"Failed to initialize Stockfish from {path}: {e}")
-                    continue
+            except Exception as e:
+                print(f"Failed to initialize Stockfish from {path}: {e}")
+                continue
         
         print("Warning: Stockfish not found, falling back to random moves")
         return False
@@ -406,6 +429,11 @@ def track_visit():
     except Exception as e:
         print(f"Visit tracking error: {e}")
         return jsonify({'error': 'Failed to track visit'}), 500
+
+@app.route('/')
+def index():
+    """Serve the main page"""
+    return app.send_static_file('index.html')
 
 @app.route('/api/health', methods=['GET'])
 def health():
