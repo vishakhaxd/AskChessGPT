@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talk to Chess - AI Chess Companion</title>
+    <title>AskChessGPT.com</title>
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,7 +11,7 @@
 <body>
     <div class="app-container">
         <header class="header">
-            <h1><i class="fas fa-chess"></i> Talk to Chess</h1>
+            <h1><i class="fas fa-chess"></i>AskChessGPT.com</h1>
             <div class="header-controls">
                 <button id="feedbackTrigger" class="btn btn-secondary">
                     <i class="fas fa-comment-dots"></i> Feedback
@@ -67,7 +67,7 @@
             
             <div class="sidebar right">
                 <div class="chat-container">
-                    <h3><i class="fas fa-comments"></i> Chess Assistant</h3>
+                    <h3><i class="fas fa-comments"></i> ChessGPT</h3>
                     <div class="chat-messages" id="chatMessages">
                         <div class="message ai-message">
                             <div class="message-content">
@@ -99,7 +99,7 @@
                     <div class="community-section">
                         <h3><i class="fas fa-users"></i> Join Our Community</h3>
                         <p>Connect with other chess enthusiasts, share strategies, and get the latest updates!</p>
-                        <a href="https://discord.gg/your-discord-link" target="_blank" class="btn btn-discord">
+                        <a href="https://discord.gg/86zuvTjq" target="_blank" class="btn btn-discord">
                             <i class="fab fa-discord"></i> Join Discord Community
                         </a>
                     </div>
@@ -147,5 +147,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="game.js?v=9"></script>
+    
+    <!-- Visit Tracking -->
+    <script>
+        // Track website visit on page load
+        $(document).ready(function() {
+            $.ajax({
+                url: 'http://localhost:5100/api/track-visit',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    referrer: document.referrer || 'Direct',
+                    url: window.location.href
+                }),
+                success: function(response) {
+                    console.log('Visit tracked successfully');
+                },
+                error: function() {
+                    console.log('Visit tracking failed');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
