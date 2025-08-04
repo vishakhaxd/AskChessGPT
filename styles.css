@@ -247,6 +247,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    height: calc(100vh - 10rem);
 }
 
 .sidebar.left {
@@ -276,6 +277,9 @@ body {
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .move-history h3 {
@@ -293,8 +297,9 @@ body {
     font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.8;
-    max-height: 400px;
+    flex: 1;
     overflow-y: auto;
+    min-height: 0;
 }
 
 .move-pair {
@@ -326,6 +331,7 @@ body {
     padding: 1.5rem;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .status {

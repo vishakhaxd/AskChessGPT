@@ -4,6 +4,8 @@ import chess
 import chess.engine
 import random
 import os
+import requests
+from datetime import datetime
 from openai import OpenAI
 
 app = Flask(__name__)
@@ -14,6 +16,54 @@ engine = None
 
 # OpenAI client
 openai_client = None
+
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN = "8258171703:AAGwa9xh8DT1ng8AKULZjE_UoXfQrMEnJHY"
+TELEGRAM_CHAT_ID = None  # Will be set when bot receives first message
+
+def send_telegram_message(message):
+    """Send message to Telegram bot"""
+    try:
+        global TELEGRAM_CHAT_ID
+        
+        if not TELEGRAM_BOT_TOKEN:
+            return False
+        
+        # If no chat ID, try to get it automatically
+        if not TELEGRAM_CHAT_ID:
+            print("No chat ID configured, attempting to get updates...")
+            try:
+                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('result'):
+                        latest_update = data['result'][-1]
+                        TELEGRAM_CHAT_ID = latest_update['message']['chat']['id']
+                        print(f"Auto-configured chat ID: {TELEGRAM_CHAT_ID}")
+                    else:
+                        print("No messages found. Send a message to the bot first.")
+                        return False
+                else:
+                    print("Failed to get Telegram updates")
+                    return False
+            except Exception as e:
+                print(f"Failed to auto-configure chat ID: {e}")
+                return False
+            
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        data = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": message,
+            "parse_mode": "Markdown"
+        }
+        
+        response = requests.post(url, json=data, timeout=10)
+        return response.status_code == 200
+        
+    except Exception as e:
+        print(f"Telegram error: {e}")
+        return False
 
 def init_openai():
     """Initialize OpenAI client"""
@@ -229,8 +279,8 @@ Only answer the question asked. Keep responses under 150 words."""
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
             ],
-            max_tokens=200,
-            temperature=0.2
+            max_tokens=300,
+            temperature=0.1
         )
         
         return response.choices[0].message.content.strip()
@@ -270,6 +320,93 @@ def chat():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/telegram/setup', methods=['GET'])
+def telegram_setup():
+    """Get Telegram bot updates to find chat ID"""
+    try:
+        global TELEGRAM_CHAT_ID
+        
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('result'):
+                # Get the latest chat ID
+                latest_update = data['result'][-1]
+                chat_id = latest_update['message']['chat']['id']
+                TELEGRAM_CHAT_ID = chat_id
+                
+                return jsonify({
+                    'status': 'success',
+                    'chat_id': chat_id,
+                    'message': 'Telegram chat ID configured successfully!'
+                })
+            else:
+                return jsonify({
+                    'status': 'info',
+                    'message': 'No messages found. Send a message to the bot first.'
+                })
+        else:
+            return jsonify({'error': 'Failed to get Telegram updates'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': f'Telegram setup error: {str(e)}'}), 500
+
+@app.route('/api/track-visit', methods=['POST'])
+def track_visit():
+    """Track website visits and send to Telegram"""
+    try:
+        data = request.json or {}
+        
+        # Get visitor info
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        referrer = data.get('referrer', 'Direct')
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # Try to get location from IP
+        location_info = "Unknown"
+        try:
+            # Using a free IP geolocation service
+            geo_response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=3)
+            if geo_response.status_code == 200:
+                geo_data = geo_response.json()
+                if geo_data.get('status') == 'success':
+                    city = geo_data.get('city', 'Unknown')
+                    country = geo_data.get('country', 'Unknown')
+                    location_info = f"{city}, {country}"
+        except Exception as e:
+            print(f"Geolocation error: {e}")
+        
+        # Create telegram message
+        telegram_message = f"""
+🌍 *Website Visit Tracked*
+
+👤 *Visitor Info:*
+📍 *Location:* {location_info}
+🌐 *IP:* {ip_address}
+🔗 *Referrer:* {referrer}
+🕒 *Time:* {timestamp}
+📱 *Browser:* {user_agent[:50]}...
+"""
+        
+        # Send to telegram
+        telegram_sent = send_telegram_message(telegram_message)
+        if telegram_sent:
+            print(f"Visit tracked: {ip_address} from {location_info}")
+        else:
+            print(f"Failed to send visit notification for {ip_address}")
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Visit tracked successfully'
+        })
+        
+    except Exception as e:
+        print(f"Visit tracking error: {e}")
+        return jsonify({'error': 'Failed to track visit'}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health():
     """Health check endpoint"""
@@ -307,12 +444,23 @@ def submit_feedback():
         
         print(f"Feedback received: {feedback_data}")
         
-        # TODO: Implement actual feedback storage/notification
-        # Options:
-        # 1. Save to database
-        # 2. Send email notification
-        # 3. Post to Discord webhook
-        # 4. Save to file
+        # Send feedback to Telegram bot
+        telegram_message = f"""
+🔔 *New Feedback Received*
+
+📋 *Type:* {feedback_type or 'Not specified'}
+📝 *Title:* {title}
+💬 *Message:* {message}
+📧 *Email:* {email or 'Not provided'}
+🕒 *Time:* {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+🌐 *URL:* {data.get('url', 'Not provided')}
+"""
+        
+        telegram_sent = send_telegram_message(telegram_message)
+        if telegram_sent:
+            print("Feedback sent to Telegram successfully")
+        else:
+            print("Failed to send feedback to Telegram")
         
         return jsonify({
             'status': 'success',
