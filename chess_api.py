@@ -95,7 +95,7 @@ def init_stockfish():
         
         if system == 'linux':
             stockfish_paths = [
-                './stockfish-android-armv8',
+                './stockfish-linux',
                 './stockfish',
                 'stockfish'
             ]
@@ -107,7 +107,7 @@ def init_stockfish():
             ]
         else:  # Windows or other
             stockfish_paths = [
-                './stockfish-android-armv8',
+                './stockfish.exe',
                 './stockfish',
                 'stockfish'
             ]
@@ -267,11 +267,16 @@ def get_position_info(fen):
 def get_gpt_chess_response(message, fen):
     """Get intelligent chess response from GPT-4o"""
     try:
+        print(f"GPT function called - OpenAI client: {openai_client is not None}")
+        
         if not openai_client:
+            print("No OpenAI client available")
             return None
             
         # Get position analysis
+        print("Getting position info...")
         pos_info = get_position_info(fen)
+        print(f"Position info: {pos_info}")
         
         # Create context-rich prompt
         system_prompt = f"""You are a world-class chess coach and analyst. You help players understand positions, strategy, and tactics.
@@ -296,6 +301,7 @@ def get_gpt_chess_response(message, fen):
 Provide helpful, accurate chess advice. Be concise but well-formatted.
 Only answer the question asked. Keep responses under 150 words."""
 
+        print("Calling OpenAI API...")
         response = openai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -306,7 +312,9 @@ Only answer the question asked. Keep responses under 150 words."""
             temperature=0.1
         )
         
-        return response.choices[0].message.content.strip()
+        result = response.choices[0].message.content.strip()
+        print(f"OpenAI response received: {len(result)} characters")
+        return result
         
     except Exception as e:
         print(f"OpenAI API error: {e}")
@@ -320,19 +328,29 @@ def chat():
         message = data.get('message', '')
         fen = data.get('fen', '')
         
+        print(f"Chat API called - Message: {message[:50]}..., FEN: {fen[:50] if fen else 'None'}")
+        print(f"OpenAI client available: {openai_client is not None}")
+        
         if not message:
+            print("Error: No message provided")
             return jsonify({'error': 'Message is required'}), 400
         
         # Try to get GPT-4o response first
         gpt_response = None
         if fen and openai_client:
+            print("Attempting to get GPT response...")
             gpt_response = get_gpt_chess_response(message, fen)
+            print(f"GPT response received: {gpt_response is not None}")
+        else:
+            print(f"Skipping GPT - FEN: {bool(fen)}, OpenAI client: {openai_client is not None}")
         
         # Use GPT response if available, otherwise show agent not working
         if gpt_response:
             response = gpt_response
+            print("Using GPT response")
         else:
             response = "Agent not working"
+            print("Using fallback response")
         
         return jsonify({
             'response': response,
@@ -341,6 +359,7 @@ def chat():
         })
         
     except Exception as e:
+        print(f"Chat API error: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/telegram/setup', methods=['GET'])
