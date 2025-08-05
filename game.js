@@ -1,3 +1,6 @@
+// API Configuration - automatically detects environment
+const API_BASE_URL = window.location.origin;
+
 // Chess Game Logic
 class ChessGame {
     constructor() {
@@ -125,8 +128,9 @@ class ChessGame {
     }
     
     generateAIResponse(userMessage) {
+        console.log(`Calling chat API: ${API_BASE_URL}/api/chat`);
         // Call the backend API for intelligent responses
-        fetch('http://localhost:5100/api/chat', {
+        fetch(`${API_BASE_URL}/api/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -452,8 +456,10 @@ class ChessGame {
         
         this.updateGameStatus('AI is thinking...');
         
+        console.log(`Calling move API: ${API_BASE_URL}/api/move`);
+        
         try {
-            const response = await fetch('http://localhost:5100/api/move', {
+            const response = await fetch(`${API_BASE_URL}/api/move`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -465,7 +471,9 @@ class ChessGame {
             });
             
             if (!response.ok) {
-                throw new Error('Failed to get AI move');
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+                throw new Error(`Failed to get AI move: ${response.status} - ${errorText}`);
             }
             
             const data = await response.json();
@@ -504,6 +512,7 @@ class ChessGame {
             }
             
         } catch (error) {
+            console.error('AI Move Error:', error);
             this.updateGameStatus('AI connection failed');
         }
     }
@@ -887,7 +896,7 @@ function initializeFeedback() {
         submitBtn.disabled = true;
 
         // Submit to backend API
-        fetch('http://localhost:5100/api/feedback', {
+        fetch(`${API_BASE_URL}/api/feedback`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
