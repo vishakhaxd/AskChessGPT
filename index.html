@@ -150,10 +150,38 @@
     
     <!-- Visit Tracking -->
     <script>
+        // Smart API URL detection
+        function getApiBaseUrl() {
+            const hostname = window.location.hostname;
+            
+            // Local development - use localhost:5100
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return 'http://localhost:5100';
+            }
+            
+            // Production - use same origin as frontend
+            return window.location.origin;
+        }
+        
         // Track website visit on page load
         $(document).ready(function() {
+            // First, try to setup Telegram automatically
             $.ajax({
-                url: 'http://localhost:5100/api/track-visit',
+                url: getApiBaseUrl() + '/api/telegram/setup',
+                method: 'GET',
+                timeout: 5000, // 5 second timeout to not delay page load
+                success: function(response) {
+                    console.log('Telegram setup:', response.message);
+                },
+                error: function(xhr) {
+                    // Silent fail - don't show errors to users for Telegram setup
+                    console.log('Telegram setup skipped:', xhr.status);
+                }
+            });
+            
+            // Then track the visit
+            $.ajax({
+                url: getApiBaseUrl() + '/api/track-visit',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({

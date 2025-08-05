@@ -1,5 +1,18 @@
 // API Configuration - automatically detects environment
-const API_BASE_URL = window.location.origin;
+// Smart API URL detection
+function getApiBaseUrl() {
+    const hostname = window.location.hostname;
+    
+    // Local development - use localhost:5100
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:5100';
+    }
+    
+    // Production - use same origin as frontend
+    return window.location.origin;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Chess Game Logic
 class ChessGame {
