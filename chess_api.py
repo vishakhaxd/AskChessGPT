@@ -19,37 +19,45 @@ openai_client = None
 
 # Telegram Bot Configuration
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = None  # Will be set when bot receives first message
+TELEGRAM_CHAT_ID = None  # Will be loaded from file on startup
+TELEGRAM_CONFIG_FILE = 'telegram_config.txt'
+
+def load_telegram_config():
+    """Load Telegram chat ID from file"""
+    global TELEGRAM_CHAT_ID
+    try:
+        if os.path.exists(TELEGRAM_CONFIG_FILE):
+            with open(TELEGRAM_CONFIG_FILE, 'r') as f:
+                chat_id = f.read().strip()
+                if chat_id:
+                    TELEGRAM_CHAT_ID = int(chat_id)
+                    print(f"Loaded Telegram chat ID: {TELEGRAM_CHAT_ID}")
+                    return True
+    except Exception as e:
+        print(f"Error loading Telegram config: {e}")
+    return False
+
+def save_telegram_config(chat_id):
+    """Save Telegram chat ID to file"""
+    try:
+        with open(TELEGRAM_CONFIG_FILE, 'w') as f:
+            f.write(str(chat_id))
+        print(f"Saved Telegram chat ID: {chat_id}")
+        return True
+    except Exception as e:
+        print(f"Error saving Telegram config: {e}")
+        return False
 
 def send_telegram_message(message):
     """Send message to Telegram bot"""
     try:
-        global TELEGRAM_CHAT_ID
-        
         if not TELEGRAM_BOT_TOKEN:
+            print("No Telegram bot token configured")
             return False
         
-        # If no chat ID, try to get it automatically
         if not TELEGRAM_CHAT_ID:
-            print("No chat ID configured, attempting to get updates...")
-            try:
-                url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-                response = requests.get(url, timeout=5)
-                if response.status_code == 200:
-                    data = response.json()
-                    if data.get('result'):
-                        latest_update = data['result'][-1]
-                        TELEGRAM_CHAT_ID = latest_update['message']['chat']['id']
-                        print(f"Auto-configured chat ID: {TELEGRAM_CHAT_ID}")
-                    else:
-                        print("No messages found. Send a message to the bot first.")
-                        return False
-                else:
-                    print("Failed to get Telegram updates")
-                    return False
-            except Exception as e:
-                print(f"Failed to auto-configure chat ID: {e}")
-                return False
+            print("No Telegram chat ID configured. Please call /api/telegram/setup first")
+            return False
             
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         data = {
@@ -59,7 +67,12 @@ def send_telegram_message(message):
         }
         
         response = requests.post(url, json=data, timeout=10)
-        return response.status_code == 200
+        if response.status_code == 200:
+            print("Telegram message sent successfully")
+            return True
+        else:
+            print(f"Failed to send Telegram message: {response.status_code} - {response.text}")
+            return False
         
     except Exception as e:
         print(f"Telegram error: {e}")
@@ -368,31 +381,61 @@ def telegram_setup():
     try:
         global TELEGRAM_CHAT_ID
         
+        if not TELEGRAM_BOT_TOKEN:
+            return jsonify({
+                'status': 'error',
+                'message': 'TELEGRAM_BOT_TOKEN environment variable not set'
+            }), 500
+        
+        print("Setting up Telegram bot...")
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
         response = requests.get(url, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
+            print(f"Telegram API response: {data}")
+            
             if data.get('result'):
                 # Get the latest chat ID
                 latest_update = data['result'][-1]
                 chat_id = latest_update['message']['chat']['id']
                 TELEGRAM_CHAT_ID = chat_id
                 
-                return jsonify({
-                    'status': 'success',
-                    'chat_id': chat_id,
-                    'message': 'Telegram chat ID configured successfully!'
-                })
+                # Save to file for persistence
+                if save_telegram_config(chat_id):
+                    # Test sending a message
+                    test_message = "🎉 Telegram bot setup completed successfully!"
+                    if send_telegram_message(test_message):
+                        return jsonify({
+                            'status': 'success',
+                            'chat_id': chat_id,
+                            'message': 'Telegram setup completed! Chat ID saved and test message sent.'
+                        })
+                    else:
+                        return jsonify({
+                            'status': 'warning',
+                            'chat_id': chat_id,
+                            'message': 'Chat ID saved but test message failed to send.'
+                        })
+                else:
+                    return jsonify({
+                        'status': 'error',
+                        'message': 'Failed to save Telegram configuration'
+                    }), 500
             else:
                 return jsonify({
                     'status': 'info',
-                    'message': 'No messages found. Send a message to the bot first.'
+                    'message': 'No messages found. Please send a message to your bot first, then try again.'
                 })
         else:
-            return jsonify({'error': 'Failed to get Telegram updates'}), 500
+            print(f"Telegram API error: {response.status_code} - {response.text}")
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to get Telegram updates: {response.status_code}'
+            }), 500
             
     except Exception as e:
+        print(f"Telegram setup error: {e}")
         return jsonify({'error': f'Telegram setup error: {str(e)}'}), 500
 
 @app.route('/api/track-visit', methods=['POST'])
@@ -461,7 +504,10 @@ def health():
         'status': 'ok', 
         'message': 'Chess API is running',
         'engine': 'Stockfish' if engine else 'Random',
-        'stockfish_available': engine is not None
+        'stockfish_available': engine is not None,
+        'telegram_bot_configured': bool(TELEGRAM_BOT_TOKEN),
+        'telegram_chat_configured': bool(TELEGRAM_CHAT_ID),
+        'openai_configured': bool(openai_client)
     })
 
 @app.route('/api/feedback', methods=['POST'])
@@ -528,9 +574,10 @@ def cleanup():
             pass
 
 if __name__ == '__main__':
-    # Initialize Stockfish and OpenAI on startup
+    # Initialize Stockfish, OpenAI and Telegram on startup
     init_stockfish()
     init_openai()
+    load_telegram_config()
     
     try:
         app.run(debug=True, host='0.0.0.0', port=5100)
