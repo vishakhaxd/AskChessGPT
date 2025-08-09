@@ -28,6 +28,35 @@ TELEGRAM_CONFIG_FILE = 'telegram_config.txt'
 GEO_CACHE = {}  # ip -> (timestamp, location_string)
 GEO_CACHE_TTL = 3600  # seconds
 
+def parse_user_agent(ua: str):
+    """Return (device_type, os_name) using lightweight substring checks (no extra deps)."""
+    if not ua:
+        return 'Unknown', 'Unknown'
+    ua_l = ua.lower()
+    # OS detection
+    if 'windows nt' in ua_l:
+        os_name = 'Windows'
+    elif 'mac os x' in ua_l or 'macintosh' in ua_l:
+        os_name = 'macOS'
+    elif 'android' in ua_l:
+        os_name = 'Android'
+    elif 'iphone' in ua_l or 'ipad' in ua_l or 'ios' in ua_l:
+        os_name = 'iOS'
+    elif 'linux' in ua_l and 'android' not in ua_l:
+        os_name = 'Linux'
+    else:
+        os_name = 'Other'
+    # Device type
+    if 'ipad' in ua_l or 'tablet' in ua_l:
+        device = 'Tablet'
+    elif 'mobi' in ua_l or 'iphone' in ua_l or ('android' in ua_l and 'mobile' in ua_l):
+        device = 'Mobile'
+    elif 'android' in ua_l and 'mobile' not in ua_l:
+        device = 'Tablet'
+    else:
+        device = 'Desktop'
+    return device, os_name
+
 def get_client_ip():
     """Extract real client IP considering common proxy headers."""
     # Priority order of headers
@@ -519,12 +548,13 @@ def track_visit():
         ip_address = get_client_ip()
         referrer = data.get('referrer', 'Direct')
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        device_type, os_name = parse_user_agent(user_agent)
 
         # Geolocate with new helper (cached, handles private IP)
         location_info = geolocate_ip(ip_address)
 
         # Create telegram message (markdown)
-        telegram_message = f"""\n🌍 *Website Visit Tracked*\n\n👤 *Visitor Info:*\n📍 *Location:* {location_info}\n🌐 *IP:* {ip_address}\n🔗 *Referrer:* {referrer}\n🕒 *Time:* {timestamp}\n📱 *Browser:* {user_agent[:50]}...\n"""
+        telegram_message = f"""\n🌍 *Website Visit Tracked*\n\n👤 *Visitor Info:*\n📍 *Location:* {location_info}\n🌐 *IP:* {ip_address}\n🔗 *Referrer:* {referrer}\n🕒 *Time:* {timestamp}\n💻 *Device:* {device_type} ({os_name})\n📱 *UA:* {user_agent[:60]}...\n"""
 
         # Send to telegram
         telegram_sent = send_telegram_message(telegram_message)
