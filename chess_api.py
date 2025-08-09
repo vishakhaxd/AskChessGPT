@@ -5,6 +5,8 @@ import chess.engine
 import random
 import os
 import requests
+import ipaddress
+import time
 from datetime import datetime
 from openai import OpenAI
 
@@ -21,6 +23,75 @@ openai_client = None
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = None  # Will be loaded from file on startup
 TELEGRAM_CONFIG_FILE = 'telegram_config.txt'
+
+# Simple in-memory cache for geolocation to reduce external calls
+GEO_CACHE = {}  # ip -> (timestamp, location_string)
+GEO_CACHE_TTL = 3600  # seconds
+
+def get_client_ip():
+    """Extract real client IP considering common proxy headers."""
+    # Priority order of headers
+    header_order = [
+        'CF-Connecting-IP',  # Cloudflare
+        'X-Forwarded-For',
+        'X-Real-IP'
+    ]
+    for header in header_order:
+        val = request.headers.get(header)
+        if val:
+            # X-Forwarded-For can have multiple comma-separated IPs: client, proxy1, proxy2
+            if header == 'X-Forwarded-For':
+                first_ip = val.split(',')[0].strip()
+                if first_ip:
+                    return first_ip
+            else:
+                return val.strip()
+    return request.remote_addr or '0.0.0.0'
+
+def is_public_ip(ip_str):
+    try:
+        ip_obj = ipaddress.ip_address(ip_str)
+        return not (ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_reserved or ip_obj.is_link_local)
+    except Exception:
+        return False
+
+def geolocate_ip(ip_address):
+    """Geolocate IP with caching and fallbacks. Returns human readable string."""
+    now = time.time()
+    cached = GEO_CACHE.get(ip_address)
+    if cached and (now - cached[0]) < GEO_CACHE_TTL:
+        return cached[1]
+
+    # Skip geolocation for non-public IPs
+    if not is_public_ip(ip_address):
+        location = 'Local / Private Network'
+        GEO_CACHE[ip_address] = (now, location)
+        return location
+
+    # Try providers in order (minimal logic)
+    providers = [
+        ('ip-api', f"http://ip-api.com/json/{ip_address}", 'city', 'country', 'status', 'success'),  # HTTP only
+        ('ipwhois', f"https://ipwho.is/{ip_address}", 'city', 'country', 'success', True)
+    ]
+    for name, url, city_key, country_key, status_key, success_val in providers:
+        try:
+            resp = requests.get(url, timeout=3)
+            if resp.status_code == 200:
+                data = resp.json()
+                status_ok = (data.get(status_key) == success_val)
+                if status_ok:
+                    city = data.get(city_key) or ''
+                    country = data.get(country_key) or ''
+                    location_parts = [p for p in [city, country] if p]
+                    location = ', '.join(location_parts) if location_parts else 'Unknown'
+                    GEO_CACHE[ip_address] = (now, location)
+                    return location
+        except Exception as e:
+            print(f"Geolocation provider {name} failed for {ip_address}: {e}")
+            continue
+    location = 'Unknown'
+    GEO_CACHE[ip_address] = (now, location)
+    return location
 
 def load_telegram_config():
     """Load Telegram chat ID from file"""
@@ -443,50 +514,26 @@ def track_visit():
     """Track website visits and send to Telegram"""
     try:
         data = request.json or {}
-        
         # Get visitor info
         user_agent = request.headers.get('User-Agent', 'Unknown')
-        ip_address = request.headers.get('X-Forwarded-For', request.remote_addr)
+        ip_address = get_client_ip()
         referrer = data.get('referrer', 'Direct')
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Try to get location from IP
-        location_info = "Unknown"
-        try:
-            # Using a free IP geolocation service
-            geo_response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=3)
-            if geo_response.status_code == 200:
-                geo_data = geo_response.json()
-                if geo_data.get('status') == 'success':
-                    city = geo_data.get('city', 'Unknown')
-                    country = geo_data.get('country', 'Unknown')
-                    location_info = f"{city}, {country}"
-        except Exception as e:
-            print(f"Geolocation error: {e}")
-        
-        # Create telegram message
-        telegram_message = f"""
-🌍 *Website Visit Tracked*
 
-👤 *Visitor Info:*
-📍 *Location:* {location_info}
-🌐 *IP:* {ip_address}
-🔗 *Referrer:* {referrer}
-🕒 *Time:* {timestamp}
-📱 *Browser:* {user_agent[:50]}...
-"""
-        
+        # Geolocate with new helper (cached, handles private IP)
+        location_info = geolocate_ip(ip_address)
+
+        # Create telegram message (markdown)
+        telegram_message = f"""\n🌍 *Website Visit Tracked*\n\n👤 *Visitor Info:*\n📍 *Location:* {location_info}\n🌐 *IP:* {ip_address}\n🔗 *Referrer:* {referrer}\n🕒 *Time:* {timestamp}\n📱 *Browser:* {user_agent[:50]}...\n"""
+
         # Send to telegram
         telegram_sent = send_telegram_message(telegram_message)
         if telegram_sent:
             print(f"Visit tracked: {ip_address} from {location_info}")
         else:
             print(f"Failed to send visit notification for {ip_address}")
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Visit tracked successfully'
-        })
+
+        return jsonify({'status': 'success', 'message': 'Visit tracked successfully'})
         
     except Exception as e:
         print(f"Visit tracking error: {e}")
