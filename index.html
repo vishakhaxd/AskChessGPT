@@ -13,6 +13,39 @@
         <header class="header">
             <h1><i class="fas fa-chess"></i>AskChessGPT.com</h1>
             <div class="header-controls">
+                <!-- Login Button (shown when not authenticated) -->
+                <button id="loginBtn" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </button>
+                
+                <!-- User Menu (shown when authenticated) -->
+                <div class="user-menu" style="display: none;">
+                    <button id="userMenuToggle" class="btn btn-user">
+                        <img id="userAvatar" class="user-avatar-img" src="" alt="User" style="display: none;">
+                        <i id="userAvatarIcon" class="fas fa-user"></i>
+                        <span id="userName">Loading...</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="userDropdown" class="user-dropdown">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <img id="dropdownUserAvatar" class="dropdown-avatar-img" src="" alt="User" style="display: none;">
+                                <i id="dropdownAvatarIcon" class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="user-details">
+                                <div id="userDisplayName">User</div>
+                                <div id="userEmail">user@example.com</div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <button id="signOutBtn" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+                
                 <button id="feedbackTrigger" class="btn btn-secondary">
                     <i class="fas fa-comment-dots"></i> Feedback
                 </button>
@@ -146,6 +179,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
     <script src="game.js?v=9"></script>
     
     <!-- Visit Tracking -->
@@ -197,5 +232,32 @@
             });
         });
     </script>
+
+    <!-- Lightweight feedback prompt modal -->
+    <div id="feedbackPrompt" class="prompt-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="feedbackPromptTitle">
+        <div class="prompt-card">
+            <div class="prompt-header">
+                <h3 id="feedbackPromptTitle"><i class="fas fa-heart"></i> We’d love your feedback</h3>
+                <button id="closeFeedbackPrompt" class="btn btn-close" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="prompt-body">
+                <p>
+                    Enjoying AskChessGPT? Help us make it better with a quick suggestion or bug report.
+                </p>
+                <p class="prompt-note">
+                    Share your ideas from the <strong>Feedback</strong> button at the top.
+                </p>
+                <p class="prompt-meta">Takes less than 2 minutes.</p>
+            </div>
+            <div class="prompt-actions">
+                <button id="openFeedbackFromPrompt" class="btn btn-primary">
+                    <i class="fas fa-comment-dots"></i> Share feedback
+                </button>
+                <button id="dismissFeedbackPrompt" class="btn btn-secondary">Maybe later</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

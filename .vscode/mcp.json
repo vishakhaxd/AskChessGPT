@@ -1,0 +1,13 @@
+{
+	"servers": {
+		"Neon": {
+			"url": "https://mcp.neon.tech/mcp",
+			"type": "http"
+		},
+		"supabase": {
+			"url": "https://mcp.supabase.com/mcp?project_ref=lplrcwixlwcbfnnbdvld",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}

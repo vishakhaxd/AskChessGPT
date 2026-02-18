@@ -9,6 +9,7 @@ import ipaddress
 import time
 from datetime import datetime
 from openai import OpenAI
+from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)  # Enable CORS for frontend
@@ -18,6 +19,9 @@ engine = None
 
 # OpenAI client
 openai_client = None
+
+# Load environment variables from .env (before reading env vars below)
+load_dotenv()
 
 # Telegram Bot Configuration
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
@@ -179,21 +183,24 @@ def send_telegram_message(message):
         return False
 
 def init_openai():
-    """Initialize OpenAI client"""
+    """Initialize OpenRouter client (OpenAI-compatible)"""
     global openai_client
     try:
-        api_key = os.environ.get('OPENAI_API_KEY')
-        print(f"Debug: API key exists: {bool(api_key)}")
+        api_key = os.environ.get('OPENROUTER_API_KEY')
+        print(f"Debug: OpenRouter API key exists: {bool(api_key)}")
         if api_key:
-            # Initialize OpenAI client with minimal parameters
-            openai_client = OpenAI()  # Will use OPENAI_API_KEY from environment
-            print("OpenAI client initialized successfully")
+            # Initialize OpenAI client with OpenRouter base URL
+            openai_client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key
+            )
+            print("OpenRouter client initialized successfully")
             return True
         else:
-            print("Warning: OPENAI_API_KEY not found in environment variables")
+            print("Warning: OPENROUTER_API_KEY not found in environment variables")
             return False
     except Exception as e:
-        print(f"Error initializing OpenAI: {e}")
+        print(f"Error initializing OpenRouter: {e}")
         return False
 
 def init_stockfish():
@@ -584,7 +591,7 @@ def health():
         'stockfish_available': engine is not None,
         'telegram_bot_configured': bool(TELEGRAM_BOT_TOKEN),
         'telegram_chat_configured': bool(TELEGRAM_CHAT_ID),
-        'openai_configured': bool(openai_client)
+        'openrouter_configured': bool(openai_client)
     })
 
 @app.route('/api/feedback', methods=['POST'])
@@ -614,17 +621,25 @@ def submit_feedback():
         
         print(f"Feedback received: {feedback_data}")
         
-        # Send feedback to Telegram bot
-        telegram_message = f"""
-🔔 *New Feedback Received*
+        # Send feedback to Telegram bot - escape special characters for Markdown
+        def escape_markdown(text):
+            """Escape special characters for Telegram Markdown"""
+            if not text:
+                return text
+            # Escape Markdown special characters
+            chars_to_escape = ['*', '_', '`', '[', ']', '(', ')', '~', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+            for char in chars_to_escape:
+                text = text.replace(char, f'\\{char}')
+            return text
+        
+        telegram_message = f"""🔔 *New Feedback Received*
 
-📋 *Type:* {feedback_type or 'Not specified'}
-📝 *Title:* {title}
-💬 *Message:* {message}
-📧 *Email:* {email or 'Not provided'}
+📋 *Type:* {escape_markdown(feedback_type) or 'Not specified'}
+📝 *Title:* {escape_markdown(title)}
+💬 *Message:* {escape_markdown(message)}
+📧 *Email:* {escape_markdown(email) or 'Not provided'}
 🕒 *Time:* {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-🌐 *URL:* {data.get('url', 'Not provided')}
-"""
+🌐 *URL:* {escape_markdown(data.get('url', 'Not provided'))}"""
         
         telegram_sent = send_telegram_message(telegram_message)
         if telegram_sent:

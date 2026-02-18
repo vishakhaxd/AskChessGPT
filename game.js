@@ -14,6 +14,262 @@ function getApiBaseUrl() {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Initialize page - no authentication required
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, initializing page...');
+    
+    // Check for OAuth callback hash in URL
+    if (window.location.hash && window.location.hash.includes('access_token')) {
+        // Handle OAuth callback
+        await handleOAuthCallback();
+    } else {
+        // Normal page load
+        await initializePage();
+    }
+});
+
+// Handle OAuth callback from Supabase
+async function handleOAuthCallback() {
+    try {
+        console.log('Handling OAuth callback');
+        // Supabase will automatically handle the auth state from the hash
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Wait longer for auth to process
+        
+        // Clean up the URL hash
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+        
+        // Initialize the page
+        initializePage();
+        
+        // Force update user display after OAuth
+        setTimeout(() => {
+            updateUserDisplay();
+        }, 500);
+    } catch (error) {
+        console.error('OAuth callback error:', error);
+        initializePage();
+    }
+}
+
+// Initialize the main page
+async function initializePage() {
+    console.log('Initializing page...');
+    
+    // Wait a bit for auth service to be fully initialized
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Initialize game for everyone
+    window.game = new ChessGame();
+    await initializeUserInterface();
+}
+
+// Initialize user interface components
+async function initializeUserInterface() {
+    console.log('Initializing UI...');
+    
+    // Wait for auth service to be ready
+    let retries = 0;
+    while ((typeof authService === 'undefined' || typeof window.authService === 'undefined') && retries < 20) {
+        console.log('Waiting for authService...', retries);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        retries++;
+    }
+    
+    // Use window.authService if global authService is not available
+    const auth = window.authService || authService;
+    
+    if (auth) {
+        console.log('AuthService ready, checking auth state...');
+        try {
+            // Wait for auth service initialization to complete
+            await auth.initPromise;
+            
+            // Force a session check
+            if (auth.supabase) {
+                const { data: { session } } = await auth.supabase.auth.getSession();
+                console.log('Manual session check result:', session);
+                if (session && session.user) {
+                    auth.currentUser = session.user;
+                }
+            }
+        } catch (error) {
+            console.error('Auth initialization failed:', error);
+        }
+    } else {
+        console.warn('AuthService not available after waiting');
+    }
+    
+    // Check if user is logged in and update UI accordingly
+    updateUserDisplay();
+    
+    // Set up periodic check for auth state changes (less frequent)
+    setInterval(() => {
+        updateUserDisplay();
+    }, 5000); // Check every 5 seconds instead of every second
+    
+    // User menu functionality
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    const userDropdown = document.getElementById('userDropdown');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const loginBtn = document.getElementById('loginBtn');
+
+    if (userMenuToggle && userDropdown) {
+        // Toggle user menu
+        userMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
+            userMenuToggle.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', () => {
+            userDropdown.classList.remove('show');
+            userMenuToggle.classList.remove('active');
+        });
+
+        // Prevent menu from closing when clicking inside
+        userDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', async () => {
+            if (typeof authService !== 'undefined') {
+                await authService.signOut();
+            }
+        });
+    }
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', () => {
+            window.location.href = '/login.html';
+        });
+    }
+}
+
+// Update user display in the UI
+function updateUserDisplay() {
+    console.log('updateUserDisplay called at:', new Date().toISOString());
+    
+    const userMenu = document.querySelector('.user-menu');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    console.log('DOM elements found:', { userMenu: !!userMenu, loginBtn: !!loginBtn });
+    
+    // Try to get auth service from global scope or local scope
+    const auth = window.authService || authService;
+    console.log('authService available:', !!auth);
+    
+    if (!auth) {
+        console.warn('authService not available, showing login button');
+        if (userMenu) userMenu.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'flex';
+        return;
+    }
+    
+    const isAuthenticated = auth.isAuthenticated();
+    const currentUser = auth.getCurrentUser();
+    console.log('Auth check:', { isAuthenticated, currentUser });
+    
+    
+    if (isAuthenticated && currentUser) {
+        // User is logged in - show user menu
+        console.log('User is authenticated, updating UI for user:', currentUser);
+        
+        const userName = document.getElementById('userName');
+        const userDisplayName = document.getElementById('userDisplayName');
+        const userEmail = document.getElementById('userEmail');
+        const userAvatar = document.getElementById('userAvatar');
+        const userAvatarIcon = document.getElementById('userAvatarIcon');
+        const dropdownUserAvatar = document.getElementById('dropdownUserAvatar');
+        const dropdownAvatarIcon = document.getElementById('dropdownAvatarIcon');
+
+        console.log('UI elements found:', {
+            userName: !!userName,
+            userDisplayName: !!userDisplayName,
+            userEmail: !!userEmail,
+            userAvatar: !!userAvatar,
+            userAvatarIcon: !!userAvatarIcon
+        });
+
+        const displayName = currentUser.user_metadata?.name || currentUser.user_metadata?.full_name || currentUser.email || 'User';
+        const shortName = displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName;
+        const avatarUrl = currentUser.user_metadata?.avatar_url || currentUser.user_metadata?.picture;
+        
+        console.log('User data:', { displayName, shortName, avatarUrl });
+        
+        if (userName) {
+            userName.textContent = shortName;
+            console.log('Set userName to:', shortName);
+        }
+        if (userDisplayName) {
+            userDisplayName.textContent = displayName;
+            console.log('Set userDisplayName to:', displayName);
+        }
+        if (userEmail) {
+            userEmail.textContent = currentUser.email || '';
+            console.log('Set userEmail to:', currentUser.email);
+        }
+        
+        // Handle user avatar in header button
+        if (avatarUrl && userAvatar && userAvatarIcon) {
+            console.log('Setting header avatar to:', avatarUrl);
+            userAvatar.src = avatarUrl;
+            userAvatar.style.display = 'block';
+            userAvatarIcon.style.display = 'none';
+            userAvatar.onerror = function() {
+                console.log('Header avatar failed to load, using fallback');
+                this.style.display = 'none';
+                userAvatarIcon.style.display = 'block';
+            };
+        } else if (userAvatarIcon) {
+            console.log('Using header icon fallback (no avatar URL or missing elements)');
+            userAvatarIcon.style.display = 'block';
+            if (userAvatar) userAvatar.style.display = 'none';
+        }
+        
+        // Handle user avatar in dropdown
+        if (avatarUrl && dropdownUserAvatar && dropdownAvatarIcon) {
+            console.log('Setting dropdown avatar');
+            dropdownUserAvatar.src = avatarUrl;
+            dropdownUserAvatar.style.display = 'block';
+            dropdownAvatarIcon.style.display = 'none';
+            dropdownUserAvatar.onerror = function() {
+                console.log('Dropdown avatar failed to load');
+                this.style.display = 'none';
+                dropdownAvatarIcon.style.display = 'block';
+            };
+        } else if (dropdownAvatarIcon) {
+            console.log('Using dropdown icon fallback');
+            dropdownAvatarIcon.style.display = 'block';
+            if (dropdownUserAvatar) dropdownUserAvatar.style.display = 'none';
+        }
+
+        if (userMenu) {
+            userMenu.style.display = 'block';
+            console.log('Showing user menu');
+        }
+        if (loginBtn) {
+            loginBtn.style.display = 'none';
+            console.log('Hiding login button');
+        }
+    } else {
+        // User is not logged in - show login button
+        console.log('User not authenticated - showing login button');
+        if (userMenu) {
+            userMenu.style.display = 'none';
+            console.log('Hiding user menu');
+        }
+        if (loginBtn) {
+            loginBtn.style.display = 'flex';
+            console.log('Showing login button');
+        }
+    }
+}
+
 // Chess Game Logic
 class ChessGame {
     constructor() {
@@ -75,6 +331,9 @@ class ChessGame {
         
         if (!message) return;
         
+        // Send user message to Telegram for tracking
+        this.sendMessageToTelegram(message);
+        
         // Add user message to chat
         this.addChatMessage(message, 'user');
         chatInput.value = '';
@@ -83,6 +342,71 @@ class ChessGame {
         setTimeout(() => {
             this.generateAIResponse(message);
         }, 500);
+    }
+    
+    // Send user chat message to Telegram for tracking
+    async sendMessageToTelegram(message) {
+        try {
+            // Get user info if available
+            let userInfo = 'Anonymous User';
+            let userEmail = 'Not logged in';
+            let userId = 'anonymous';
+            
+            // Try to get auth service from global scope or local scope
+            const auth = window.authService || authService;
+            
+            if (auth && auth.isAuthenticated()) {
+                const user = auth.getCurrentUser();
+                if (user) {
+                    userInfo = user.user_metadata?.name || user.user_metadata?.full_name || 'Logged in User';
+                    userEmail = user.email || 'No email';
+                    userId = user.id || 'unknown';
+                }
+            }
+            
+            // Get game context if available
+            let gameContext = 'No game active';
+            if (this.gameActive) {
+                const moves = this.chess.history();
+                const gamePhase = this.getGamePhase();
+                gameContext = `Game active - ${gamePhase} phase, ${moves.length} moves played`;
+            }
+            
+            // Format message for Telegram
+            const telegramMessage = `🎮 **Chess Chat Message**\n\n` +
+                `👤 **User:** ${userInfo}\n` +
+                `📧 **Email:** ${userEmail}\n` +
+                `🆔 **User ID:** ${userId}\n` +
+                `💬 **Message:** "${message}"\n` +
+                `🏁 **Game Status:** ${gameContext}\n` +
+                `🕐 **Time:** ${new Date().toLocaleString()}\n` +
+                `🌐 **Page:** askchessgpt.com`;
+            
+            // Send to backend API
+            await fetch(`${API_BASE_URL}/api/feedback`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'chat_message',
+                    title: 'User Chat Message',
+                    message: telegramMessage,
+                    email: userEmail,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    url: window.location.href,
+                    userId: userId,
+                    gameContext: gameContext,
+                    originalMessage: message
+                })
+            });
+            
+            console.log('Chat message sent to Telegram for tracking');
+        } catch (error) {
+            console.error('Failed to send chat message to Telegram:', error);
+            // Don't show error to user - this is background tracking
+        }
     }
     
     addChatMessage(message, sender) {
@@ -846,8 +1170,9 @@ class ChessGame {
 
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new ChessGame();
     initializeFeedback();
+    initializeFeedbackPrompt();
+    // Note: Chess game initialization is now handled by the auth check above
 });
 
 // Feedback System
@@ -956,4 +1281,48 @@ function initializeFeedback() {
         submitBtn.style.background = 'var(--danger-color)';
         submitBtn.disabled = true;
     }
+}
+
+// Lightweight homepage feedback prompt
+function initializeFeedbackPrompt() {
+    const prompt = document.getElementById('feedbackPrompt');
+    if (!prompt) return;
+
+    const openBtn = document.getElementById('openFeedbackFromPrompt');
+    const closeX = document.getElementById('closeFeedbackPrompt');
+    const dismissBtn = document.getElementById('dismissFeedbackPrompt');
+    const feedbackTrigger = document.getElementById('feedbackTrigger');
+
+    const closePrompt = () => {
+        prompt.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        try { localStorage.setItem('acg_feedback_prompt_dismissed', '1'); } catch (e) {}
+    };
+
+    // Show once per session/user (persist in localStorage)
+    const dismissed = (() => { try { return localStorage.getItem('acg_feedback_prompt_dismissed') === '1'; } catch (e) { return false; } })();
+    if (!dismissed) {
+        setTimeout(() => {
+            prompt.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }, 800);
+    }
+
+    // Wire actions
+    if (openBtn) {
+        openBtn.addEventListener('click', () => {
+            closePrompt();
+            // Open existing feedback modal via header trigger
+            if (feedbackTrigger) {
+                feedbackTrigger.click();
+            }
+        });
+    }
+    if (dismissBtn) dismissBtn.addEventListener('click', closePrompt);
+    if (closeX) closeX.addEventListener('click', closePrompt);
+
+    // Close on backdrop click
+    prompt.addEventListener('click', (e) => {
+        if (e.target === prompt) closePrompt();
+    });
 }
