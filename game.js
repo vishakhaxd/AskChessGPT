@@ -23,9 +23,11 @@ class ChessGame {
         this.validMoves = [];
         this.lastMoveContext = null;
         this.sessionId = crypto.randomUUID();
+        this._playerAnalysisHtml = '';
 
         this.initializeEventListeners();
         this.initializeChat();
+        this.tryRestoreGame();
     }
 
     initializeEventListeners() {
@@ -114,45 +116,80 @@ class ChessGame {
         if (!this.gameActive) return;
         const panel = document.getElementById('aiLogicContent');
         if (!panel) return;
-        panel.innerHTML = '<span class="typing-indicator" style="display:inline-flex;gap:4px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
-        try {
-            const resp = await fetch(`${API_BASE_URL}/api/analyze-move`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fen: this.chess.fen(),
-                    lastMove,
-                    sessionId: this.sessionId,
-                    stream: true
-                })
-            });
-            if (resp.headers.get('content-type')?.includes('text/event-stream')) {
-                const reader = resp.body.getReader();
-                const decoder = new TextDecoder();
-                let full = '', buffer = '';
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop();
-                    for (const line of lines) {
-                        if (!line.startsWith('data: ')) continue;
-                        try {
-                            const payload = JSON.parse(line.slice(6));
-                            if (payload.content) { full += payload.content; panel.innerHTML = this.parseChessMarkdown(full); }
-                            if (payload.done && payload.full) full = payload.full;
-                        } catch {}
+        const isPlayer = lastMove.actor === 'player';
+
+        if (isPlayer) {
+            // Cancel any prior stream
+            if (this._analysisAbort) this._analysisAbort.abort();
+            this._analysisAbort = new AbortController();
+            this._playerAnalysisHtml = '';
+            panel.innerHTML = '<span class="typing-indicator" style="display:inline-flex;gap:4px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+        } else {
+            // Wait for player analysis to finish before starting AI analysis
+            if (this._playerAnalysisPromise) await this._playerAnalysisPromise;
+            if (this._analysisAbort) this._analysisAbort.abort();
+            this._analysisAbort = new AbortController();
+            const prefix = this._playerAnalysisHtml ? `<div class="player-analysis">${this._playerAnalysisHtml}</div><hr class="logic-divider">` : '';
+            panel.innerHTML = prefix + '<span class="typing-indicator" style="display:inline-flex;gap:4px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+        }
+
+        const signal = this._analysisAbort.signal;
+        const doWork = async () => {
+            try {
+                const resp = await fetch(`${API_BASE_URL}/api/analyze-move`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fen: this.chess.fen(), lastMove, sessionId: this.sessionId, stream: true }),
+                    signal
+                });
+                if (resp.headers.get('content-type')?.includes('text/event-stream')) {
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder();
+                    let full = '', buffer = '';
+                    while (true) {
+                        if (signal.aborted) { reader.cancel(); return; }
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
+                            try {
+                                const payload = JSON.parse(line.slice(6));
+                                if (payload.content) {
+                                    full += payload.content;
+                                    this._renderAnalysis(panel, isPlayer, this.parseChessMarkdown(full));
+                                }
+                                if (payload.done && payload.full) full = payload.full;
+                            } catch {}
+                        }
                     }
+                    if (full) this._renderAnalysis(panel, isPlayer, this.parseChessMarkdown(full));
+                } else {
+                    const data = await resp.json();
+                    this._renderAnalysis(panel, isPlayer, data.response ? this.parseChessMarkdown(data.response) : 'No analysis.');
                 }
-                if (full) panel.innerHTML = this.parseChessMarkdown(full);
-                else panel.textContent = 'No analysis available.';
-            } else {
-                const data = await resp.json();
-                panel.innerHTML = data.response ? this.parseChessMarkdown(data.response) : 'No analysis available.';
+            } catch (e) {
+                if (e.name === 'AbortError') return;
             }
-        } catch {
-            panel.textContent = 'Analysis unavailable.';
+        };
+
+        if (isPlayer) {
+            this._playerAnalysisPromise = doWork();
+            await this._playerAnalysisPromise;
+        } else {
+            await doWork();
+        }
+    }
+
+    _renderAnalysis(panel, isPlayer, html) {
+        if (isPlayer) {
+            this._playerAnalysisHtml = html;
+            panel.innerHTML = `<div class="player-analysis">${html}</div>`;
+        } else {
+            const prefix = this._playerAnalysisHtml ? `<div class="player-analysis">${this._playerAnalysisHtml}</div><hr class="logic-divider">` : '';
+            panel.innerHTML = `${prefix}<div class="ai-analysis">${html}</div>`;
         }
     }
 
@@ -224,6 +261,8 @@ class ChessGame {
         this.lastMoveContext = null;
         this.sessionId = crypto.randomUUID();
 
+        history.replaceState(null, '', `/gameplay/${this.sessionId}`);
+
         document.getElementById('gameSetup').style.display = 'none';
         document.getElementById('gameArea').style.display = 'grid';
         document.getElementById('gameplayIntro').style.display = 'none';
@@ -272,7 +311,7 @@ class ChessGame {
             if (square) this.handleSquareClick(square);
         });
 
-        setTimeout(() => { this.board.position('start'); this.resizeBoard(); }, 100);
+        setTimeout(() => { this.board.position(this.chess.fen()); this.resizeBoard(); }, 100);
         window.addEventListener('resize', () => this.resizeBoard());
     }
 
@@ -323,10 +362,13 @@ class ChessGame {
         this.updateLastMoveDisplay();
         this.updateGameStatus();
 
+        this.requestProactiveAnalysis(this.lastMoveContext);
+
         if (this.chess.game_over()) { this.handleGameEnd(); return; }
 
         this.isPlayerTurn = false;
         this.pendingAI = true;
+        this.saveGameState();
         this.updateGameStatus('AI is thinking...');
         setTimeout(() => this.makeAIMove(), 250);
     }
@@ -353,10 +395,13 @@ class ChessGame {
         this.updateLastMoveDisplay();
         this.updateGameStatus();
 
+        this.requestProactiveAnalysis(this.lastMoveContext);
+
         if (this.chess.game_over()) { this.handleGameEnd(); return; }
 
         this.isPlayerTurn = false;
         this.pendingAI = true;
+        this.saveGameState();
         this.updateGameStatus('AI is thinking...');
     }
 
@@ -438,6 +483,7 @@ class ChessGame {
 
         // Proactive analysis for AI move
         if (this.lastMoveContext) this.requestProactiveAnalysis(this.lastMoveContext);
+        this.saveGameState();
     }
 
     updateGameStatus(custom = null) {
@@ -462,6 +508,7 @@ class ChessGame {
     handleGameEnd() {
         this.gameActive = false;
         this.updateGameStatus();
+        this.clearGameState();
         let result;
         if (this.chess.in_checkmate()) {
             const winner = this.chess.turn() === 'w' ? 'Black' : 'White';
@@ -513,16 +560,102 @@ class ChessGame {
         this.updateGameStatus();
         this.updateLastMoveDisplay();
         this.deselectSquare();
+        this.saveGameState();
     }
 
     showGameSetup() {
         this.gameActive = false;
         this.pendingAI = false;
         this.lastMoveContext = null;
+        this.clearGameState();
+        history.replaceState(null, '', '/gameplay');
         document.getElementById('gameSetup').style.display = 'block';
         document.getElementById('gameArea').style.display = 'none';
         document.getElementById('gameplayIntro').style.display = 'flex';
         document.querySelector('.gameplay-shell').classList.remove('session-live');
         document.getElementById('learningStudio').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // -- Persistence -----------------------------------------------------------
+
+    saveGameState() {
+        if (!this.gameActive) return;
+        const state = {
+            sessionId: this.sessionId,
+            playerColor: this.playerColor,
+            aiElo: this.aiElo,
+            pgn: this.chess.pgn(),
+            isPlayerTurn: this.isPlayerTurn
+        };
+        try { localStorage.setItem('askchessgpt_game', JSON.stringify(state)); } catch {}
+        fetch(`${API_BASE_URL}/api/session/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(state)
+        }).catch(() => {});
+    }
+
+    clearGameState() {
+        try { localStorage.removeItem('askchessgpt_game'); } catch {}
+    }
+
+    tryRestoreGame() {
+        const pathMatch = window.location.pathname.match(/^\/gameplay\/([a-f0-9-]+)$/i);
+        if (pathMatch) {
+            const urlSessionId = pathMatch[1];
+            fetch(`${API_BASE_URL}/api/session/${urlSessionId}`)
+                .then(r => r.ok ? r.json() : null)
+                .then(state => {
+                    if (state && state.pgn) this._restoreFromState(state);
+                    else this._tryLocalRestore();
+                })
+                .catch(() => this._tryLocalRestore());
+            return;
+        }
+        this._tryLocalRestore();
+    }
+
+    _tryLocalRestore() {
+        let state;
+        try { state = JSON.parse(localStorage.getItem('askchessgpt_game')); } catch {}
+        if (!state || !state.pgn) return;
+        this._restoreFromState(state);
+    }
+
+    _restoreFromState(state) {
+        this.sessionId = state.sessionId || crypto.randomUUID();
+        this.playerColor = state.playerColor || 'white';
+        this.aiElo = state.aiElo || 1500;
+
+        this.chess = new Chess();
+        this.chess.load_pgn(state.pgn);
+
+        history.replaceState(null, '', `/gameplay/${this.sessionId}`);
+
+        document.getElementById('gameSetup').style.display = 'none';
+        document.getElementById('gameArea').style.display = 'grid';
+        document.getElementById('gameplayIntro').style.display = 'none';
+        document.querySelector('.gameplay-shell').classList.add('session-live');
+        document.querySelectorAll('#eloValue').forEach(s => s.textContent = this.aiElo);
+
+        setTimeout(() => {
+            this.initializeBoard();
+            this.board.position(this.chess.fen(), false);
+            this.gameActive = true;
+            this.isPlayerTurn = state.isPlayerTurn !== undefined ? state.isPlayerTurn : (this.chess.turn() === (this.playerColor === 'white' ? 'w' : 'b'));
+            this.pendingAI = false;
+            this.updateGameStatus();
+            this.updateMoveHistory();
+            this.updateLastMoveDisplay();
+            const lp = document.getElementById('aiLogicContent');
+            if (lp) lp.textContent = 'Game restored. Play a move to see analysis.';
+
+            if (this.chess.game_over()) { this.handleGameEnd(); return; }
+            if (!this.isPlayerTurn) {
+                this.pendingAI = true;
+                this.updateGameStatus('AI is thinking...');
+                setTimeout(() => this.makeAIMove(), 500);
+            }
+        }, 50);
     }
 }

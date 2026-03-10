@@ -17,6 +17,35 @@ engine = None
 openai_client = None
 load_dotenv()
 
+# -- Game state persistence (file-based) ----------------------------------------
+GAMES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'games')
+os.makedirs(GAMES_DIR, exist_ok=True)
+
+import re
+
+VALID_SESSION_RE = re.compile(r'^[a-f0-9\-]{1,64}$', re.IGNORECASE)
+
+def _session_path(session_id):
+    if not VALID_SESSION_RE.match(session_id):
+        return None
+    return os.path.join(GAMES_DIR, f'{session_id}.json')
+
+def save_game(session_id, data):
+    path = _session_path(session_id)
+    if not path:
+        return False
+    data['updatedAt'] = time.time()
+    with open(path, 'w') as f:
+        json.dump(data, f)
+    return True
+
+def load_game(session_id):
+    path = _session_path(session_id)
+    if not path or not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return json.load(f)
+
 # -- Session memory (in-process) -----------------------------------------------
 sessions = {}
 MAX_SESSION_HISTORY = 12
@@ -327,11 +356,24 @@ SYSTEM_PROMPT = """You are **AskChessGPT**, a world-class chess coach (2400+ str
 - **Position overview**: Who stands better and why.
 
 ## Proactive analysis
-For [PROACTIVE] messages: give a brief 40-80 word coach comment. Focus on:
-- Was the move good or bad? (use the quality rating)
-- One tip for what to focus on next
-- If a mistake, briefly name the better move
-Be encouraging but honest.
+For [PROACTIVE] messages:
+
+### When analyzing the PLAYER's move ([PLAYER_MOVE]):
+- Rate the move quality (brilliant/strong/good/inaccuracy/mistake/blunder) using the engine data.
+- If the move was GOOD: briefly praise it (1-2 sentences), mention what it achieves.
+- If the move was BAD: DO NOT reveal the best move directly. Instead:
+  - Use Socratic questions: "Do you see the threat on f7?", "Which piece is now undefended?", "Can your opponent exploit the open diagonal?"
+  - Give positional hints: "Think about king safety", "Look at what your knight was protecting"
+  - Guide them toward the right idea without spoiling it
+- Keep it 50-100 words.
+
+### When analyzing the AI's move ([AI_MOVE]):
+- Explain the strategic/tactical reason behind the AI's move.
+- What does it threaten? What plan does it serve? What does it defend?
+- Help the player understand what they're up against.
+- NEVER suggest the player's best response or next move.
+- End with a Socratic question to guide their thinking: "What piece might be in danger now?", "How can you counter this threat?"
+- Keep it 50-100 words.
 
 ## Rules
 - NEVER fabricate lines. Only reference moves from the analysis data.
@@ -515,7 +557,18 @@ def api_analyze_move():
             pos_ctx = f"FEN: {fen}"
         actor = 'I' if last_move.get('actor') == 'player' else 'AI'
         san = last_move.get('san', '?')
-        prompt = f"{actor} just played {san}. Give a quick coach comment."
+        if actor == 'I':
+            prompt = (f"[PLAYER_MOVE] I just played {san}. "
+                      "Rate my move quality. If it was bad, explain WHY it's bad using Socratic questions — "
+                      "e.g. 'Do you see what threat your opponent now has?' or 'Notice which piece is now undefended?' "
+                      "Don't reveal the best move directly — give hints and ideas that guide me to find it. "
+                      "If the move was good, briefly say why it works.")
+        else:
+            prompt = (f"[AI_MOVE] The AI played {san}. "
+                      "Explain why the AI chose this move — what threat it creates, what plan it follows, "
+                      "or what it defends. Help me understand the logic behind it. "
+                      "Do NOT suggest my next move or reveal the best response. "
+                      "Instead end with a Socratic question that helps me think about what to do next.")
         if openai_client:
             msgs = build_llm_messages(session, pos_ctx, prompt, is_proactive=True)
             if do_stream:
@@ -546,8 +599,33 @@ def index():
     return app.send_static_file('index.html')
 
 @app.route('/gameplay')
-def gameplay():
+@app.route('/gameplay/<session_id>')
+def gameplay(session_id=None):
     return app.send_static_file('gameplay.html')
+
+@app.route('/api/session/save', methods=['POST'])
+def session_save():
+    data = request.get_json()
+    sid = data.get('sessionId')
+    if not sid:
+        return jsonify({'error': 'missing sessionId'}), 400
+    ok = save_game(sid, {
+        'sessionId': sid,
+        'playerColor': data.get('playerColor', 'white'),
+        'aiElo': data.get('aiElo', 1500),
+        'pgn': data.get('pgn', ''),
+        'isPlayerTurn': data.get('isPlayerTurn', True)
+    })
+    if not ok:
+        return jsonify({'error': 'invalid sessionId'}), 400
+    return jsonify({'ok': True, 'sessionId': sid})
+
+@app.route('/api/session/<session_id>', methods=['GET'])
+def session_load(session_id):
+    game = load_game(session_id)
+    if not game:
+        return jsonify({'error': 'not found'}), 404
+    return jsonify(game)
 
 @app.route('/api/health', methods=['GET'])
 def health():

@@ -612,6 +612,17 @@ body {
     font-weight: 600;
 }
 
+.logic-divider {
+    border: none;
+    border-top: 1px solid var(--border-primary);
+    margin: 1rem 0;
+}
+
+.player-analysis,
+.ai-analysis {
+    padding: 0.2rem 0;
+}
+
 .move-history-panel {
     flex: 0 0 auto;
     max-height: 40%;
