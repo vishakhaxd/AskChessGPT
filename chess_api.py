@@ -1,676 +1,568 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 import chess
 import chess.engine
 import random
 import os
-import requests
-import ipaddress
+import json
+import uuid
 import time
-from datetime import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)  # Enable CORS for frontend
+CORS(app)
 
-# Global Stockfish engine
 engine = None
-
-# OpenAI client
 openai_client = None
-
-# Load environment variables from .env (before reading env vars below)
 load_dotenv()
 
-# Telegram Bot Configuration
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = None  # Will be loaded from file on startup
-TELEGRAM_CONFIG_FILE = 'telegram_config.txt'
+# -- Session memory (in-process) -----------------------------------------------
+sessions = {}
+MAX_SESSION_HISTORY = 12
+SESSION_TTL = 7200
 
-# Simple in-memory cache for geolocation to reduce external calls
-GEO_CACHE = {}  # ip -> (timestamp, location_string)
-GEO_CACHE_TTL = 3600  # seconds
+def get_session(sid):
+    if sid and sid in sessions:
+        return sessions[sid]
+    new_sid = sid or str(uuid.uuid4())
+    sessions[new_sid] = {'messages': [], 'created': time.time()}
+    return sessions[new_sid]
 
-def parse_user_agent(ua: str):
-    """Return (device_type, os_name) using lightweight substring checks (no extra deps)."""
-    if not ua:
-        return 'Unknown', 'Unknown'
-    ua_l = ua.lower()
-    # OS detection
-    if 'windows nt' in ua_l:
-        os_name = 'Windows'
-    elif 'mac os x' in ua_l or 'macintosh' in ua_l:
-        os_name = 'macOS'
-    elif 'android' in ua_l:
-        os_name = 'Android'
-    elif 'iphone' in ua_l or 'ipad' in ua_l or 'ios' in ua_l:
-        os_name = 'iOS'
-    elif 'linux' in ua_l and 'android' not in ua_l:
-        os_name = 'Linux'
-    else:
-        os_name = 'Other'
-    # Device type
-    if 'ipad' in ua_l or 'tablet' in ua_l:
-        device = 'Tablet'
-    elif 'mobi' in ua_l or 'iphone' in ua_l or ('android' in ua_l and 'mobile' in ua_l):
-        device = 'Mobile'
-    elif 'android' in ua_l and 'mobile' not in ua_l:
-        device = 'Tablet'
-    else:
-        device = 'Desktop'
-    return device, os_name
-
-def get_client_ip():
-    """Extract real client IP considering common proxy headers."""
-    # Priority order of headers
-    header_order = [
-        'CF-Connecting-IP',  # Cloudflare
-        'X-Forwarded-For',
-        'X-Real-IP'
-    ]
-    for header in header_order:
-        val = request.headers.get(header)
-        if val:
-            # X-Forwarded-For can have multiple comma-separated IPs: client, proxy1, proxy2
-            if header == 'X-Forwarded-For':
-                first_ip = val.split(',')[0].strip()
-                if first_ip:
-                    return first_ip
-            else:
-                return val.strip()
-    return request.remote_addr or '0.0.0.0'
-
-def is_public_ip(ip_str):
-    try:
-        ip_obj = ipaddress.ip_address(ip_str)
-        return not (ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_reserved or ip_obj.is_link_local)
-    except Exception:
-        return False
-
-def geolocate_ip(ip_address):
-    """Geolocate IP with caching and fallbacks. Returns human readable string."""
+def prune_sessions():
     now = time.time()
-    cached = GEO_CACHE.get(ip_address)
-    if cached and (now - cached[0]) < GEO_CACHE_TTL:
-        return cached[1]
+    expired = [k for k, v in sessions.items() if now - v['created'] > SESSION_TTL]
+    for k in expired:
+        del sessions[k]
 
-    # Skip geolocation for non-public IPs
-    if not is_public_ip(ip_address):
-        location = 'Local / Private Network'
-        GEO_CACHE[ip_address] = (now, location)
-        return location
+# -- Opening book ---------------------------------------------------------------
+OPENINGS = {
+    "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR": "King\'s Pawn Opening",
+    "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR": "Queen\'s Pawn Opening",
+    "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR": "English Opening",
+    "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R": "Reti Opening",
+    "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR": "Open Game",
+    "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R": "King\'s Knight Opening",
+    "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R": "Italian / Spanish complex",
+    "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R": "Ruy Lopez",
+    "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R": "Italian Game",
+    "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R": "Two Knights Defense",
+    "r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R": "Giuoco Piano",
+    "rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR": "Vienna Game",
+    "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR": "Sicilian Defense",
+    "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R": "Open Sicilian",
+    "rnbqkbnr/pp1ppppp/8/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR": "Closed Sicilian",
+    "rnbqkbnr/pp1ppppp/3p4/8/3PP3/8/PPP2PPP/RNBQKBNR": "Sicilian Najdorf zone",
+    "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R": "Sicilian Classical",
+    "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR": "Scandinavian Defense",
+    "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR": "Queen\'s Pawn Game",
+    "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR": "Queen\'s Gambit",
+    "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR": "Queen\'s Gambit Declined",
+    "rnbqkbnr/ppp2ppp/4p3/8/2pP4/8/PP2PPPP/RNBQKBNR": "Queen\'s Gambit Accepted",
+    "rnbqkb1r/ppp1pppp/5n2/3p4/2PP4/8/PP2PPPP/RNBQKBNR": "Queen\'s Gambit (Nf6)",
+    "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR": "King\'s Indian Defense",
+    "rnbqk2r/ppppppbp/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR": "King\'s Indian Classical",
+    "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/8/PP2PPPP/RNBQKBNR": "Nimzo/Queen\'s Indian zone",
+    "rnbqk2r/pppp1ppp/4pn2/8/1bPP4/2N5/PP2PPPP/R1BQKBNR": "Nimzo-Indian Defense",
+    "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/5N2/PP2PPPP/RNBQKB1R": "Queen\'s Indian Defense",
+    "rnbqkbnr/pppppp1p/6p1/8/4P3/8/PPPP1PPP/RNBQKBNR": "Modern Defense",
+    "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR": "Caro-Kann Defense",
+    "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR": "French Defense",
+    "rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR": "King\'s Gambit",
+    "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR": "Indian Game",
+    "rnbqkbnr/ppp1pppp/3p4/8/4P3/8/PPPP1PPP/RNBQKBNR": "Pirc Defense",
+    "rnbqkbnr/ppp1pppp/3p4/8/3P4/8/PPP1PPPP/RNBQKBNR": "Pirc / Philidor zone",
+}
 
-    # Try providers in order (minimal logic)
-    providers = [
-        ('ip-api', f"http://ip-api.com/json/{ip_address}", 'city', 'country', 'status', 'success'),  # HTTP only
-        ('ipwhois', f"https://ipwho.is/{ip_address}", 'city', 'country', 'success', True)
-    ]
-    for name, url, city_key, country_key, status_key, success_val in providers:
-        try:
-            resp = requests.get(url, timeout=3)
-            if resp.status_code == 200:
-                data = resp.json()
-                status_ok = (data.get(status_key) == success_val)
-                if status_ok:
-                    city = data.get(city_key) or ''
-                    country = data.get(country_key) or ''
-                    location_parts = [p for p in [city, country] if p]
-                    location = ', '.join(location_parts) if location_parts else 'Unknown'
-                    GEO_CACHE[ip_address] = (now, location)
-                    return location
-        except Exception as e:
-            print(f"Geolocation provider {name} failed for {ip_address}: {e}")
-            continue
-    location = 'Unknown'
-    GEO_CACHE[ip_address] = (now, location)
-    return location
+def detect_opening(fen):
+    return OPENINGS.get(fen.split()[0] if fen else '')
 
-def load_telegram_config():
-    """Load Telegram chat ID from file"""
-    global TELEGRAM_CHAT_ID
-    try:
-        if os.path.exists(TELEGRAM_CONFIG_FILE):
-            with open(TELEGRAM_CONFIG_FILE, 'r') as f:
-                chat_id = f.read().strip()
-                if chat_id:
-                    TELEGRAM_CHAT_ID = int(chat_id)
-                    print(f"Loaded Telegram chat ID: {TELEGRAM_CHAT_ID}")
-                    return True
-    except Exception as e:
-        print(f"Error loading Telegram config: {e}")
-    return False
+# -- ELO profiles ---------------------------------------------------------------
 
-def save_telegram_config(chat_id):
-    """Save Telegram chat ID to file"""
-    try:
-        with open(TELEGRAM_CONFIG_FILE, 'w') as f:
-            f.write(str(chat_id))
-        print(f"Saved Telegram chat ID: {chat_id}")
-        return True
-    except Exception as e:
-        print(f"Error saving Telegram config: {e}")
-        return False
+def clamp_elo(elo):
+    try: return max(400, min(3000, int(elo)))
+    except (TypeError, ValueError): return 1500
 
-def send_telegram_message(message):
-    """Send message to Telegram bot"""
-    try:
-        if not TELEGRAM_BOT_TOKEN:
-            print("No Telegram bot token configured")
-            return False
-        
-        if not TELEGRAM_CHAT_ID:
-            print("No Telegram chat ID configured. Please call /api/telegram/setup first")
-            return False
-            
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {
-            "chat_id": TELEGRAM_CHAT_ID,
-            "text": message,
-            "parse_mode": "Markdown"
-        }
-        
-        response = requests.post(url, json=data, timeout=10)
-        if response.status_code == 200:
-            print("Telegram message sent successfully")
-            return True
+def get_engine_profile(elo):
+    n = clamp_elo(elo)
+    if n < 800:  return {'elo': n, 'uci_elo': 1320, 'skill': 0,  'depth': 4,  'time': 0.03, 'multipv': 5, 'exploration': 0.95, 'max_score_gap': 350}
+    if n < 1000: return {'elo': n, 'uci_elo': 1350, 'skill': 1,  'depth': 6,  'time': 0.05, 'multipv': 5, 'exploration': 0.8,  'max_score_gap': 220}
+    if n < 1300: return {'elo': n, 'uci_elo': 1450, 'skill': 3,  'depth': 7,  'time': 0.08, 'multipv': 4, 'exploration': 0.55, 'max_score_gap': 180}
+    if n < 1600: return {'elo': n, 'uci_elo': 1600, 'skill': 6,  'depth': 9,  'time': 0.12, 'multipv': 4, 'exploration': 0.32, 'max_score_gap': 130}
+    if n < 1900: return {'elo': n, 'uci_elo': 1800, 'skill': 9,  'depth': 11, 'time': 0.22, 'multipv': 3, 'exploration': 0.16, 'max_score_gap': 90}
+    if n < 2300: return {'elo': n, 'uci_elo': min(2500, n), 'skill': 14, 'depth': 13, 'time': 0.35, 'multipv': 2, 'exploration': 0.05, 'max_score_gap': 50}
+    return {'elo': n, 'uci_elo': min(2850, n), 'skill': 20, 'depth': 15, 'time': 0.6, 'multipv': 1, 'exploration': 0.0, 'max_score_gap': 20}
+
+def configure_engine_for_profile(profile):
+    if not engine: return
+    options = getattr(engine, 'options', {})
+    config = {}
+    if 'UCI_LimitStrength' in options and 'UCI_Elo' in options:
+        config['UCI_LimitStrength'] = True
+        config['UCI_Elo'] = profile['uci_elo']
+    if 'Skill Level' in options:
+        config['Skill Level'] = profile['skill']
+    if config: engine.configure(config)
+
+# -- Engine helpers ---------------------------------------------------------------
+
+def normalize_analysis_entries(analysis):
+    return analysis if isinstance(analysis, list) else [analysis]
+
+def pv_to_san(board, pv, limit=5):
+    b = board.copy()
+    sans = []
+    for m in pv[:limit]:
+        if m not in b.legal_moves: break
+        sans.append(b.san(m))
+        b.push(m)
+    return sans
+
+def deep_analyze(board, multipv=3, depth=15, time_limit=0.4):
+    if not engine: return []
+    options = getattr(engine, 'options', {})
+    config = {}
+    if 'UCI_LimitStrength' in options: config['UCI_LimitStrength'] = False
+    if 'Skill Level' in options: config['Skill Level'] = 20
+    if config: engine.configure(config)
+    analysis = engine.analyse(board, chess.engine.Limit(depth=depth, time=time_limit), multipv=multipv)
+    candidates = []
+    for entry in normalize_analysis_entries(analysis):
+        pv = entry.get('pv') or []
+        move = pv[0] if pv else None
+        if not move: continue
+        score_obj = entry.get('score')
+        cp = score_obj.relative.score(mate_score=100000) if score_obj else 0
+        line = pv_to_san(board, pv)
+        candidates.append({'move': move, 'san': board.san(move), 'score': cp, 'line': line})
+    return candidates
+
+def pick_weighted_engine_move(analysis, legal_moves, profile):
+    candidates = []
+    legal_set = set(legal_moves)
+    for entry in normalize_analysis_entries(analysis):
+        pv = entry.get('pv') or []
+        move = pv[0] if pv else None
+        if not move or move not in legal_set: continue
+        score_obj = entry.get('score')
+        score = score_obj.relative.score(mate_score=100000) if score_obj else 0
+        candidates.append((move, score))
+    if not candidates: return None
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    if len(candidates) == 1 or profile['exploration'] <= 0:
+        return candidates[0][0]
+    best = candidates[0][1]
+    wc, ws = [], []
+    for i, (m, s) in enumerate(candidates):
+        gap = max(0, best - s)
+        if i > 0 and gap > profile['max_score_gap']: continue
+        w = 1.0 if i == 0 else profile['exploration'] / (i + 1)
+        w *= max(0.15, 1 - (gap / max(profile['max_score_gap'], 1)))
+        wc.append(m)
+        ws.append(max(w, 0.05))
+    return random.choices(wc, weights=ws, k=1)[0] if wc else candidates[0][0]
+
+def get_engine_move(board, elo):
+    if not engine: return None, None
+    profile = get_engine_profile(elo)
+    configure_engine_for_profile(profile)
+    analysis = engine.analyse(board, chess.engine.Limit(depth=profile['depth'], time=profile['time']), multipv=profile['multipv'])
+    return pick_weighted_engine_move(analysis, list(board.legal_moves), profile), profile
+
+# -- Position features ---------------------------------------------------------------
+
+def format_score(cp):
+    if cp >= 99900: return '+M'
+    if cp <= -99900: return '-M'
+    return f'{cp/100:+.1f}'
+
+def get_quality_label(delta):
+    if delta >= -10: return 'brilliant'
+    if delta >= -40: return 'strong'
+    if delta >= -80: return 'good'
+    if delta >= -150: return 'inaccuracy'
+    if delta >= -300: return 'mistake'
+    return 'blunder'
+
+def get_quality_emoji(label):
+    return {'brilliant': '!!', 'strong': '!', 'good': '', 'inaccuracy': '?!', 'mistake': '?', 'blunder': '??'}.get(label, '')
+
+def analyze_position_features(board):
+    features = []
+    turn = board.turn
+    opp = not turn
+    if board.is_check():
+        features.append('King is in check')
+    for sq in chess.SQUARES:
+        piece = board.piece_at(sq)
+        if piece and piece.color == turn and piece.piece_type != chess.KING:
+            attackers = board.attackers(opp, sq)
+            defenders = board.attackers(turn, sq)
+            if attackers and len(defenders) < len(attackers):
+                features.append(f'{("White" if turn else "Black")} {chess.piece_name(piece.piece_type)} on {chess.square_name(sq)} is hanging')
+    king_sq = board.king(turn)
+    if king_sq is not None:
+        for sq in chess.SQUARES:
+            piece = board.piece_at(sq)
+            if piece and piece.color == turn and piece.piece_type != chess.KING:
+                test = board.copy()
+                test.remove_piece_at(sq)
+                if test.is_attacked_by(opp, king_sq):
+                    features.append(f'{chess.piece_name(piece.piece_type).capitalize()} on {chess.square_name(sq)} is pinned')
+    for f in range(8):
+        has_wp = any(board.piece_at(chess.square(f, r)) == chess.Piece(chess.PAWN, chess.WHITE) for r in range(8))
+        has_bp = any(board.piece_at(chess.square(f, r)) == chess.Piece(chess.PAWN, chess.BLACK) for r in range(8))
+        if not has_wp and not has_bp:
+            col = chr(ord('a') + f)
+            for r in range(8):
+                p = board.piece_at(chess.square(f, r))
+                if p and p.piece_type == chess.ROOK:
+                    features.append(f'Rook on open {col}-file')
+                    break
+    for sq in chess.SQUARES:
+        piece = board.piece_at(sq)
+        if not piece or piece.piece_type != chess.PAWN: continue
+        f_idx, r = chess.square_file(sq), chess.square_rank(sq)
+        passed = True
+        if piece.color == chess.WHITE:
+            for cf in [f_idx-1, f_idx, f_idx+1]:
+                if 0 <= cf <= 7:
+                    for cr in range(r+1, 7):
+                        b = board.piece_at(chess.square(cf, cr))
+                        if b and b.piece_type == chess.PAWN and b.color == chess.BLACK:
+                            passed = False; break
         else:
-            print(f"Failed to send Telegram message: {response.status_code} - {response.text}")
-            return False
-        
+            for cf in [f_idx-1, f_idx, f_idx+1]:
+                if 0 <= cf <= 7:
+                    for cr in range(1, r):
+                        b = board.piece_at(chess.square(cf, cr))
+                        if b and b.piece_type == chess.PAWN and b.color == chess.WHITE:
+                            passed = False; break
+        if passed:
+            color = 'White' if piece.color == chess.WHITE else 'Black'
+            features.append(f'{color} passed pawn on {chess.square_name(sq)}')
+    if board.has_castling_rights(turn):
+        features.append(f'{("White" if turn else "Black")} can still castle')
+    return features[:6]
+
+# -- Rich context builder ---------------------------------------------------------------
+
+def get_position_context(fen, last_move=None):
+    board = chess.Board(fen)
+    turn = "White" if board.turn else "Black"
+    mn = board.fullmove_number
+    pc = len(board.piece_map())
+    phase = "opening" if mn <= 8 else ("endgame" if pc <= 12 else "middlegame")
+    vals = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9}
+    wm = sum(vals.get(p.piece_type, 0) for p in board.piece_map().values() if p.color == chess.WHITE)
+    bm = sum(vals.get(p.piece_type, 0) for p in board.piece_map().values() if p.color == chess.BLACK)
+    opening = detect_opening(fen)
+    candidates = deep_analyze(board, multipv=3, depth=15, time_limit=0.4)
+    features = analyze_position_features(board)
+    lm_analysis = _analyze_last_move(last_move, candidates) if last_move else None
+
+    ctx = f"POSITION STATE:\n"
+    ctx += f"  FEN: {fen}\n"
+    ctx += f"  Turn: {turn} (move {mn}), Phase: {phase}\n"
+    ctx += f"  Material: White {wm} / Black {bm} (balance {wm-bm:+d})\n"
+    ctx += f"  In check: {board.is_check()}"
+    if opening: ctx += f"\n  Opening: **{opening}**"
+    if candidates:
+        ctx += "\n\nENGINE ANALYSIS (Stockfish depth 15):"
+        for i, c in enumerate(candidates):
+            ctx += f"\n  {i+1}. `{c['san']}` ({format_score(c['score'])}) line: {' '.join(c['line'])}"
+    if features:
+        ctx += "\n\nPOSITION FEATURES:"
+        for feat in features:
+            ctx += f"\n  - {feat}"
+    if lm_analysis:
+        ctx += f"\n\nLAST MOVE PLAYED:\n{lm_analysis}"
+    return ctx
+
+def _analyze_last_move(last_move, current_candidates):
+    before_fen = last_move.get('beforeFen')
+    uci = last_move.get('uci')
+    san = last_move.get('san') or uci
+    actor = 'Player' if last_move.get('actor') == 'player' else 'AI'
+    if not before_fen or not uci: return None
+    try:
+        before_board = chess.Board(before_fen)
+        move = chess.Move.from_uci(uci)
+    except ValueError: return None
+    if move not in before_board.legal_moves: return None
+    before_cands = deep_analyze(before_board, multipv=4, depth=15, time_limit=0.4)
+    if not before_cands: return None
+    best = before_cands[0]
+    played_score = None
+    for c in before_cands:
+        if c['move'] == move:
+            played_score = c['score']; break
+    if played_score is None: played_score = best['score'] - 200
+    delta = played_score - best['score']
+    quality = get_quality_label(delta)
+    emoji = get_quality_emoji(quality)
+    result = f"  {actor} played `{san}` {emoji} -- **{quality}**\n"
+    result += f"  Score: {format_score(played_score)} (best was `{best['san']}` at {format_score(best['score'])})"
+    if delta < -80 and best['san'] != san:
+        result += f"\n  Lost ~{abs(delta)}cp. Better: `{best['san']}` ({' '.join(best['line'])})"
+    return result
+
+# -- System prompt ---------------------------------------------------------------
+
+SYSTEM_PROMPT = """You are **AskChessGPT**, a world-class chess coach (2400+ strength) who explains positions in clear, practical language for club players (700-1800 Elo).
+
+## Your approach
+- Ground every explanation in the ENGINE ANALYSIS data provided. Never invent moves.
+- Use `backtick` notation for moves (e.g. `Nf3`, `e4`).
+- Name openings in **bold** (e.g. **Sicilian Defense**).
+- Be concise: 80-150 words unless deep analysis is requested.
+- Use bullet points for lists.
+
+## Response types (detect from user query):
+- **Move explanation**: Reference LAST MOVE PLAYED data. Say if it was good/bad, why, and what was better.
+- **Candidate moves**: Present top 3 engine moves with practical reasoning.
+- **Plan/strategy**: What should each side do? Reference pawn structure, piece activity, king safety.
+- **Mistake review**: Show score drop, name what went wrong, explain the better move.
+- **Opening guidance**: Name the opening, explain typical plans.
+- **Position overview**: Who stands better and why.
+
+## Proactive analysis
+For [PROACTIVE] messages: give a brief 40-80 word coach comment. Focus on:
+- Was the move good or bad? (use the quality rating)
+- One tip for what to focus on next
+- If a mistake, briefly name the better move
+Be encouraging but honest.
+
+## Rules
+- NEVER fabricate lines. Only reference moves from the analysis data.
+- Format moves in `backticks`, concepts in **bold**.
+- If a blunder, be constructive: explain what to watch for next time."""
+
+def build_llm_messages(session, position_context, user_message, is_proactive=False):
+    messages = [{"role": "system", "content": SYSTEM_PROMPT + "\n\n" + position_context}]
+    for msg in session['messages'][-MAX_SESSION_HISTORY:]:
+        messages.append(msg)
+    tag = "[PROACTIVE] " if is_proactive else ""
+    messages.append({"role": "user", "content": f"{tag}{user_message}"})
+    return messages
+
+# -- LLM calls ---------------------------------------------------------------
+
+def call_llm(messages, max_tokens=400):
+    if not openai_client: return None
+    try:
+        r = openai_client.chat.completions.create(
+            model="anthropic/claude-opus-4.6", messages=messages,
+            max_tokens=max_tokens, temperature=0.15)
+        return r.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Telegram error: {e}")
-        return False
+        print(f"[chat] LLM failed: {e}")
+        return None
+
+def call_llm_stream(messages, max_tokens=400):
+    if not openai_client:
+        yield "data: " + json.dumps({"done": True, "full": ""}) + "\n\n"
+        return
+    try:
+        stream = openai_client.chat.completions.create(
+            model="anthropic/claude-opus-4.6", messages=messages,
+            max_tokens=max_tokens, temperature=0.15, stream=True)
+        full = ""
+        for chunk in stream:
+            d = chunk.choices[0].delta if chunk.choices else None
+            if d and d.content:
+                full += d.content
+                yield "data: " + json.dumps({"content": d.content}) + "\n\n"
+        yield "data: " + json.dumps({"done": True, "full": full}) + "\n\n"
+    except Exception as e:
+        print(f"[chat] Stream failed: {e}")
+        yield "data: " + json.dumps({"error": str(e)}) + "\n\n"
+
+# -- Fallback ---------------------------------------------------------------
+
+def get_fallback_response(fen, message, last_move=None):
+    board = chess.Board(fen)
+    candidates = deep_analyze(board, multipv=3)
+    if not candidates:
+        return f'{("White" if board.turn else "Black")} to move. Engine unavailable.'
+    best = candidates[0]
+    ml = message.lower()
+    if any(w in ml for w in ['candidate', 'best', 'suggest']):
+        lines = [f"  {c['san']} ({format_score(c['score'])}) {' '.join(c['line'])}" for c in candidates[:3]]
+        return "Top moves:\n" + "\n".join(lines)
+    if last_move and any(w in ml for w in ['last', 'why', 'explain']):
+        a = _analyze_last_move(last_move, candidates)
+        if a: return a
+    return f'{("White" if board.turn else "Black")} to move. Best: `{best["san"]}` ({format_score(best["score"])}). Line: {" ".join(best["line"])}'
+
+# -- Init ---------------------------------------------------------------
 
 def init_openai():
-    """Initialize OpenRouter client (OpenAI-compatible)"""
     global openai_client
     try:
-        api_key = os.environ.get('OPENROUTER_API_KEY')
-        print(f"Debug: OpenRouter API key exists: {bool(api_key)}")
-        if api_key:
-            # Initialize OpenAI client with OpenRouter base URL
-            openai_client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
-            print("OpenRouter client initialized successfully")
+        key = os.environ.get('OPENROUTER_API_KEY')
+        if key:
+            openai_client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=key)
+            print("[chat] Using OpenRouter API")
             return True
-        else:
-            print("Warning: OPENROUTER_API_KEY not found in environment variables")
-            return False
+        key = os.environ.get('OPENAI_API_KEY')
+        if key:
+            openai_client = OpenAI(api_key=key)
+            print("[chat] Using OpenAI API")
+            return True
+        print("[chat] No LLM key -- fallback only")
+        return False
     except Exception as e:
-        print(f"Error initializing OpenRouter: {e}")
+        print(f"[chat] Init error: {e}")
         return False
 
 def init_stockfish():
-    """Initialize Stockfish engine"""
     global engine
     try:
         import platform
         system = platform.system().lower()
-        
-        # Auto-detect platform and set appropriate Stockfish paths
-        stockfish_paths = []
-        
-        if system == 'linux':
-            stockfish_paths = [
-                './stockfish-linux',
-                './stockfish',
-                'stockfish'
-            ]
-        elif system == 'darwin':  # macOS
-            stockfish_paths = [
-                './stockfish-macos-m1-apple-silicon',
-                './stockfish',
-                'stockfish'
-            ]
-        else:  # Windows or other
-            stockfish_paths = [
-                './stockfish.exe',
-                './stockfish',
-                'stockfish'
-            ]
-        
-        print(f"Platform detected: {system}")
-        print(f"Trying Stockfish paths: {stockfish_paths}")
-        
-        for path in stockfish_paths:
+        paths = {'linux': ['./stockfish-linux', './stockfish', 'stockfish'],
+                 'darwin': ['./stockfish-macos-m1-apple-silicon', './stockfish', 'stockfish']
+                 }.get(system, ['./stockfish.exe', './stockfish', 'stockfish'])
+        for p in paths:
             try:
-                if os.path.exists(path) or path == 'stockfish':
-                    engine = chess.engine.SimpleEngine.popen_uci(path)
-                    print(f"Stockfish initialized successfully from: {path}")
+                if os.path.exists(p) or p == 'stockfish':
+                    engine = chess.engine.SimpleEngine.popen_uci(p)
                     return True
-            except Exception as e:
-                print(f"Failed to initialize Stockfish from {path}: {e}")
-                continue
-        
-        print("Warning: Stockfish not found, falling back to random moves")
+            except Exception: continue
         return False
-    except Exception as e:
-        print(f"Error initializing Stockfish: {e}")
-        return False
+    except Exception: return False
 
-def elo_to_depth_and_time(elo):
-    """Convert Elo rating to appropriate depth and time limits"""
-    if elo < 800:
-        return 1, 0.1
-    elif elo < 1000:
-        return 2, 0.2
-    elif elo < 1200:
-        return 3, 0.3
-    elif elo < 1400:
-        return 4, 0.5
-    elif elo < 1600:
-        return 5, 0.8
-    elif elo < 1800:
-        return 6, 1.0
-    elif elo < 2000:
-        return 7, 1.5
-    elif elo < 2200:
-        return 8, 2.0
-    elif elo < 2400:
-        return 9, 3.0
-    elif elo < 2600:
-        return 10, 4.0
-    else:
-        return 12, 5.0
+# -- Routes ---------------------------------------------------------------
 
 @app.route('/api/move', methods=['POST'])
-def get_move():
-    """Get AI move for given position"""
+def api_move():
     try:
         data = request.json
         fen = data.get('fen')
-        elo = data.get('elo', 1500)
-        
-        print(f"Received FEN: {fen}")  # Debug log
-        
-        if not fen:
-            return jsonify({'error': 'FEN position required'}), 400
-        
-        # Create chess board from FEN
+        elo = clamp_elo(data.get('elo', 1500))
+        if not fen: return jsonify({'error': 'FEN required'}), 400
         board = chess.Board(fen)
-        print(f"Turn: {'White' if board.turn else 'Black'}")  # Debug log
-        
-        # Get legal moves
-        legal_moves = list(board.legal_moves)
-        print(f"Legal moves count: {len(legal_moves)}")  # Debug log
-        
-        if not legal_moves:
-            return jsonify({'error': 'No legal moves available'}), 400
-        
-        # For now, make random move (you can implement Stockfish later)
-        if not legal_moves:
-            return jsonify({'error': 'No legal moves available'}), 400
-            
-        # Use Stockfish if available, otherwise fall back to random
-        move = None
+        legal = list(board.legal_moves)
+        if not legal: return jsonify({'error': 'No legal moves'}), 400
+        move, profile = (None, None)
         if engine:
-            try:
-                depth, time_limit = elo_to_depth_and_time(elo)
-                print(f"Using Stockfish with depth={depth}, time={time_limit}s for Elo {elo}")
-                
-                # Get best move from Stockfish
-                result = engine.play(board, chess.engine.Limit(depth=depth, time=time_limit))
-                move = result.move
-                print(f"Stockfish selected move: {str(move)}")
-                
-            except Exception as e:
-                print(f"Stockfish error: {e}, falling back to random move")
-                move = None
-        
-        # Fallback to random move if Stockfish failed or not available
-        if not move:
-            print(f"Using random move from {len(legal_moves)} options")
-            move = random.choice(legal_moves)
-            print(f"Random move selected: {str(move)}")
-        
-        # Verify the move is legal
-        if move not in legal_moves:
-            print(f"ERROR: Selected move {move} not in legal moves! Using fallback.")
-            move = legal_moves[0]
-        
-        return jsonify({
-            'move': str(move),
-            'elo': elo,
-            'engine': 'Stockfish' if engine else 'Random',
-            'message': f'{"Stockfish" if engine else "Random"} move (Elo {elo})'
-        })
-        
+            try: move, profile = get_engine_move(board, elo)
+            except Exception: pass
+        if not move: move = random.choice(legal)
+        if move not in legal: move = legal[0]
+        return jsonify({'move': str(move), 'elo': elo, 'engine': 'Stockfish' if engine else 'Random'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-def get_position_info(fen):
-    """Get detailed position information for GPT context"""
-    try:
-        board = chess.Board(fen)
-        
-        # Basic position info
-        turn = "White" if board.turn else "Black"
-        move_number = board.fullmove_number
-        
-        # Game phase
-        pieces = len([p for p in board.piece_map().values()])
-        if move_number <= 10:
-            phase = "opening"
-        elif pieces <= 10:
-            phase = "endgame"  
-        else:
-            phase = "middlegame"
-            
-        # Checks and threats
-        in_check = board.is_check()
-        legal_moves = list(board.legal_moves)
-        
-        # Material count
-        material = {"white": 0, "black": 0}
-        piece_values = {"p": 1, "n": 3, "b": 3, "r": 5, "q": 9}
-        
-        for square, piece in board.piece_map().items():
-            color = "white" if piece.color else "black"
-            material[color] += piece_values.get(piece.symbol().lower(), 0)
-        
-        return {
-            "turn": turn,
-            "move_number": move_number,
-            "phase": phase,
-            "in_check": in_check,
-            "legal_moves_count": len(legal_moves),
-            "material_white": material["white"],
-            "material_black": material["black"],
-            "material_balance": material["white"] - material["black"]
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-def get_gpt_chess_response(message, fen):
-    """Get intelligent chess response from GPT-4o"""
-    try:
-        print(f"GPT function called - OpenAI client: {openai_client is not None}")
-        
-        if not openai_client:
-            print("No OpenAI client available")
-            return None
-            
-        # Get position analysis
-        print("Getting position info...")
-        pos_info = get_position_info(fen)
-        print(f"Position info: {pos_info}")
-        
-        # Create context-rich prompt
-        system_prompt = f"""You are a world-class chess coach and analyst. You help players understand positions, strategy, and tactics.
-
-**Current Position Analysis:**
-- **Turn to move:** {pos_info.get('turn', 'Unknown')}
-- **Move number:** {pos_info.get('move_number', 'Unknown')}
-- **Game phase:** {pos_info.get('phase', 'Unknown')}
-- **In check:** {pos_info.get('in_check', False)}
-- **Legal moves:** {pos_info.get('legal_moves_count', 0)}
-- **Material balance:** {pos_info.get('material_balance', 0)} (positive favors White)
-
-**FEN:** {fen}
-
-**Formatting Instructions:**
-- Use **Opening Name** format for chess openings (e.g., **Italian Game**, **Sicilian Defense**, **Queen's Gambit**)
-- Use `move` format for all chess moves (e.g., `1.e4`, `Nf3`, `O-O`, `Bxf7+`)
-- Use **bold** for important chess concepts and terms
-- Use • for bullet points
-- Keep responses concise and well-formatted
-
-Provide helpful, accurate chess advice. Be concise but well-formatted.
-Only answer the question asked. Keep responses under 150 words."""
-
-        print("Calling OpenAI API...")
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message}
-            ],
-            max_tokens=300,
-            temperature=0.1
-        )
-        
-        result = response.choices[0].message.content.strip()
-        print(f"OpenAI response received: {len(result)} characters")
-        return result
-        
-    except Exception as e:
-        print(f"OpenAI API error: {e}")
-        return None
-
 @app.route('/api/chat', methods=['POST'])
-def chat():
-    """Handle chat messages and provide chess advice using GPT-4o"""
+def api_chat():
     try:
         data = request.json
         message = data.get('message', '')
         fen = data.get('fen', '')
-        
-        print(f"Chat API called - Message: {message[:50]}..., FEN: {fen[:50] if fen else 'None'}")
-        print(f"OpenAI client available: {openai_client is not None}")
-        
-        if not message:
-            print("Error: No message provided")
-            return jsonify({'error': 'Message is required'}), 400
-        
-        # Try to get GPT-4o response first
-        gpt_response = None
-        if fen and openai_client:
-            print("Attempting to get GPT response...")
-            gpt_response = get_gpt_chess_response(message, fen)
-            print(f"GPT response received: {gpt_response is not None}")
-        else:
-            print(f"Skipping GPT - FEN: {bool(fen)}, OpenAI client: {openai_client is not None}")
-        
-        # Use GPT response if available, otherwise show agent not working
-        if gpt_response:
-            response = gpt_response
-            print("Using GPT response")
-        else:
-            response = "Agent not working"
-            print("Using fallback response")
-        
-        return jsonify({
-            'response': response,
-            'status': 'success',
-            'source': 'gpt-4o' if gpt_response else 'fallback'
-        })
-        
+        last_move = data.get('lastMove')
+        session_id = data.get('sessionId', '')
+        do_stream = data.get('stream', False)
+        if not message: return jsonify({'error': 'Message required'}), 400
+        prune_sessions()
+        session = get_session(session_id)
+        try:
+            pos_ctx = get_position_context(fen, last_move) if fen else "No position provided."
+        except Exception:
+            pos_ctx = f"FEN: {fen}" if fen else "No position provided."
+        if openai_client:
+            msgs = build_llm_messages(session, pos_ctx, message)
+            if do_stream:
+                def gen():
+                    full = ""
+                    for chunk in call_llm_stream(msgs):
+                        try:
+                            payload = json.loads(chunk.replace('data: ', '').strip())
+                            if payload.get('content'): full += payload['content']
+                            if payload.get('done') and payload.get('full'): full = payload['full']
+                        except Exception: pass
+                        yield chunk
+                    if full:
+                        session['messages'].append({"role": "user", "content": message})
+                        session['messages'].append({"role": "assistant", "content": full})
+                return Response(gen(), mimetype='text/event-stream',
+                                headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+            resp = call_llm(msgs)
+            if resp:
+                session['messages'].append({"role": "user", "content": message})
+                session['messages'].append({"role": "assistant", "content": resp})
+                return jsonify({'response': resp, 'status': 'success', 'source': 'llm', 'sessionId': session_id})
+        fb = get_fallback_response(fen, message, last_move) if fen else "Start a game first."
+        return jsonify({'response': fb, 'status': 'success', 'source': 'fallback', 'sessionId': session_id})
     except Exception as e:
-        print(f"Chat API error: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/telegram/setup', methods=['GET'])
-def telegram_setup():
-    """Get Telegram bot updates to find chat ID"""
+@app.route('/api/analyze-move', methods=['POST'])
+def api_analyze_move():
     try:
-        global TELEGRAM_CHAT_ID
-        
-        if not TELEGRAM_BOT_TOKEN:
-            return jsonify({
-                'status': 'error',
-                'message': 'TELEGRAM_BOT_TOKEN environment variable not set'
-            }), 500
-        
-        print("Setting up Telegram bot...")
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-        response = requests.get(url, timeout=10)
-        
-        if response.status_code == 200:
-            data = response.json()
-            print(f"Telegram API response: {data}")
-            
-            if data.get('result'):
-                # Get the latest chat ID
-                latest_update = data['result'][-1]
-                chat_id = latest_update['message']['chat']['id']
-                TELEGRAM_CHAT_ID = chat_id
-                
-                # Save to file for persistence
-                if save_telegram_config(chat_id):
-                    # Test sending a message
-                    test_message = "🎉 Telegram bot setup completed successfully!"
-                    if send_telegram_message(test_message):
-                        return jsonify({
-                            'status': 'success',
-                            'chat_id': chat_id,
-                            'message': 'Telegram setup completed! Chat ID saved and test message sent.'
-                        })
-                    else:
-                        return jsonify({
-                            'status': 'warning',
-                            'chat_id': chat_id,
-                            'message': 'Chat ID saved but test message failed to send.'
-                        })
-                else:
-                    return jsonify({
-                        'status': 'error',
-                        'message': 'Failed to save Telegram configuration'
-                    }), 500
-            else:
-                return jsonify({
-                    'status': 'info',
-                    'message': 'No messages found. Please send a message to your bot first, then try again.'
-                })
-        else:
-            print(f"Telegram API error: {response.status_code} - {response.text}")
-            return jsonify({
-                'status': 'error',
-                'message': f'Failed to get Telegram updates: {response.status_code}'
-            }), 500
-            
+        data = request.json
+        fen = data.get('fen', '')
+        last_move = data.get('lastMove')
+        session_id = data.get('sessionId', '')
+        do_stream = data.get('stream', False)
+        if not fen or not last_move: return jsonify({'error': 'FEN and lastMove required'}), 400
+        prune_sessions()
+        session = get_session(session_id)
+        try:
+            pos_ctx = get_position_context(fen, last_move)
+        except Exception:
+            pos_ctx = f"FEN: {fen}"
+        actor = 'I' if last_move.get('actor') == 'player' else 'AI'
+        san = last_move.get('san', '?')
+        prompt = f"{actor} just played {san}. Give a quick coach comment."
+        if openai_client:
+            msgs = build_llm_messages(session, pos_ctx, prompt, is_proactive=True)
+            if do_stream:
+                def gen():
+                    full = ""
+                    for chunk in call_llm_stream(msgs, max_tokens=200):
+                        try:
+                            payload = json.loads(chunk.replace('data: ', '').strip())
+                            if payload.get('content'): full += payload['content']
+                            if payload.get('done') and payload.get('full'): full = payload['full']
+                        except Exception: pass
+                        yield chunk
+                    if full:
+                        session['messages'].append({"role": "assistant", "content": f"[Auto] {full}"})
+                return Response(gen(), mimetype='text/event-stream',
+                                headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+            resp = call_llm(msgs, max_tokens=200)
+            if resp:
+                session['messages'].append({"role": "assistant", "content": f"[Auto] {resp}"})
+                return jsonify({'response': resp, 'status': 'success', 'source': 'llm'})
+        lma = _analyze_last_move(last_move, [])
+        return jsonify({'response': lma or 'No analysis available.', 'status': 'success', 'source': 'fallback'})
     except Exception as e:
-        print(f"Telegram setup error: {e}")
-        return jsonify({'error': f'Telegram setup error: {str(e)}'}), 500
-
-@app.route('/api/track-visit', methods=['POST'])
-def track_visit():
-    """Track website visits and send to Telegram"""
-    try:
-        data = request.json or {}
-        # Get visitor info
-        user_agent = request.headers.get('User-Agent', 'Unknown')
-        ip_address = get_client_ip()
-        referrer = data.get('referrer', 'Direct')
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        device_type, os_name = parse_user_agent(user_agent)
-
-        # Geolocate with new helper (cached, handles private IP)
-        location_info = geolocate_ip(ip_address)
-
-        # Create telegram message (markdown)
-        telegram_message = f"""\n🌍 *Website Visit Tracked*\n\n👤 *Visitor Info:*\n📍 *Location:* {location_info}\n🌐 *IP:* {ip_address}\n🔗 *Referrer:* {referrer}\n🕒 *Time:* {timestamp}\n💻 *Device:* {device_type} ({os_name})\n📱 *UA:* {user_agent[:60]}...\n"""
-
-        # Send to telegram
-        telegram_sent = send_telegram_message(telegram_message)
-        if telegram_sent:
-            print(f"Visit tracked: {ip_address} from {location_info}")
-        else:
-            print(f"Failed to send visit notification for {ip_address}")
-
-        return jsonify({'status': 'success', 'message': 'Visit tracked successfully'})
-        
-    except Exception as e:
-        print(f"Visit tracking error: {e}")
-        return jsonify({'error': 'Failed to track visit'}), 500
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def index():
-    """Serve the main page"""
     return app.send_static_file('index.html')
+
+@app.route('/gameplay')
+def gameplay():
+    return app.send_static_file('gameplay.html')
 
 @app.route('/api/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
-    return jsonify({
-        'status': 'ok', 
-        'message': 'Chess API is running',
-        'engine': 'Stockfish' if engine else 'Random',
-        'stockfish_available': engine is not None,
-        'telegram_bot_configured': bool(TELEGRAM_BOT_TOKEN),
-        'telegram_chat_configured': bool(TELEGRAM_CHAT_ID),
-        'openrouter_configured': bool(openai_client)
-    })
-
-@app.route('/api/feedback', methods=['POST'])
-def submit_feedback():
-    """Handle feedback submissions"""
-    try:
-        data = request.json
-        feedback_type = data.get('type', '')
-        title = data.get('title', '')
-        message = data.get('message', '')
-        email = data.get('email', '')
-        
-        if not title or not message:
-            return jsonify({'error': 'Title and message are required'}), 400
-        
-        # For now, just log the feedback
-        # You can later save to database, send email, etc.
-        feedback_data = {
-            'type': feedback_type,
-            'title': title,
-            'message': message,
-            'email': email,
-            'timestamp': data.get('timestamp'),
-            'user_agent': data.get('userAgent'),
-            'url': data.get('url')
-        }
-        
-        print(f"Feedback received: {feedback_data}")
-        
-        # Send feedback to Telegram bot - escape special characters for Markdown
-        def escape_markdown(text):
-            """Escape special characters for Telegram Markdown"""
-            if not text:
-                return text
-            # Escape Markdown special characters
-            chars_to_escape = ['*', '_', '`', '[', ']', '(', ')', '~', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
-            for char in chars_to_escape:
-                text = text.replace(char, f'\\{char}')
-            return text
-        
-        telegram_message = f"""🔔 *New Feedback Received*
-
-📋 *Type:* {escape_markdown(feedback_type) or 'Not specified'}
-📝 *Title:* {escape_markdown(title)}
-💬 *Message:* {escape_markdown(message)}
-📧 *Email:* {escape_markdown(email) or 'Not provided'}
-🕒 *Time:* {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-🌐 *URL:* {escape_markdown(data.get('url', 'Not provided'))}"""
-        
-        telegram_sent = send_telegram_message(telegram_message)
-        if telegram_sent:
-            print("Feedback sent to Telegram successfully")
-        else:
-            print("Failed to send feedback to Telegram")
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Feedback received successfully!'
-        })
-        
-    except Exception as e:
-        print(f"Feedback submission error: {e}")
-        return jsonify({'error': 'Failed to submit feedback'}), 500
+    return jsonify({'status': 'ok', 'engine': 'Stockfish' if engine else 'Random',
+                    'stockfish': engine is not None, 'llm': bool(openai_client)})
 
 def cleanup():
-    """Clean up resources"""
     global engine
     if engine:
-        try:
-            engine.quit()
-        except:
-            pass
+        try: engine.quit()
+        except Exception: pass
 
 if __name__ == '__main__':
-    # Initialize Stockfish, OpenAI and Telegram on startup
     init_stockfish()
     init_openai()
-    load_telegram_config()
-    
     try:
         app.run(debug=True, host='0.0.0.0', port=5100)
     finally:

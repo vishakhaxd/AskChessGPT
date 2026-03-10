@@ -1,44 +1,55 @@
-# Chess Game with Backend AI
+# AskChessGPT
 
-## Setup Instructions
+AskChessGPT is a learning-first chess web app built around one core idea:
 
-### 1. Install Python Dependencies
+Learn chess by asking better questions.
+
+The homepage now leads into an editorial landing page and analysis studio where players can:
+
+- play a position against the engine
+- ask why a move works
+- ask for plans and candidate ideas
+- use the board as a study surface instead of a generic game lobby
+
+## Setup
+
+### 1. Install Python dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Start the Backend API
+### 2. Start the app
+
 ```bash
-python chess_api.py
+python3 chess_api.py
 ```
-The API will run on `http://localhost:5000`
 
-### 3. Start the Frontend
-```bash
-python3 -m http.server 8000
-```
-Then open `http://localhost:8000` in your browser
+The Flask app serves both the API and the frontend at `http://localhost:5100`.
 
-## API Endpoints
+## Main Endpoints
 
-- `POST /api/move` - Get AI move for a given position
+- `GET /` - Main landing page and learning studio
+- `GET /gameplay` - Dedicated gameplay and analysis studio page
+- `POST /api/move` - Request an engine move for the current FEN and target Elo
+- `POST /api/chat` - Ask a question about the current position
 - `GET /api/health` - Health check
 
-## Current Implementation
+## Current Product State
 
-- **Frontend**: Clean React-like chess interface with click-to-select
-- **Backend**: Flask API with random moves (ready for Stockfish integration)
-- **AI**: Currently makes random legal moves, easily upgradeable to Stockfish
+- learning-first homepage with editorial visual direction
+- dedicated gameplay page at `/gameplay`
+- no login in the main product flow
+- no Telegram visit tracking or telemetry plumbing
+- Stockfish-backed move generation with softer low-Elo behavior
+- fallback coaching responses when the LLM is unavailable
 
-## Next Steps (for later)
+## Notes
 
-1. Install Stockfish engine: `pip install stockfish`
-2. Update `chess_api.py` to use Stockfish instead of random moves
-3. Add proper Elo-based difficulty scaling
+- The app will try to use a local Stockfish binary from the repository based on platform.
+- If `OPENROUTER_API_KEY` is set, the chat endpoint uses OpenRouter via the OpenAI-compatible client.
+- Without an LLM key, the tutor still returns lightweight fallback coaching prompts.
 
-## Removed
+## Product Planning
 
-- All complex Stockfish worker code
-- Browser WebAssembly dependencies
-- Network/CORS issues
-- Duplicate AI implementations
+The detailed product and page strategy is documented in [PRODUCT_PLAN.md](PRODUCT_PLAN.md).

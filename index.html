@@ -4,260 +4,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AskChessGPT.com</title>
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-grotesk@600,700&f[]=general-sans@400,500,600&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-container">
-        <header class="header">
-            <h1><i class="fas fa-chess"></i>AskChessGPT.com</h1>
-            <div class="header-controls">
-                <!-- Login Button (shown when not authenticated) -->
-                <button id="loginBtn" class="btn btn-login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Login
-                </button>
-                
-                <!-- User Menu (shown when authenticated) -->
-                <div class="user-menu" style="display: none;">
-                    <button id="userMenuToggle" class="btn btn-user">
-                        <img id="userAvatar" class="user-avatar-img" src="" alt="User" style="display: none;">
-                        <i id="userAvatarIcon" class="fas fa-user"></i>
-                        <span id="userName">Loading...</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div id="userDropdown" class="user-dropdown">
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <img id="dropdownUserAvatar" class="dropdown-avatar-img" src="" alt="User" style="display: none;">
-                                <i id="dropdownAvatarIcon" class="fas fa-user-circle"></i>
-                            </div>
-                            <div class="user-details">
-                                <div id="userDisplayName">User</div>
-                                <div id="userEmail">user@example.com</div>
-                            </div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <button id="signOutBtn" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Sign Out
-                        </button>
-                    </div>
-                </div>
-                
-                <button id="feedbackTrigger" class="btn btn-secondary">
-                    <i class="fas fa-comment-dots"></i> Feedback
-                </button>
-                <button id="newGame" class="btn btn-primary"><i class="fas fa-plus"></i> New Game</button>
-                <div class="elo-display">Elo: <span id="eloValue">1500</span></div>
-            </div>
-        </header>
+    <div class="app-container" id="top">
+        <div class="noise-overlay" aria-hidden="true"></div>
 
-        <div class="game-setup" id="gameSetup">
-            <div class="setup-card">
-                <h2><i class="fas fa-cog"></i> Game Settings</h2>
-                <div class="setting">
-                    <label for="playerColor">Your Color:</label>
-                    <select id="playerColor">
-                        <option value="white">White</option>
-                        <option value="black">Black</option>
-                    </select>
-                </div>
-                <div class="setting">
-                    <label for="stockfishElo">AI Strength (Elo):</label>
-                    <input type="range" id="stockfishElo" min="800" max="3000" value="1500" step="100">
-                    <div class="elo-labels">
-                        <span>Beginner</span>
-                        <span>Master</span>
-                    </div>
-                </div>
-                <button id="startGame" class="btn btn-start">
-                    <i class="fas fa-play"></i> Start Game
-                </button>
-            </div>
-        </div>
+        <nav class="editorial-nav">
+            <div class="nav-brand">AskChessGPT</div>
+            <div class="nav-line" aria-hidden="true"></div>
+            <div class="nav-status">LEARNING BETA</div>
+        </nav>
 
-        <div class="game-layout" id="gameArea" style="display: none;">
-            <div class="sidebar left">
-                <div class="move-history">
-                    <h3><i class="fas fa-history"></i> Move History</h3>
-                    <div id="moveList"></div>
-                </div>
-                <div class="game-controls">
-                    <div class="status" id="gameStatus">Your turn</div>
-                    <button id="undoMove" class="btn btn-secondary">
-                        <i class="fas fa-undo"></i> Undo
-                    </button>
-                </div>
-            </div>
-            
-            <div class="main-board">
-                <div class="board-container">
-                    <div id="chessboard"></div>
-                </div>
-            </div>
-            
-            <div class="sidebar right">
-                <div class="chat-container">
-                    <h3><i class="fas fa-comments"></i> ChessGPT</h3>
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message ai-message">
-                            <div class="message-content">
-                                Hello! I'm your chess assistant. Ask me about the position, strategy, or any chess-related questions!
-                            </div>
-                        </div>
+        <main class="landing-page" id="landingPage">
+            <section class="hero-section">
+                <div class="hero-copy">
+                    <div class="eyebrow">
+                        <span class="eyebrow-line"></span>
+                        <span>QUESTION-DRIVEN CHESS STUDY</span>
                     </div>
-                    <div class="chat-input-container">
-                        <input type="text" id="chatInput" placeholder="Ask about the position..." />
-                        <button id="sendMessage" class="btn btn-chat">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                    <div class="hero-title-wrap">
+                        <div class="hero-title hero-title-back" aria-hidden="true">ASK.<br>LEARN.<br>IMPROVE.</div>
+                        <h1 class="hero-title hero-title-front">ASK.<br>LEARN.<br>IMPROVE.</h1>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Feedback Section -->
-        <div class="feedback-section" id="feedbackSection" style="display: none;">
-            <div class="feedback-container">
-                <div class="feedback-header">
-                    <h2><i class="fas fa-comments"></i> Feedback & Community</h2>
-                    <button id="closeFeedback" class="btn btn-close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                
-                <div class="feedback-content">
-                    <div class="community-section">
-                        <h3><i class="fas fa-users"></i> Join Our Community</h3>
-                        <p>Connect with other chess enthusiasts, share strategies, and get the latest updates!</p>
-                        <a href="https://discord.gg/86zuvTjq" target="_blank" class="btn btn-discord">
-                            <i class="fab fa-discord"></i> Join Discord Community
-                        </a>
-                    </div>
-                    
-                    <div class="feedback-form-section">
-                        <h3><i class="fas fa-lightbulb"></i> Share Your Feedback</h3>
-                        <form id="feedbackForm" class="feedback-form">
-                            <div class="form-group">
-                                <label for="feedbackType">Type:</label>
-                                <select id="feedbackType" required>
-                                    <option value="">Select feedback type</option>
-                                    <option value="bug">🐛 Bug Report</option>
-                                    <option value="feature">💡 Feature Request</option>
-                                    <option value="improvement">🚀 Improvement Suggestion</option>
-                                    <option value="general">💬 General Feedback</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="feedbackTitle">Title:</label>
-                                <input type="text" id="feedbackTitle" placeholder="Brief title for your feedback" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="feedbackMessage">Message:</label>
-                                <textarea id="feedbackMessage" rows="4" placeholder="Describe your feedback in detail..." required></textarea>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="feedbackEmail">Email (optional):</label>
-                                <input type="email" id="feedbackEmail" placeholder="your@email.com (for follow-up)">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane"></i> Send Feedback
-                            </button>
-                        </form>
+                <div class="hero-side">
+                    <p class="hero-lead">
+                        Ask any position what matters, why a move works, what you missed, and how to train the idea until it sticks.
+                    </p>
+                    <p class="hero-subcopy">
+                        Built for players who want understanding, not just another engine line or a bot that crushes them.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/gameplay" class="btn btn-primary btn-inline">Try A Position</a>
+                        <a href="/gameplay" class="btn btn-secondary btn-inline">Open Gameplay</a>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
+
+            <section class="manifest-section">
+                <div class="manifest-copy">
+                    <p>
+                        Most chess tools tell you the move. This one is built to answer the real question: <strong>why</strong>.
+                    </p>
+                </div>
+                <div class="manifest-grid">
+                    <article class="manifest-card">
+                        <span class="card-kicker">01</span>
+                        <h2>Why this move?</h2>
+                        <p>Translate engine strength into plain-language ideas, threats, and plans.</p>
+                    </article>
+                    <article class="manifest-card">
+                        <span class="card-kicker">02</span>
+                        <h2>What did I miss?</h2>
+                        <p>Expose blunders, missed tactics, and positional misunderstandings without drowning in lines.</p>
+                    </article>
+                    <article class="manifest-card">
+                        <span class="card-kicker">03</span>
+                        <h2>What next?</h2>
+                        <p>Get candidate moves, follow-up plans, and training prompts from the same position.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="demo-section">
+                <div class="demo-board-card">
+                    <div class="demo-label">Sample Question</div>
+                    <div class="demo-question">Why is <span>`Nf3`</span> stronger than grabbing the pawn?</div>
+                </div>
+                <div class="demo-answer-card">
+                    <div class="demo-label">How AskChessGPT Responds</div>
+                    <p>
+                        <strong>`Nf3`</strong> develops with tempo, supports central control, and keeps your king safe. The pawn grab wins material now but gives Black easy development and open lines against your king. In this structure, time matters more than the pawn.
+                    </p>
+                    <ul>
+                        <li>Improves king safety</li>
+                        <li>Supports `d4` and castling</li>
+                        <li>Avoids falling behind in development</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+
+        <a class="waitlist-badge" href="#top" aria-label="Scroll to top">
+            <span class="waitlist-badge-inner">WAITING LIST • WAITING LIST •</span>
+        </a>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="auth.js"></script>
-    <script src="game.js?v=9"></script>
-    
-    <!-- Visit Tracking -->
-    <script>
-        // Smart API URL detection
-        function getApiBaseUrl() {
-            const hostname = window.location.hostname;
-            
-            // Local development - use localhost:5100
-            if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                return 'http://localhost:5100';
-            }
-            
-            // Production - use same origin as frontend
-            return window.location.origin;
-        }
-        
-        // Track website visit on page load
-        $(document).ready(function() {
-            // First, try to setup Telegram automatically
-            $.ajax({
-                url: getApiBaseUrl() + '/api/telegram/setup',
-                method: 'GET',
-                timeout: 5000, // 5 second timeout to not delay page load
-                success: function(response) {
-                    console.log('Telegram setup:', response.message);
-                },
-                error: function(xhr) {
-                    // Silent fail - don't show errors to users for Telegram setup
-                    console.log('Telegram setup skipped:', xhr.status);
-                }
-            });
-            
-            // Then track the visit
-            $.ajax({
-                url: getApiBaseUrl() + '/api/track-visit',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    referrer: document.referrer || 'Direct',
-                    url: window.location.href
-                }),
-                success: function(response) {
-                    console.log('Visit tracked successfully');
-                },
-                error: function() {
-                    console.log('Visit tracking failed');
-                }
-            });
-        });
-    </script>
-
-    <!-- Lightweight feedback prompt modal -->
-    <div id="feedbackPrompt" class="prompt-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="feedbackPromptTitle">
-        <div class="prompt-card">
-            <div class="prompt-header">
-                <h3 id="feedbackPromptTitle"><i class="fas fa-heart"></i> We’d love your feedback</h3>
-                <button id="closeFeedbackPrompt" class="btn btn-close" aria-label="Close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="prompt-body">
-                <p>
-                    Enjoying AskChessGPT? Help us make it better with a quick suggestion or bug report.
-                </p>
-                <p class="prompt-note">
-                    Share your ideas from the <strong>Feedback</strong> button at the top.
-                </p>
-                <p class="prompt-meta">Takes less than 2 minutes.</p>
-            </div>
-            <div class="prompt-actions">
-                <button id="openFeedbackFromPrompt" class="btn btn-primary">
-                    <i class="fas fa-comment-dots"></i> Share feedback
-                </button>
-                <button id="dismissFeedbackPrompt" class="btn btn-secondary">Maybe later</button>
-            </div>
-        </div>
-    </div>
 </body>
 </html>

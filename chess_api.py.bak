@@ -1,0 +1,723 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import chess
+import chess.engine
+import random
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+
+app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)  # Enable CORS for frontend
+
+# Global Stockfish engine
+engine = None
+
+# OpenAI client
+openai_client = None
+
+# Load environment variables from .env (before reading env vars below)
+load_dotenv()
+
+
+def clamp_elo(elo):
+    """Normalize requested Elo into the supported UI range."""
+    try:
+        return max(400, min(3000, int(elo)))
+    except (TypeError, ValueError):
+        return 1500
+
+
+def get_engine_profile(elo):
+    """Map requested Elo to engine strength and randomness settings."""
+    normalized_elo = clamp_elo(elo)
+
+    if normalized_elo < 800:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': 1320,
+            'skill': 0,
+            'depth': 4,
+            'time': 0.03,
+            'multipv': 5,
+            'exploration': 0.95,
+            'max_score_gap': 350,
+        }
+    if normalized_elo < 1000:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': 1350,
+            'skill': 1,
+            'depth': 6,
+            'time': 0.05,
+            'multipv': 5,
+            'exploration': 0.8,
+            'max_score_gap': 220,
+        }
+    if normalized_elo < 1300:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': 1450,
+            'skill': 3,
+            'depth': 7,
+            'time': 0.08,
+            'multipv': 4,
+            'exploration': 0.55,
+            'max_score_gap': 180,
+        }
+    if normalized_elo < 1600:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': 1600,
+            'skill': 6,
+            'depth': 9,
+            'time': 0.12,
+            'multipv': 4,
+            'exploration': 0.32,
+            'max_score_gap': 130,
+        }
+    if normalized_elo < 1900:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': 1800,
+            'skill': 9,
+            'depth': 11,
+            'time': 0.22,
+            'multipv': 3,
+            'exploration': 0.16,
+            'max_score_gap': 90,
+        }
+    if normalized_elo < 2300:
+        return {
+            'elo': normalized_elo,
+            'uci_elo': min(2500, normalized_elo),
+            'skill': 14,
+            'depth': 13,
+            'time': 0.35,
+            'multipv': 2,
+            'exploration': 0.05,
+            'max_score_gap': 50,
+        }
+    return {
+        'elo': normalized_elo,
+        'uci_elo': min(2850, normalized_elo),
+        'skill': 20,
+        'depth': 15,
+        'time': 0.6,
+        'multipv': 1,
+        'exploration': 0.0,
+        'max_score_gap': 20,
+    }
+
+
+def configure_engine_for_profile(profile):
+    """Apply supported Stockfish strength options for the requested profile."""
+    if not engine:
+        return
+
+    options = getattr(engine, 'options', {})
+    config = {}
+
+    if 'UCI_LimitStrength' in options and 'UCI_Elo' in options:
+        config['UCI_LimitStrength'] = True
+        config['UCI_Elo'] = profile['uci_elo']
+
+    if 'Skill Level' in options:
+        config['Skill Level'] = profile['skill']
+
+    if config:
+        engine.configure(config)
+
+
+def normalize_analysis_entries(analysis):
+    if isinstance(analysis, list):
+        return analysis
+    return [analysis]
+
+
+def pick_weighted_engine_move(analysis, legal_moves, profile):
+    """Sample among strong engine candidates so low Elo feels less robotic."""
+    candidates = []
+    legal_move_set = set(legal_moves)
+
+    for entry in normalize_analysis_entries(analysis):
+        principal_variation = entry.get('pv') or []
+        move = principal_variation[0] if principal_variation else None
+        if not move or move not in legal_move_set:
+            continue
+
+        score_obj = entry.get('score')
+        score = score_obj.relative.score(mate_score=100000) if score_obj else 0
+        candidates.append((move, score))
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda item: item[1], reverse=True)
+    if len(candidates) == 1 or profile['exploration'] <= 0:
+        return candidates[0][0]
+
+    best_score = candidates[0][1]
+    weighted_candidates = []
+    weights = []
+
+    for index, (move, score) in enumerate(candidates):
+        score_gap = max(0, best_score - score)
+        if index > 0 and score_gap > profile['max_score_gap']:
+            continue
+
+        weight = 1.0 if index == 0 else profile['exploration'] / (index + 1)
+        weight *= max(0.15, 1 - (score_gap / max(profile['max_score_gap'], 1)))
+
+        weighted_candidates.append(move)
+        weights.append(max(weight, 0.05))
+
+    if not weighted_candidates:
+        return candidates[0][0]
+
+    return random.choices(weighted_candidates, weights=weights, k=1)[0]
+
+
+def get_engine_move(board, elo):
+    """Get a move from Stockfish with strength controls and softer low-Elo play."""
+    if not engine:
+        return None, None
+
+    profile = get_engine_profile(elo)
+    configure_engine_for_profile(profile)
+
+    analysis = engine.analyse(
+        board,
+        chess.engine.Limit(depth=profile['depth'], time=profile['time']),
+        multipv=profile['multipv'],
+    )
+    return pick_weighted_engine_move(analysis, list(board.legal_moves), profile), profile
+
+
+def analyze_position(board, elo, multipv=3):
+    """Return top engine candidates for a position when Stockfish is available."""
+    if not engine:
+        return []
+
+    profile = get_engine_profile(elo)
+    configure_engine_for_profile(profile)
+    analysis = engine.analyse(
+        board,
+        chess.engine.Limit(depth=profile['depth'], time=profile['time']),
+        multipv=multipv,
+    )
+
+    candidates = []
+    for entry in normalize_analysis_entries(analysis):
+        pv = entry.get('pv') or []
+        move = pv[0] if pv else None
+        if not move:
+            continue
+
+        score_obj = entry.get('score')
+        score = score_obj.relative.score(mate_score=100000) if score_obj else 0
+        candidates.append((move, score))
+
+    return candidates
+
+
+def get_move_quality_label(delta):
+    if delta >= -40:
+        return 'strong'
+    if delta >= -120:
+        return 'playable'
+    if delta >= -250:
+        return 'inaccurate'
+    return 'a serious mistake'
+
+
+def format_engine_score(score):
+    if score >= 99900:
+        return 'winning by force'
+    if score <= -99900:
+        return 'losing by force'
+    if score > 120:
+        return 'a clear edge'
+    if score > 40:
+        return 'a small edge'
+    if score >= -40:
+        return 'rough equality'
+    if score >= -120:
+        return 'slightly worse'
+    return 'under pressure'
+
+
+def describe_move_heuristics(board, move):
+    piece = board.piece_at(move.from_square)
+    if not piece:
+        return 'It improves the position without creating immediate weaknesses.'
+
+    reasons = []
+    to_square = chess.square_name(move.to_square)
+    from_square = chess.square_name(move.from_square)
+
+    if board.is_castling(move):
+        reasons.append('it castles, improving king safety and connecting the rooks')
+
+    if board.is_capture(move):
+        reasons.append('it captures material or removes an important defender')
+
+    if board.gives_check(move):
+        reasons.append('it creates immediate pressure with check')
+
+    if piece.piece_type in (chess.KNIGHT, chess.BISHOP):
+        home_rank = '1' if piece.color == chess.WHITE else '8'
+        if from_square.endswith(home_rank):
+            reasons.append('it develops a minor piece toward active squares')
+
+    if piece.piece_type == chess.PAWN and to_square in {'d4', 'e4', 'd5', 'e5'}:
+        reasons.append('it claims central space')
+
+    if piece.piece_type != chess.PAWN and to_square in {'d4', 'e4', 'd5', 'e5', 'c4', 'f4', 'c5', 'f5'}:
+        reasons.append('it improves central influence')
+
+    if piece.piece_type == chess.ROOK and from_square[0] != to_square[0]:
+        reasons.append('it activates a rook onto a more useful file')
+
+    if not reasons:
+        reasons.append('it improves coordination and keeps the position stable')
+
+    return ' and '.join(reasons[:2]) + '.'
+
+
+def get_engine_fallback_response(message, fen):
+    board = chess.Board(fen)
+    candidates = analyze_position(board, 1700, multipv=3)
+    if not candidates:
+        return None
+
+    message_l = message.lower()
+    best_move, best_score = candidates[0]
+    best_move_san = board.san(best_move)
+    best_reason = describe_move_heuristics(board, best_move)
+    evaluation_text = format_engine_score(best_score)
+
+    if 'candidate' in message_l or '3 candidate' in message_l or 'best move' in message_l:
+        lines = []
+        for move, score in candidates[:3]:
+            san = board.san(move)
+            reason = describe_move_heuristics(board, move)
+            lines.append(f"• `{san}`: {reason} Engine view: {format_engine_score(score)}")
+        return "\n".join(lines)
+
+    if 'plan' in message_l or 'strategy' in message_l:
+        return (
+            f"The engine's first choice is `{best_move_san}`, and the position looks like {evaluation_text}. "
+            f"The practical idea is that {best_reason} In this phase, focus on piece activity first and only then look for direct tactics."
+        )
+
+    if 'miss' in message_l or 'mistake' in message_l or 'blunder' in message_l:
+        return (
+            f"A useful reference move here is `{best_move_san}`. {best_reason} "
+            "If your move ignored development, king safety, or a forcing line, that is probably what you missed."
+        )
+
+    if 'why' in message_l or 'explain' in message_l:
+        return (
+            f"The engine likes `{best_move_san}` because {best_reason} "
+            f"After that move, the position evaluates as {evaluation_text}, which usually means the move improves activity without conceding counterplay."
+        )
+
+    # Default: give a useful position overview using the engine
+    turn = "White" if board.turn else "Black"
+    return (
+        f"{turn} to move. The engine's top choice is `{best_move_san}` ({evaluation_text}). "
+        f"{best_reason} Ask about candidate moves, the best plan, or the last move for more detail."
+    )
+
+
+def explain_last_move(last_move):
+    if not last_move:
+        return None
+
+    before_fen = last_move.get('beforeFen')
+    after_fen = last_move.get('afterFen')
+    uci = last_move.get('uci')
+    san = last_move.get('san') or uci or 'that move'
+    actor = 'You' if last_move.get('actor') == 'player' else 'The AI'
+
+    if not before_fen or not after_fen or not uci:
+        return None
+
+    try:
+        before_board = chess.Board(before_fen)
+        after_board = chess.Board(after_fen)
+        move = chess.Move.from_uci(uci)
+    except ValueError:
+        return None
+
+    if move not in before_board.legal_moves:
+        return None
+
+    before_candidates = analyze_position(before_board, 2000, multipv=3)
+    after_candidates = analyze_position(after_board, 2000, multipv=2)
+    if not before_candidates:
+        return None
+
+    best_move, best_score = before_candidates[0]
+    played_score = None
+
+    for candidate_move, score in before_candidates:
+        if candidate_move == move:
+            played_score = score
+            break
+
+    if played_score is None:
+        analysis = analyze_position(before_board, 2000, multipv=6)
+        for candidate_move, score in analysis:
+            if candidate_move == move:
+                played_score = score
+                break
+
+    if played_score is None:
+        played_score = best_score - 180
+
+    score_delta = played_score - best_score
+    quality = get_move_quality_label(score_delta)
+    played_reason = describe_move_heuristics(before_board, move)
+
+    response_suffix = ''
+    if after_candidates:
+        reply_move = after_candidates[0][0]
+        response_suffix = f" Best reply now is `{after_board.san(reply_move)}`."
+
+    if move == best_move:
+        return (
+            f"{actor} just played `{san}`, and it was a {quality} choice. {played_reason} "
+            f"It keeps the position at {format_engine_score(played_score)}.{response_suffix}"
+        )
+
+    best_san = before_board.san(best_move)
+    best_reason = describe_move_heuristics(before_board, best_move)
+    return (
+        f"{actor} just played `{san}`. It was {quality}: {played_reason} "
+        f"The cleaner move was `{best_san}` because {best_reason} "
+        f"Compared with the engine's top choice, this changes the position from {format_engine_score(best_score)} to {format_engine_score(played_score)}.{response_suffix}"
+    )
+
+def init_openai():
+    """Initialize LLM client. Tries OPENROUTER_API_KEY first, then OPENAI_API_KEY."""
+    global openai_client
+    try:
+        # Prefer OpenRouter first
+        router_key = os.environ.get('OPENROUTER_API_KEY')
+        if router_key:
+            openai_client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=router_key
+            )
+            print("[chat] Using OpenRouter API")
+            return True
+        # Fall back to direct OpenAI
+        openai_key = os.environ.get('OPENAI_API_KEY')
+        if openai_key:
+            openai_client = OpenAI(api_key=openai_key)
+            print("[chat] Using direct OpenAI API")
+            return True
+        print("[chat] No LLM API key found — engine-only fallback active")
+        return False
+    except Exception as e:
+        print(f"[chat] LLM init error: {e}")
+        return False
+
+def init_stockfish():
+    """Initialize Stockfish engine"""
+    global engine
+    try:
+        import platform
+        system = platform.system().lower()
+        
+        # Auto-detect platform and set appropriate Stockfish paths
+        stockfish_paths = []
+        
+        if system == 'linux':
+            stockfish_paths = [
+                './stockfish-linux',
+                './stockfish',
+                'stockfish'
+            ]
+        elif system == 'darwin':  # macOS
+            stockfish_paths = [
+                './stockfish-macos-m1-apple-silicon',
+                './stockfish',
+                'stockfish'
+            ]
+        else:  # Windows or other
+            stockfish_paths = [
+                './stockfish.exe',
+                './stockfish',
+                'stockfish'
+            ]
+        
+        for path in stockfish_paths:
+            try:
+                if os.path.exists(path) or path == 'stockfish':
+                    engine = chess.engine.SimpleEngine.popen_uci(path)
+                    return True
+            except Exception:
+                continue
+        return False
+    except Exception:
+        return False
+
+@app.route('/api/move', methods=['POST'])
+def get_move():
+    """Get AI move for given position"""
+    try:
+        data = request.json
+        fen = data.get('fen')
+        elo = clamp_elo(data.get('elo', 1500))
+        
+        if not fen:
+            return jsonify({'error': 'FEN position required'}), 400
+        
+        board = chess.Board(fen)
+        legal_moves = list(board.legal_moves)
+        
+        if not legal_moves:
+            return jsonify({'error': 'No legal moves available'}), 400
+
+        move = None
+        profile = None
+        if engine:
+            try:
+                move, profile = get_engine_move(board, elo)
+            except Exception:
+                move = None
+        
+        if not move:
+            move = random.choice(legal_moves)
+        
+        if move not in legal_moves:
+            move = legal_moves[0]
+        
+        return jsonify({
+            'move': str(move),
+            'elo': elo,
+            'engine': 'Stockfish' if engine else 'Random',
+            'message': f'{"Stockfish" if engine else "Random"} move (Elo {elo})',
+            'profile': profile,
+        })
+        
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
+
+def get_position_info(fen):
+    """Get detailed position information for GPT context"""
+    try:
+        board = chess.Board(fen)
+        
+        # Basic position info
+        turn = "White" if board.turn else "Black"
+        move_number = board.fullmove_number
+        
+        # Game phase
+        pieces = len([p for p in board.piece_map().values()])
+        if move_number <= 10:
+            phase = "opening"
+        elif pieces <= 10:
+            phase = "endgame"  
+        else:
+            phase = "middlegame"
+            
+        # Checks and threats
+        in_check = board.is_check()
+        legal_moves = list(board.legal_moves)
+        
+        # Material count
+        material = {"white": 0, "black": 0}
+        piece_values = {"p": 1, "n": 3, "b": 3, "r": 5, "q": 9}
+        
+        for square, piece in board.piece_map().items():
+            color = "white" if piece.color else "black"
+            material[color] += piece_values.get(piece.symbol().lower(), 0)
+        
+        return {
+            "turn": turn,
+            "move_number": move_number,
+            "phase": phase,
+            "in_check": in_check,
+            "legal_moves_count": len(legal_moves),
+            "material_white": material["white"],
+            "material_black": material["black"],
+            "material_balance": material["white"] - material["black"]
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+def get_gpt_chess_response(message, fen):
+    """Get intelligent chess response from GPT-4o"""
+    try:
+        if not openai_client:
+            return None
+
+        pos_info = get_position_info(fen)
+
+        system_prompt = f"""You are a world-class chess coach and analyst. You help players understand positions, strategy, and tactics.
+
+**Current Position Analysis:**
+- **Turn to move:** {pos_info.get('turn', 'Unknown')}
+- **Move number:** {pos_info.get('move_number', 'Unknown')}
+- **Game phase:** {pos_info.get('phase', 'Unknown')}
+- **In check:** {pos_info.get('in_check', False)}
+- **Legal moves:** {pos_info.get('legal_moves_count', 0)}
+- **Material balance:** {pos_info.get('material_balance', 0)} (positive favors White)
+
+**FEN:** {fen}
+
+**Formatting Instructions:**
+- Use **Opening Name** format for chess openings (e.g., **Italian Game**, **Sicilian Defense**, **Queen's Gambit**)
+- Use `move` format for all chess moves (e.g., `1.e4`, `Nf3`, `O-O`, `Bxf7+`)
+- Use **bold** for important chess concepts and terms
+- Use • for bullet points
+- Keep responses concise and well-formatted
+
+Provide helpful, accurate chess advice. Be concise but well-formatted.
+Only answer the question asked. Keep responses under 150 words."""
+
+        response = openai_client.chat.completions.create(
+            model="anthropic/claude-opus-4.6",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": message}
+            ],
+            max_tokens=300,
+            temperature=0.1
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        print(f"[chat] LLM call failed: {e}")
+        return None
+
+def get_fallback_chess_response(message, fen):
+    """Return a lightweight coaching response when the LLM is unavailable."""
+    position_info = get_position_info(fen) if fen else {}
+    message_l = message.lower()
+
+    if position_info.get('error'):
+        return "I can still help, but I need a valid position to explain plans, candidate moves, or mistakes."
+
+    if fen:
+        engine_response = get_engine_fallback_response(message, fen)
+        if engine_response:
+            return engine_response
+
+    turn = position_info.get('turn', 'Unknown side')
+    phase = position_info.get('phase', 'position')
+    material_balance = position_info.get('material_balance', 0)
+
+    if 'candidate' in message_l or 'best move' in message_l or 'what should i play' in message_l:
+        return (
+            f"{turn} is to move in a {phase}. Start by comparing forcing moves, improving piece activity, "
+            "and king safety. Ask for 3 candidate moves once engine-backed move ranking is enabled."
+        )
+
+    if 'plan' in message_l or 'strategy' in message_l:
+        return (
+            f"In this {phase}, begin with the simple questions: which side has the safer king, which pieces are inactive, "
+            f"and whether the material balance ({material_balance:+d}) suggests simplification or pressure."
+        )
+
+    if 'miss' in message_l or 'mistake' in message_l or 'blunder' in message_l:
+        return (
+            f"Review the position from {turn}'s perspective and check three things first: loose pieces, forcing tactics, and whether a greedy move leaves development behind. "
+            "That is usually where club-level mistakes come from."
+        )
+
+    return (
+        f"This is a {phase} with {turn} to move. Ask about the best plan, candidate moves, or what changed after the last move, "
+        "and I will break the position down in practical terms."
+    )
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """Handle chat messages and provide chess advice using GPT-4o"""
+    try:
+        data = request.json
+        message = data.get('message', '')
+        fen = data.get('fen', '')
+        last_move = data.get('lastMove')
+        
+        if not message:
+            return jsonify({'error': 'Message is required'}), 400
+
+        message_l = message.lower()
+        if fen and last_move and (
+            'last move' in message_l or
+            'what changed' in message_l or
+            'why did' in message_l or
+            'why was' in message_l
+        ):
+            last_move_response = explain_last_move(last_move)
+            if last_move_response:
+                return jsonify({
+                    'response': last_move_response,
+                    'status': 'success',
+                    'source': 'fallback'
+                })
+        
+        gpt_response = None
+        if fen and openai_client:
+            gpt_response = get_gpt_chess_response(message, fen)
+
+        if gpt_response:
+            response = gpt_response
+        else:
+            response = get_fallback_chess_response(message, fen)
+        
+        return jsonify({
+            'response': response,
+            'status': 'success',
+            'source': 'gpt-4o' if gpt_response else 'fallback'
+        })
+        
+    except Exception as error:
+        return jsonify({'error': str(error)}), 500
+
+@app.route('/')
+def index():
+    """Serve the main page"""
+    return app.send_static_file('index.html')
+
+
+@app.route('/gameplay')
+def gameplay():
+    """Serve the gameplay studio page."""
+    return app.send_static_file('gameplay.html')
+
+@app.route('/api/health', methods=['GET'])
+def health():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'ok', 
+        'message': 'Chess API is running',
+        'engine': 'Stockfish' if engine else 'Random',
+        'stockfish_available': engine is not None,
+        'openrouter_configured': bool(openai_client)
+    })
+
+def cleanup():
+    """Clean up resources"""
+    global engine
+    if engine:
+        try:
+            engine.quit()
+        except:
+            pass
+
+if __name__ == '__main__':
+    # Initialize engine and chat services on startup
+    init_stockfish()
+    init_openai()
+    
+    try:
+        app.run(debug=True, host='0.0.0.0', port=5100)
+    finally:
+        cleanup()

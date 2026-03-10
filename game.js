@@ -1,276 +1,15 @@
-// API Configuration - automatically detects environment
-// Smart API URL detection
+// API Configuration
 function getApiBaseUrl() {
     const hostname = window.location.hostname;
-    
-    // Local development - use localhost:5100
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:5100';
-    }
-    
-    // Production - use same origin as frontend
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return 'http://localhost:5100';
     return window.location.origin;
 }
-
 const API_BASE_URL = getApiBaseUrl();
 
-// Initialize page - no authentication required
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM loaded, initializing page...');
-    
-    // Check for OAuth callback hash in URL
-    if (window.location.hash && window.location.hash.includes('access_token')) {
-        // Handle OAuth callback
-        await handleOAuthCallback();
-    } else {
-        // Normal page load
-        await initializePage();
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('gameSetup')) window.game = new ChessGame();
 });
 
-// Handle OAuth callback from Supabase
-async function handleOAuthCallback() {
-    try {
-        console.log('Handling OAuth callback');
-        // Supabase will automatically handle the auth state from the hash
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Wait longer for auth to process
-        
-        // Clean up the URL hash
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.pathname);
-        }
-        
-        // Initialize the page
-        initializePage();
-        
-        // Force update user display after OAuth
-        setTimeout(() => {
-            updateUserDisplay();
-        }, 500);
-    } catch (error) {
-        console.error('OAuth callback error:', error);
-        initializePage();
-    }
-}
-
-// Initialize the main page
-async function initializePage() {
-    console.log('Initializing page...');
-    
-    // Wait a bit for auth service to be fully initialized
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Initialize game for everyone
-    window.game = new ChessGame();
-    await initializeUserInterface();
-}
-
-// Initialize user interface components
-async function initializeUserInterface() {
-    console.log('Initializing UI...');
-    
-    // Wait for auth service to be ready
-    let retries = 0;
-    while ((typeof authService === 'undefined' || typeof window.authService === 'undefined') && retries < 20) {
-        console.log('Waiting for authService...', retries);
-        await new Promise(resolve => setTimeout(resolve, 100));
-        retries++;
-    }
-    
-    // Use window.authService if global authService is not available
-    const auth = window.authService || authService;
-    
-    if (auth) {
-        console.log('AuthService ready, checking auth state...');
-        try {
-            // Wait for auth service initialization to complete
-            await auth.initPromise;
-            
-            // Force a session check
-            if (auth.supabase) {
-                const { data: { session } } = await auth.supabase.auth.getSession();
-                console.log('Manual session check result:', session);
-                if (session && session.user) {
-                    auth.currentUser = session.user;
-                }
-            }
-        } catch (error) {
-            console.error('Auth initialization failed:', error);
-        }
-    } else {
-        console.warn('AuthService not available after waiting');
-    }
-    
-    // Check if user is logged in and update UI accordingly
-    updateUserDisplay();
-    
-    // Set up periodic check for auth state changes (less frequent)
-    setInterval(() => {
-        updateUserDisplay();
-    }, 5000); // Check every 5 seconds instead of every second
-    
-    // User menu functionality
-    const userMenuToggle = document.getElementById('userMenuToggle');
-    const userDropdown = document.getElementById('userDropdown');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const loginBtn = document.getElementById('loginBtn');
-
-    if (userMenuToggle && userDropdown) {
-        // Toggle user menu
-        userMenuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-            userMenuToggle.classList.toggle('active');
-        });
-
-        // Close menu when clicking outside
-        document.addEventListener('click', () => {
-            userDropdown.classList.remove('show');
-            userMenuToggle.classList.remove('active');
-        });
-
-        // Prevent menu from closing when clicking inside
-        userDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-
-    if (signOutBtn) {
-        signOutBtn.addEventListener('click', async () => {
-            if (typeof authService !== 'undefined') {
-                await authService.signOut();
-            }
-        });
-    }
-    
-    if (loginBtn) {
-        loginBtn.addEventListener('click', () => {
-            window.location.href = '/login.html';
-        });
-    }
-}
-
-// Update user display in the UI
-function updateUserDisplay() {
-    console.log('updateUserDisplay called at:', new Date().toISOString());
-    
-    const userMenu = document.querySelector('.user-menu');
-    const loginBtn = document.getElementById('loginBtn');
-    
-    console.log('DOM elements found:', { userMenu: !!userMenu, loginBtn: !!loginBtn });
-    
-    // Try to get auth service from global scope or local scope
-    const auth = window.authService || authService;
-    console.log('authService available:', !!auth);
-    
-    if (!auth) {
-        console.warn('authService not available, showing login button');
-        if (userMenu) userMenu.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'flex';
-        return;
-    }
-    
-    const isAuthenticated = auth.isAuthenticated();
-    const currentUser = auth.getCurrentUser();
-    console.log('Auth check:', { isAuthenticated, currentUser });
-    
-    
-    if (isAuthenticated && currentUser) {
-        // User is logged in - show user menu
-        console.log('User is authenticated, updating UI for user:', currentUser);
-        
-        const userName = document.getElementById('userName');
-        const userDisplayName = document.getElementById('userDisplayName');
-        const userEmail = document.getElementById('userEmail');
-        const userAvatar = document.getElementById('userAvatar');
-        const userAvatarIcon = document.getElementById('userAvatarIcon');
-        const dropdownUserAvatar = document.getElementById('dropdownUserAvatar');
-        const dropdownAvatarIcon = document.getElementById('dropdownAvatarIcon');
-
-        console.log('UI elements found:', {
-            userName: !!userName,
-            userDisplayName: !!userDisplayName,
-            userEmail: !!userEmail,
-            userAvatar: !!userAvatar,
-            userAvatarIcon: !!userAvatarIcon
-        });
-
-        const displayName = currentUser.user_metadata?.name || currentUser.user_metadata?.full_name || currentUser.email || 'User';
-        const shortName = displayName.length > 15 ? displayName.substring(0, 15) + '...' : displayName;
-        const avatarUrl = currentUser.user_metadata?.avatar_url || currentUser.user_metadata?.picture;
-        
-        console.log('User data:', { displayName, shortName, avatarUrl });
-        
-        if (userName) {
-            userName.textContent = shortName;
-            console.log('Set userName to:', shortName);
-        }
-        if (userDisplayName) {
-            userDisplayName.textContent = displayName;
-            console.log('Set userDisplayName to:', displayName);
-        }
-        if (userEmail) {
-            userEmail.textContent = currentUser.email || '';
-            console.log('Set userEmail to:', currentUser.email);
-        }
-        
-        // Handle user avatar in header button
-        if (avatarUrl && userAvatar && userAvatarIcon) {
-            console.log('Setting header avatar to:', avatarUrl);
-            userAvatar.src = avatarUrl;
-            userAvatar.style.display = 'block';
-            userAvatarIcon.style.display = 'none';
-            userAvatar.onerror = function() {
-                console.log('Header avatar failed to load, using fallback');
-                this.style.display = 'none';
-                userAvatarIcon.style.display = 'block';
-            };
-        } else if (userAvatarIcon) {
-            console.log('Using header icon fallback (no avatar URL or missing elements)');
-            userAvatarIcon.style.display = 'block';
-            if (userAvatar) userAvatar.style.display = 'none';
-        }
-        
-        // Handle user avatar in dropdown
-        if (avatarUrl && dropdownUserAvatar && dropdownAvatarIcon) {
-            console.log('Setting dropdown avatar');
-            dropdownUserAvatar.src = avatarUrl;
-            dropdownUserAvatar.style.display = 'block';
-            dropdownAvatarIcon.style.display = 'none';
-            dropdownUserAvatar.onerror = function() {
-                console.log('Dropdown avatar failed to load');
-                this.style.display = 'none';
-                dropdownAvatarIcon.style.display = 'block';
-            };
-        } else if (dropdownAvatarIcon) {
-            console.log('Using dropdown icon fallback');
-            dropdownAvatarIcon.style.display = 'block';
-            if (dropdownUserAvatar) dropdownUserAvatar.style.display = 'none';
-        }
-
-        if (userMenu) {
-            userMenu.style.display = 'block';
-            console.log('Showing user menu');
-        }
-        if (loginBtn) {
-            loginBtn.style.display = 'none';
-            console.log('Hiding login button');
-        }
-    } else {
-        // User is not logged in - show login button
-        console.log('User not authenticated - showing login button');
-        if (userMenu) {
-            userMenu.style.display = 'none';
-            console.log('Hiding user menu');
-        }
-        if (loginBtn) {
-            loginBtn.style.display = 'flex';
-            console.log('Showing login button');
-        }
-    }
-}
-
-// Chess Game Logic
 class ChessGame {
     constructor() {
         this.chess = new Chess();
@@ -279,1050 +18,511 @@ class ChessGame {
         this.aiElo = 1500;
         this.isPlayerTurn = true;
         this.gameActive = false;
+        this.pendingAI = false;
         this.selectedSquare = null;
         this.validMoves = [];
-        
+        this.lastMoveContext = null;
+        this.sessionId = crypto.randomUUID();
+
         this.initializeEventListeners();
         this.initializeChat();
     }
-    
+
     initializeEventListeners() {
-        // Game setup
         document.getElementById('stockfishElo').addEventListener('input', (e) => {
-            const elo = e.target.value;
-            const eloValueSpans = document.querySelectorAll('#eloValue');
-            eloValueSpans.forEach(span => span.textContent = elo);
-            this.aiElo = parseInt(elo);
+            document.querySelectorAll('#eloValue').forEach(s => s.textContent = e.target.value);
+            this.aiElo = parseInt(e.target.value);
         });
-        
-        document.getElementById('startGame').addEventListener('click', () => {
-            this.startNewGame();
-        });
-        
-        document.getElementById('newGame').addEventListener('click', () => {
-            this.showGameSetup();
-        });
-        
-        document.getElementById('undoMove').addEventListener('click', () => {
-            this.undoLastMove();
-        });
+        document.getElementById('startGame').addEventListener('click', () => this.startNewGame());
+        document.getElementById('newGame').addEventListener('click', () => this.showGameSetup());
+        document.getElementById('undoMove').addEventListener('click', () => this.undoLastMove());
     }
-    
+
     initializeChat() {
-        const chatInput = document.getElementById('chatInput');
-        const sendButton = document.getElementById('sendMessage');
-        
-        // Send message on button click
-        sendButton.addEventListener('click', () => {
-            this.sendChatMessage();
-        });
-        
-        // Send message on Enter key
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.sendChatMessage();
-            }
-        });
+        const input = document.getElementById('chatInput');
+        document.getElementById('sendMessage').addEventListener('click', () => this.sendChatMessage());
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendChatMessage(); });
     }
-    
+
     sendChatMessage() {
-        const chatInput = document.getElementById('chatInput');
-        const message = chatInput.value.trim();
-        
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
         if (!message) return;
-        
-        // Send user message to Telegram for tracking
-        this.sendMessageToTelegram(message);
-        
-        // Add user message to chat
         this.addChatMessage(message, 'user');
-        chatInput.value = '';
-        
-        // Generate AI response
-        setTimeout(() => {
-            this.generateAIResponse(message);
-        }, 500);
+        input.value = '';
+        this.generateAIResponse(message);
     }
-    
-    // Send user chat message to Telegram for tracking
-    async sendMessageToTelegram(message) {
-        try {
-            // Get user info if available
-            let userInfo = 'Anonymous User';
-            let userEmail = 'Not logged in';
-            let userId = 'anonymous';
-            
-            // Try to get auth service from global scope or local scope
-            const auth = window.authService || authService;
-            
-            if (auth && auth.isAuthenticated()) {
-                const user = auth.getCurrentUser();
-                if (user) {
-                    userInfo = user.user_metadata?.name || user.user_metadata?.full_name || 'Logged in User';
-                    userEmail = user.email || 'No email';
-                    userId = user.id || 'unknown';
-                }
-            }
-            
-            // Get game context if available
-            let gameContext = 'No game active';
-            if (this.gameActive) {
-                const moves = this.chess.history();
-                const gamePhase = this.getGamePhase();
-                gameContext = `Game active - ${gamePhase} phase, ${moves.length} moves played`;
-            }
-            
-            // Format message for Telegram
-            const telegramMessage = `🎮 **Chess Chat Message**\n\n` +
-                `👤 **User:** ${userInfo}\n` +
-                `📧 **Email:** ${userEmail}\n` +
-                `🆔 **User ID:** ${userId}\n` +
-                `💬 **Message:** "${message}"\n` +
-                `🏁 **Game Status:** ${gameContext}\n` +
-                `🕐 **Time:** ${new Date().toLocaleString()}\n` +
-                `🌐 **Page:** askchessgpt.com`;
-            
-            // Send to backend API
-            await fetch(`${API_BASE_URL}/api/feedback`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    type: 'chat_message',
-                    title: 'User Chat Message',
-                    message: telegramMessage,
-                    email: userEmail,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    url: window.location.href,
-                    userId: userId,
-                    gameContext: gameContext,
-                    originalMessage: message
-                })
-            });
-            
-            console.log('Chat message sent to Telegram for tracking');
-        } catch (error) {
-            console.error('Failed to send chat message to Telegram:', error);
-            // Don't show error to user - this is background tracking
-        }
-    }
-    
-    addChatMessage(message, sender) {
+
+    addChatMessage(message, sender, { isProactive = false } = {}) {
         const chatMessages = document.getElementById('chatMessages');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${sender}-message`;
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        
-        // Parse markdown for AI messages, plain text for user messages
-        if (sender === 'ai') {
-            contentDiv.innerHTML = this.parseChessMarkdown(message);
-        } else {
-            contentDiv.textContent = message;
-        }
-        
-        messageDiv.appendChild(contentDiv);
-        chatMessages.appendChild(messageDiv);
-        
-        // Scroll to bottom
+        const div = document.createElement('div');
+        div.className = `message ${sender}-message${isProactive ? ' proactive-message' : ''}`;
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        content.innerHTML = sender === 'ai' ? this.parseChessMarkdown(message) : this.escapeHtml(message);
+        div.appendChild(content);
+        chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        return content;
     }
-    
+
+    escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
     parseChessMarkdown(text) {
-        // Escape HTML first to prevent XSS
-        const escapeHtml = (str) => {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        };
-        
-        let parsed = escapeHtml(text);
-        
-        // Parse opening names (text between **opening** markers)
-        parsed = parsed.replace(/\*\*(.*?(?:Game|Defense|Opening|Attack|Variation|System|Gambit).*?)\*\*/gi, 
-            '<span class="chess-opening">$1</span>');
-        
-        // Parse other bold text
+        let parsed = this.escapeHtml(text);
+        parsed = parsed.replace(/^#{1,3}\s+(.+)$/gm, '<strong>$1</strong><br>');
         parsed = parsed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        
-        // Parse chess moves in backticks (including numbers, letters, symbols)
-        parsed = parsed.replace(/`([^`]+)`/g, '<span class="chess-move">$1</span>');
-        
-        // Parse bullet points
-        parsed = parsed.replace(/• /g, '<li>');
-        parsed = parsed.replace(/\n• /g, '</li>\n<li>');
-        
-        // Wrap consecutive bullet points in ul tags
+        parsed = parsed.replace(/`([^`]+)`/g, '<code>$1</code>');
+        parsed = parsed.replace(/^- (.+)$/gm, '<li>$1</li>');
         parsed = parsed.replace(/(<li>.*?<\/li>(?:\s*<li>.*?<\/li>)*)/gs, '<ul>$1</ul>');
-        
-        // Parse line breaks
         parsed = parsed.replace(/\n/g, '<br>');
-        
         return parsed;
     }
-    
-    generateAIResponse(userMessage) {
-        console.log(`Calling chat API: ${API_BASE_URL}/api/chat`);
-        // Call the backend API for intelligent responses
-        fetch(`${API_BASE_URL}/api/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: userMessage,
-                fen: this.chess.fen()
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.response) {
-                this.addChatMessage(data.response, 'ai');
+
+    // -- Streaming chat --------------------------------------------------------
+
+    async generateAIResponse(userMessage) {
+        const contentEl = this.showTypingIndicator();
+        try {
+            const resp = await fetch(`${API_BASE_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: userMessage,
+                    fen: this.chess.fen(),
+                    lastMove: this.lastMoveContext,
+                    sessionId: this.sessionId,
+                    stream: true
+                })
+            });
+            if (resp.headers.get('content-type')?.includes('text/event-stream')) {
+                await this.readStream(resp, contentEl);
             } else {
-                // Fallback to local responses
-                const responses = this.getContextualResponse(userMessage.toLowerCase());
-                const response = responses[Math.floor(Math.random() * responses.length)];
-                this.addChatMessage(response, 'ai');
+                const data = await resp.json();
+                this.removeTypingIndicator(contentEl, data.response || 'No response.');
             }
-        })
-        .catch(error => {
-            console.error('Chat API error:', error);
-            // Fallback to local responses
-            const responses = this.getContextualResponse(userMessage.toLowerCase());
-            const response = responses[Math.floor(Math.random() * responses.length)];
-            this.addChatMessage(response, 'ai');
-        });
-    }
-    
-    getContextualResponse(message) {
-        const position = this.chess.fen();
-        const turn = this.chess.turn() === 'w' ? 'White' : 'Black';
-        const gamePhase = this.getGamePhase();
-        
-        // Check if message is about current position
-        if (message.includes('position') || message.includes('analyze') || message.includes('evaluation')) {
-            return [
-                `Current position: ${turn} to move. We're in the ${gamePhase} phase.`,
-                `This position shows typical ${gamePhase} characteristics. ${turn} has the initiative.`,
-                `Let me analyze: ${turn} to move in this ${gamePhase} position.`
-            ];
+        } catch (e) {
+            this.removeTypingIndicator(contentEl, 'Connection error. Try again.');
         }
-        
-        // Check if message is about strategy
-        if (message.includes('strategy') || message.includes('plan') || message.includes('what should')) {
-            if (gamePhase === 'opening') {
-                return [
-                    "In the opening, focus on controlling the center, developing pieces, and castling for king safety.",
-                    "Key opening principles: develop knights before bishops, castle early, and control central squares.",
-                    "Good opening moves prioritize piece development and center control over material gain."
-                ];
-            } else if (gamePhase === 'middlegame') {
-                return [
-                    "In the middlegame, look for tactical opportunities and improve piece coordination.",
-                    "Focus on piece activity, pawn structure, and king safety. Look for tactical motifs.",
-                    "The middlegame is about improving piece placement and creating threats."
-                ];
+    }
+
+    async requestProactiveAnalysis(lastMove) {
+        if (!this.gameActive) return;
+        const panel = document.getElementById('aiLogicContent');
+        if (!panel) return;
+        panel.innerHTML = '<span class="typing-indicator" style="display:inline-flex;gap:4px;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+        try {
+            const resp = await fetch(`${API_BASE_URL}/api/analyze-move`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fen: this.chess.fen(),
+                    lastMove,
+                    sessionId: this.sessionId,
+                    stream: true
+                })
+            });
+            if (resp.headers.get('content-type')?.includes('text/event-stream')) {
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let full = '', buffer = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        try {
+                            const payload = JSON.parse(line.slice(6));
+                            if (payload.content) { full += payload.content; panel.innerHTML = this.parseChessMarkdown(full); }
+                            if (payload.done && payload.full) full = payload.full;
+                        } catch {}
+                    }
+                }
+                if (full) panel.innerHTML = this.parseChessMarkdown(full);
+                else panel.textContent = 'No analysis available.';
             } else {
-                return [
-                    "In the endgame, king activity becomes crucial. Centralize your king!",
-                    "Endgame principles: activate your king, push passed pawns, and simplify when ahead.",
-                    "Focus on king and pawn endgames - they're the foundation of endgame knowledge."
-                ];
+                const data = await resp.json();
+                panel.innerHTML = data.response ? this.parseChessMarkdown(data.response) : 'No analysis available.';
+            }
+        } catch {
+            panel.textContent = 'Analysis unavailable.';
+        }
+    }
+
+    async readStream(resp, contentEl, isProactive = false) {
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let full = '';
+        let buffer = '';
+        let cleared = false;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                try {
+                    const payload = JSON.parse(line.slice(6));
+                    if (payload.content) {
+                        if (!cleared) { contentEl.classList.remove('typing-indicator'); contentEl.innerHTML = ''; cleared = true; }
+                        full += payload.content;
+                        contentEl.innerHTML = this.parseChessMarkdown(full);
+                        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+                    }
+                    if (payload.done && payload.full) full = payload.full;
+                    if (payload.error) {
+                        this.removeTypingIndicator(contentEl, 'Error: ' + payload.error);
+                        return;
+                    }
+                } catch {}
             }
         }
-        
-        // Check if message is about moves
-        if (message.includes('move') || message.includes('suggest') || message.includes('recommend')) {
-            const moves = this.chess.moves();
-            if (moves.length > 0) {
-                const randomMove = moves[Math.floor(Math.random() * moves.length)];
-                return [
-                    `Consider moves like ${randomMove}. Look for tactics and piece development.`,
-                    `You have ${moves.length} legal moves. Focus on piece activity and center control.`,
-                    `Think about moves that improve your position, like ${randomMove}.`
-                ];
-            }
+        if (full) {
+            contentEl.innerHTML = this.parseChessMarkdown(full);
+            if (isProactive) contentEl.closest('.message')?.classList.add('proactive-message');
+        } else {
+            contentEl.closest('.message')?.remove();
         }
-        
-        // General responses
-        const generalResponses = [
-            "That's an interesting question! Chess is all about pattern recognition and planning.",
-            "Great question! Remember the key principles: development, center control, and king safety.",
-            "Chess is a beautiful game of strategy and tactics. What specific aspect interests you?",
-            "Every position tells a story. What would you like to know about this position?",
-            "I'm here to help with your chess understanding! Feel free to ask about any position or concept.",
-            "Chess improvement comes from understanding patterns and practicing regularly!"
-        ];
-        
-        return generalResponses;
     }
-    
-    getGamePhase() {
-        const moves = this.chess.history();
-        if (moves.length < 10) return 'opening';
-        
-        const pieces = this.chess.board().flat().filter(p => p !== null);
-        const majorPieces = pieces.filter(p => ['q', 'r'].includes(p.type.toLowerCase())).length;
-        
-        if (majorPieces <= 4) return 'endgame';
-        return 'middlegame';
+
+    showTypingIndicator(isProactive = false) {
+        const chatMessages = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = `message ai-message${isProactive ? ' proactive-message' : ''}`;
+        const content = document.createElement('div');
+        content.className = 'message-content typing-indicator';
+        content.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        div.appendChild(content);
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return content;
     }
-    
+
+    removeTypingIndicator(contentEl, text, isProactive = false) {
+        contentEl.classList.remove('typing-indicator');
+        contentEl.innerHTML = this.parseChessMarkdown(text);
+        if (isProactive) contentEl.closest('.message')?.classList.add('proactive-message');
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    // -- Board & Game ----------------------------------------------------------
+
     startNewGame() {
         this.playerColor = document.getElementById('playerColor').value;
         this.aiElo = parseInt(document.getElementById('stockfishElo').value);
-        
-        // Hide setup, show game
+        this.pendingAI = false;
+        this.lastMoveContext = null;
+        this.sessionId = crypto.randomUUID();
+
         document.getElementById('gameSetup').style.display = 'none';
         document.getElementById('gameArea').style.display = 'grid';
-        
-        // Initialize chess and board
+        document.getElementById('gameplayIntro').style.display = 'none';
+        document.querySelector('.gameplay-shell').classList.add('session-live');
+
         this.chess = new Chess();
-        
-        // Wait for DOM to update before initializing board
+
         setTimeout(() => {
             this.initializeBoard();
             this.gameActive = true;
-            
-            // Set initial turn
             this.isPlayerTurn = this.playerColor === 'white';
             this.updateGameStatus();
-            
-            // Clear any selection
+            this.updateLastMoveDisplay();
             this.deselectSquare();
-            
-            // If player is black, let AI move first
-            if (this.playerColor === 'black') {
-                setTimeout(() => {
-                    this.makeAIMove();
-                }, 500);
-            } else {
-            }
-            
+            const lp = document.getElementById('aiLogicContent');
+            if (lp) lp.textContent = 'Play a move to see the AI\'s reasoning.';
+            if (this.playerColor === 'black') setTimeout(() => this.makeAIMove(), 500);
             this.updateMoveHistory();
         }, 50);
     }
-    
+
     initializeBoard() {
-        // Clear any existing board
         document.getElementById('chessboard').innerHTML = '';
-        
+
         const config = {
-            draggable: false, // Disable drag and drop
+            draggable: true,
             position: 'start',
             orientation: this.playerColor,
-            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
+            pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+            moveSpeed: 150,
+            snapbackSpeed: 150,
+            snapSpeed: 50,
+            onDragStart: (source, piece) => this.onDragStart(source, piece),
+            onDrop: (source, target) => this.onDrop(source, target),
+            onSnapEnd: () => this.onSnapEnd()
         };
-        
-        // Ensure the library is loaded
-        if (typeof Chessboard === 'undefined') {
-            console.error('Chessboard.js not loaded');
-            return;
-        }
-        
-        if (typeof Chess === 'undefined') {
-            console.error('Chess.js not loaded');
-            return;
-        }
-        
+
+        if (typeof Chessboard === 'undefined' || typeof Chess === 'undefined') return;
+
         this.board = Chessboard('chessboard', config);
-        
-        // Explicitly set the starting position
         this.board.position('start');
-        
-        // Add click event listeners to squares
-        this.addClickListeners();
-        
-        // Force a small delay and then resize to ensure proper rendering
-        setTimeout(() => {
-            this.board.position('start'); // Set position again to ensure pieces load
-            this.resizeBoard();
-        }, 100);
-        
+
+        $('#chessboard').off('click.chess').on('click.chess', '.square-55d63', (e) => {
+            if (!this.gameActive || !this.isPlayerTurn || this.pendingAI) return;
+            const square = this.getSquareFromElement(e.currentTarget);
+            if (square) this.handleSquareClick(square);
+        });
+
+        setTimeout(() => { this.board.position('start'); this.resizeBoard(); }, 100);
         window.addEventListener('resize', () => this.resizeBoard());
     }
-    
-    addClickListeners() {
-        // Add click event listener to all squares
-        setTimeout(() => {
-            $('#chessboard .square-55d63').off('click').on('click', (e) => {
-                if (!this.gameActive || !this.isPlayerTurn) return;
-                
-                const square = this.getSquareFromElement(e.currentTarget);
-                if (square) {
-                    this.handleSquareClick(square);
-                }
-            });
-        }, 200);
-    }
-    
-    getSquareFromElement(element) {
-        const classes = element.className.split(' ');
-        for (let className of classes) {
-            if (className.startsWith('square-') && className.length === 9) {
-                return className.substring(7); // Remove 'square-' prefix
-            }
-        }
+
+    getSquareFromElement(el) {
+        for (const c of el.className.split(' '))
+            if (c.startsWith('square-') && c.length === 9) return c.substring(7);
         return null;
     }
-    
+
     handleSquareClick(square) {
-        
-        // If no piece is selected
-        if (!this.selectedSquare) {
-            this.selectSquare(square);
-        } 
-        // If clicking the same square, deselect
-        else if (this.selectedSquare === square) {
-            this.deselectSquare();
-        }
-        // If clicking a different square
-        else {
-            // Check if it's a valid move
-            if (this.isValidMove(square)) {
-                this.makeMove(this.selectedSquare, square);
-            } else {
-                // Try to select the new square (if it has a piece)
-                this.deselectSquare();
-                this.selectSquare(square);
-            }
-        }
+        if (this.pendingAI) return;
+        if (!this.selectedSquare) { this.selectSquare(square); return; }
+        if (this.selectedSquare === square) { this.deselectSquare(); return; }
+        if (this.isValidMove(square)) this.makeMove(this.selectedSquare, square);
+        else { this.deselectSquare(); this.selectSquare(square); }
     }
-    
+
     selectSquare(square) {
         const piece = this.chess.get(square);
-        
-        // Only select if there's a piece and it's the player's piece
         if (!piece) return;
-        
-        const pieceColor = piece.color;
-        const playerColor = this.playerColor === 'white' ? 'w' : 'b';
-        
-        if (pieceColor !== playerColor) return;
-        
-        // Get valid moves for this piece
-        const moves = this.chess.moves({
-            square: square,
-            verbose: true
-        });
-        
-        if (moves.length === 0) return; // No valid moves
-        
+        if (piece.color !== (this.playerColor === 'white' ? 'w' : 'b')) return;
+        const moves = this.chess.moves({ square, verbose: true });
+        if (!moves.length) return;
         this.selectedSquare = square;
         this.validMoves = moves;
-        
-        // Highlight the selected square and valid moves
         this.highlightSelectedSquare(square);
         this.highlightValidMoves(moves);
     }
-    
+
     deselectSquare() {
         this.selectedSquare = null;
         this.validMoves = [];
         this.removeHighlights();
     }
-    
-    isValidMove(targetSquare) {
-        return this.validMoves.some(move => move.to === targetSquare);
-    }
-    
+
+    isValidMove(target) { return this.validMoves.some(m => m.to === target); }
+
     makeMove(from, to) {
-        
-        const move = this.chess.move({
-            from: from,
-            to: to,
-            promotion: 'q' // Always promote to queen for simplicity
-        });
-        
-        if (!move) {
-            return;
-        }
-        
-        // Update board position
-        this.board.position(this.chess.fen());
-        
-        // Clear selection
+        const beforeFen = this.chess.fen();
+        const move = this.chess.move({ from, to, promotion: 'q' });
+        if (!move) return;
+
+        this.lastMoveContext = this.buildLastMoveContext(move, beforeFen, 'player');
         this.deselectSquare();
-        
+        this.board.position(this.chess.fen());
+        this.highlightLastMove(from, to);
         this.updateMoveHistory();
+        this.updateLastMoveDisplay();
         this.updateGameStatus();
-        
-        // Check for game end
-        if (this.chess.game_over()) {
-            this.handleGameEnd();
-            return;
-        }
-        
-        // Switch turns
+
+        if (this.chess.game_over()) { this.handleGameEnd(); return; }
+
         this.isPlayerTurn = false;
+        this.pendingAI = true;
         this.updateGameStatus('AI is thinking...');
-        
-        // Make AI move after a short delay
-        setTimeout(() => {
-            this.makeAIMove();
-        }, 200); // Reduced from 500ms to 200ms
+        setTimeout(() => this.makeAIMove(), 250);
     }
-    
-    highlightSelectedSquare(square) {
-        const $square = $(`#chessboard .square-${square}`);
-        $square.addClass('highlight-source');
+
+    onDragStart(source, piece) {
+        if (!this.gameActive || !this.isPlayerTurn || this.pendingAI) return false;
+        if (!piece || piece[0] !== (this.playerColor === 'white' ? 'w' : 'b')) return false;
+        this.selectSquare(source);
+        return true;
     }
-    
+
+    onDrop(source, target) {
+        this.deselectSquare();
+        if (target === 'offboard' || !this.gameActive || !this.isPlayerTurn || this.pendingAI) return 'snapback';
+
+        const beforeFen = this.chess.fen();
+        const move = this.chess.move({ from: source, to: target, promotion: 'q' });
+        if (!move) return 'snapback';
+
+        this.lastMoveContext = this.buildLastMoveContext(move, beforeFen, 'player');
+        this._pendingDrop = { from: source, to: target };
+
+        this.updateMoveHistory();
+        this.updateLastMoveDisplay();
+        this.updateGameStatus();
+
+        if (this.chess.game_over()) { this.handleGameEnd(); return; }
+
+        this.isPlayerTurn = false;
+        this.pendingAI = true;
+        this.updateGameStatus('AI is thinking...');
+    }
+
+    onSnapEnd() {
+        this.board.position(this.chess.fen(), false);
+        if (this._pendingDrop) {
+            this.highlightLastMove(this._pendingDrop.from, this._pendingDrop.to);
+            this._pendingDrop = null;
+            setTimeout(() => this.makeAIMove(), 200);
+        }
+    }
+
+    highlightSelectedSquare(square) { $(`#chessboard .square-${square}`).addClass('highlight-source'); }
     highlightValidMoves(moves) {
-        moves.forEach(move => {
-            const $square = $(`#chessboard .square-${move.to}`);
-            $square.addClass('highlight-destination');
+        moves.forEach(m => {
+            $(`#chessboard .square-${m.to}`).addClass(m.captured ? 'highlight-capture' : 'highlight-destination');
         });
     }
-    
-    resizeBoard() {
-        if (this.board) {
-            const container = document.querySelector('.board-container');
-            if (container) {
-                const maxWidth = Math.min(500, container.clientWidth - 20);
-                this.board.resize();
-            }
-        }
+    highlightLastMove(from, to) {
+        $('#chessboard .square-55d63').removeClass('highlight-last-move');
+        $(`#chessboard .square-${from}`).addClass('highlight-last-move');
+        $(`#chessboard .square-${to}`).addClass('highlight-last-move');
     }
-    
+    resizeBoard() { if (this.board) this.board.resize(); }
+    removeHighlights() { $('#chessboard .square-55d63').removeClass('highlight-source highlight-destination highlight-capture'); }
+
     async makeAIMove() {
         if (!this.gameActive || this.isPlayerTurn) return;
-        
         this.updateGameStatus('AI is thinking...');
-        
-        console.log(`Calling move API: ${API_BASE_URL}/api/move`);
-        
+        const beforeFen = this.chess.fen();
+
         try {
-            const response = await fetch(`${API_BASE_URL}/api/move`, {
+            const resp = await fetch(`${API_BASE_URL}/api/move`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    fen: this.chess.fen(),
-                    elo: this.aiElo
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fen: this.chess.fen(), elo: this.aiElo })
             });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error Response:', errorText);
-                throw new Error(`Failed to get AI move: ${response.status} - ${errorText}`);
-            }
-            
-            const data = await response.json();
-            console.log('Backend response:', data); // Debug log
-            console.log('Frontend FEN:', this.chess.fen()); // Debug log
-            
-            // Try different ways to apply the move
+            if (!resp.ok) throw new Error('AI move failed');
+            const data = await resp.json();
+
             let move = null;
-            
-            // Method 1: Direct string move
-            try {
-                move = this.chess.move(data.move);
-                console.log('Method 1 (direct string) result:', move);
-            } catch (e) {
-                console.log('Method 1 failed:', e.message);
-            }
-            
-            // Method 2: Parse move string and use object format
+            try { move = this.chess.move(data.move); } catch { move = null; }
             if (!move && data.move.length === 4) {
-                try {
-                    const from = data.move.substring(0, 2);
-                    const to = data.move.substring(2, 4);
-                    move = this.chess.move({ from: from, to: to });
-                    console.log('Method 2 (object format) result:', move);
-                } catch (e) {
-                    console.log('Method 2 failed:', e.message);
-                }
+                try { move = this.chess.move({ from: data.move.substring(0, 2), to: data.move.substring(2, 4) }); }
+                catch { move = null; }
             }
-            
-            console.log('Final move result:', move); // Debug log
+
             if (move) {
+                this.lastMoveContext = this.buildLastMoveContext(move, beforeFen, 'ai');
                 this.finishAIMove();
             } else {
-                console.log('Invalid move:', data.move, 'for position:', this.chess.fen()); // Debug log
-                this.updateGameStatus('AI error occurred');
+                this.pendingAI = false;
+                this.updateGameStatus('AI error');
             }
-            
-        } catch (error) {
-            console.error('AI Move Error:', error);
+        } catch {
+            this.pendingAI = false;
             this.updateGameStatus('AI connection failed');
         }
     }
-    
 
-    
-    getDepthForElo(elo) {
-        if (elo < 1200) return 5;
-        if (elo < 1600) return 8;
-        if (elo < 2000) return 10;
-        if (elo < 2400) return 12;
-        return 15;
-    }
-    
-    // Simple AI fallback (optimized version of previous AI)
-    makeSimpleAIMove() {
-        const possibleMoves = this.chess.moves({ verbose: true });
-        if (possibleMoves.length === 0) {
-            this.updateGameStatus('AI has no moves');
-            return;
-        }
-        
-        let selectedMove;
-        const skillLevel = this.eloToSkillLevel(this.aiElo);
-        
-        if (skillLevel >= 8) {
-            selectedMove = this.getBestMove(2);
-        } else if (skillLevel >= 5) {
-            const bestMoves = this.getTopMoves(3, 2);
-            selectedMove = bestMoves[Math.floor(Math.random() * Math.min(2, bestMoves.length))];
-        } else if (skillLevel >= 2) {
-            if (Math.random() < 0.4) {
-                selectedMove = this.getBestMove(1);
-            } else {
-                selectedMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-            }
-        } else {
-            const captures = possibleMoves.filter(move => move.captured);
-            if (captures.length > 0 && Math.random() < 0.3) {
-                selectedMove = captures[Math.floor(Math.random() * captures.length)];
-            } else {
-                selectedMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-            }
-        }
-        
-        const move = this.chess.move(selectedMove);
-        
-        if (move) {
-            this.finishAIMove();
-        }
-    }
-    
     finishAIMove() {
-        // Update board position
+        this.pendingAI = false;
+        this.removeHighlights();
         this.board.position(this.chess.fen());
-        this.updateMoveHistory();
-        
-        // Check for game end
-        if (this.chess.game_over()) {
-            this.handleGameEnd();
-            return;
+
+        if (this.lastMoveContext) {
+            const uci = this.lastMoveContext.uci;
+            if (uci && uci.length >= 4)
+                setTimeout(() => this.highlightLastMove(uci.substring(0, 2), uci.substring(2, 4)), 160);
         }
-        
-        // Switch back to player
+
+        this.updateMoveHistory();
+        this.updateLastMoveDisplay();
+
+        if (this.chess.game_over()) { this.handleGameEnd(); return; }
+
         this.isPlayerTurn = true;
         this.updateGameStatus();
+
+        // Proactive analysis for AI move
+        if (this.lastMoveContext) this.requestProactiveAnalysis(this.lastMoveContext);
     }
-    
-    eloToSkillLevel(elo) {
-        // Convert Elo to skill level (0-10)
-        if (elo < 900) return 0;
-        if (elo < 1100) return 1;
-        if (elo < 1300) return 2;
-        if (elo < 1500) return 3;
-        if (elo < 1700) return 4;
-        if (elo < 1900) return 5;
-        if (elo < 2100) return 6;
-        if (elo < 2300) return 7;
-        if (elo < 2500) return 8;
-        if (elo < 2700) return 9;
-        return 10;
-    }
-    
-    // Minimax algorithm with alpha-beta pruning
-    minimax(depth, alpha, beta, maximizingPlayer) {
-        if (depth === 0 || this.chess.game_over()) {
-            return this.evaluatePosition();
-        }
-        
-        const moves = this.chess.moves({ verbose: true });
-        
-        if (maximizingPlayer) {
-            let maxEval = -Infinity;
-            for (let move of moves) {
-                this.chess.move(move);
-                const evaluation = this.minimax(depth - 1, alpha, beta, false);
-                this.chess.undo();
-                maxEval = Math.max(maxEval, evaluation);
-                alpha = Math.max(alpha, evaluation);
-                if (beta <= alpha) break; // Alpha-beta pruning
-            }
-            return maxEval;
-        } else {
-            let minEval = Infinity;
-            for (let move of moves) {
-                this.chess.move(move);
-                const evaluation = this.minimax(depth - 1, alpha, beta, true);
-                this.chess.undo();
-                minEval = Math.min(minEval, evaluation);
-                beta = Math.min(beta, evaluation);
-                if (beta <= alpha) break; // Alpha-beta pruning
-            }
-            return minEval;
-        }
-    }
-    
-    getBestMove(depth) {
-        const moves = this.chess.moves({ verbose: true });
-        let bestMove = moves[0];
-        let bestValue = -Infinity;
-        const isAIWhite = this.playerColor === 'black';
-        
-        for (let move of moves) {
-            this.chess.move(move);
-            const value = this.minimax(depth - 1, -Infinity, Infinity, !isAIWhite);
-            this.chess.undo();
-            
-            if ((isAIWhite && value > bestValue) || (!isAIWhite && value < bestValue)) {
-                bestValue = value;
-                bestMove = move;
-            }
-        }
-        
-        return bestMove;
-    }
-    
-    getTopMoves(numMoves, depth) {
-        const moves = this.chess.moves({ verbose: true });
-        const evaluatedMoves = [];
-        const isAIWhite = this.playerColor === 'black';
-        
-        for (let move of moves) {
-            this.chess.move(move);
-            const value = this.minimax(depth - 1, -Infinity, Infinity, !isAIWhite);
-            this.chess.undo();
-            evaluatedMoves.push({ move, value });
-        }
-        
-        // Sort moves by value
-        evaluatedMoves.sort((a, b) => {
-            return isAIWhite ? b.value - a.value : a.value - b.value;
-        });
-        
-        return evaluatedMoves.slice(0, numMoves).map(item => item.move);
-    }
-    
-    // Fast position evaluation function - OPTIMIZED FOR SPEED
-    evaluatePosition() {
+
+    updateGameStatus(custom = null) {
+        const el = document.getElementById('gameStatus');
+        if (custom) { el.textContent = custom; el.className = 'status thinking'; return; }
         if (this.chess.in_checkmate()) {
-            return this.chess.turn() === 'w' ? -9999 : 9999;
-        }
-        
-        if (this.chess.in_draw()) {
-            return 0;
-        }
-        
-        let evaluation = 0;
-        const board = this.chess.board();
-        
-        // Simple piece values (faster than complex positional evaluation)
-        const pieceValues = {
-            'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000
-        };
-        
-        // Quick material count
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                const piece = board[i][j];
-                if (piece) {
-                    const value = pieceValues[piece.type];
-                    const sign = piece.color === 'w' ? 1 : -1;
-                    evaluation += sign * value;
-                    
-                    // Simple center bonus (much faster than full positional tables)
-                    if ((i === 3 || i === 4) && (j === 3 || j === 4)) {
-                        evaluation += sign * 10;
-                    }
-                }
-            }
-        }
-        
-        // Simple mobility bonus (count moves for current player only)
-        evaluation += this.chess.moves().length * 2;
-        
-        return evaluation;
-    }
-    
-    // Remove old random move function
-    makeRandomMove() {
-        this.makeAIMove();
-    }
-    
-    removeHighlights() {
-        // Remove all highlight classes
-        $('#chessboard .square-55d63').removeClass('highlight-source highlight-destination');
-    }
-    
-    executeStockfishMove(moveStr) {
-        const move = this.chess.move(moveStr);
-        
-        if (move) {
-            this.finishAIMove();
-        } else {
-            this.makeSimpleAIMove(); // Fallback
-        }
-    }
-    
-    updateGameStatus(customMessage = null) {
-        const statusEl = document.getElementById('gameStatus');
-        
-        if (customMessage) {
-            statusEl.textContent = customMessage;
-            statusEl.className = 'status thinking';
-            return;
-        }
-        
-        if (this.chess.in_checkmate()) {
-            const winner = this.chess.turn() === 'w' ? 'Black' : 'White';
-            statusEl.textContent = `Checkmate! ${winner} wins`;
-            statusEl.className = 'status game-over';
+            const w = this.chess.turn() === 'w' ? 'Black' : 'White';
+            el.textContent = `Checkmate! ${w} wins`;
+            el.className = 'status game-over';
         } else if (this.chess.in_draw()) {
-            statusEl.textContent = 'Game drawn';
-            statusEl.className = 'status draw';
+            el.textContent = 'Game drawn';
+            el.className = 'status draw';
         } else if (this.chess.in_check()) {
-            const player = this.isPlayerTurn ? 'Your' : "AI's";
-            statusEl.textContent = `${player} king is in check`;
-            statusEl.className = 'status';
+            el.textContent = `${this.isPlayerTurn ? 'Your' : "AI's"} king is in check`;
+            el.className = 'status';
         } else {
-            const turn = this.isPlayerTurn ? 'Your turn' : "AI's turn";
-            statusEl.textContent = turn;
-            statusEl.className = 'status';
+            el.textContent = this.isPlayerTurn ? 'Your turn' : "AI's turn";
+            el.className = 'status';
         }
     }
-    
+
     handleGameEnd() {
         this.gameActive = false;
         this.updateGameStatus();
-        
-        // Determine result
         let result;
         if (this.chess.in_checkmate()) {
             const winner = this.chess.turn() === 'w' ? 'Black' : 'White';
-            const playerWon = (winner.toLowerCase() === this.playerColor);
-            result = playerWon ? 'You won!' : 'You lost!';
-        } else {
-            result = 'Draw!';
-        }
-        
-        setTimeout(() => {
-            alert(`Game Over: ${result}`);
-        }, 100);
+            result = winner.toLowerCase() === this.playerColor ? 'You won!' : 'You lost!';
+        } else result = 'Draw!';
+        setTimeout(() => alert(`Game Over: ${result}`), 100);
     }
-    
+
     updateMoveHistory() {
-        const moveList = document.getElementById('moveList');
-        const history = this.chess.history();
-        
+        const el = document.getElementById('moveList');
+        const h = this.chess.history();
         let html = '';
-        for (let i = 0; i < history.length; i += 2) {
-            const moveNumber = Math.floor(i / 2) + 1;
-            const whiteMove = history[i];
-            const blackMove = history[i + 1] || '';
-            
-            html += `
-                <div class="move-pair">
-                    <span class="move-number">${moveNumber}.</span>
-                    <span class="move">${whiteMove}</span>
-                    ${blackMove ? `<span class="move">${blackMove}</span>` : ''}
-                </div>
-            `;
+        for (let i = 0; i < h.length; i += 2) {
+            const n = Math.floor(i / 2) + 1;
+            html += `<div class="move-pair"><span class="move-number">${n}.</span><span class="move">${h[i]}</span>${h[i+1] ? `<span class="move">${h[i+1]}</span>` : ''}</div>`;
         }
-        
-        moveList.innerHTML = html;
-        moveList.scrollTop = moveList.scrollHeight;
+        el.innerHTML = html;
     }
-    
+
+    updateLastMoveDisplay() {
+        const el = document.getElementById('lastMoveText');
+        if (!el) return;
+        if (!this.lastMoveContext) { el.textContent = 'No moves yet.'; return; }
+        const actor = this.lastMoveContext.actor === 'player' ? 'You' : 'AI';
+        el.textContent = `${actor} played ${this.lastMoveContext.san || '?'}`;
+    }
+
+    buildLastMoveContext(move, beforeFen, actor) {
+        return {
+            actor, san: move.san,
+            uci: `${move.from}${move.to}${move.promotion || ''}`,
+            from: move.from, to: move.to,
+            beforeFen: beforeFen || null,
+            afterFen: this.chess.fen(),
+            turn: move.color
+        };
+    }
+
     undoLastMove() {
-        if (!this.gameActive || this.chess.history().length === 0) return;
-        
-        // Simple approach: Always undo two moves (player + AI) to get back to player's turn
-        // If there's only one move, just undo that one
-        const historyLength = this.chess.history().length;
-        
-        if (historyLength >= 2) {
-            // Undo both AI's move and player's move
-            this.chess.undo(); // Undo AI's move
-            this.chess.undo(); // Undo player's move
-        } else if (historyLength === 1) {
-            // Only one move exists, just undo it
-            this.chess.undo();
-        }
-        
-        // Update board and UI
-        this.board.position(this.chess.fen());
+        if (!this.gameActive || !this.chess.history().length) return;
+        const len = this.chess.history().length;
+        if (len >= 2) { this.chess.undo(); this.chess.undo(); }
+        else this.chess.undo();
+        this.board.position(this.chess.fen(), false);
         this.updateMoveHistory();
         this.isPlayerTurn = true;
+        this.pendingAI = false;
+        this.lastMoveContext = null;
         this.updateGameStatus();
-        this.deselectSquare(); // Clear any selection
+        this.updateLastMoveDisplay();
+        this.deselectSquare();
     }
-    
+
     showGameSetup() {
-        // Reset game
         this.gameActive = false;
+        this.pendingAI = false;
+        this.lastMoveContext = null;
         document.getElementById('gameSetup').style.display = 'block';
         document.getElementById('gameArea').style.display = 'none';
+        document.getElementById('gameplayIntro').style.display = 'flex';
+        document.querySelector('.gameplay-shell').classList.remove('session-live');
+        document.getElementById('learningStudio').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-}
-
-// Initialize game when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    initializeFeedback();
-    initializeFeedbackPrompt();
-    // Note: Chess game initialization is now handled by the auth check above
-});
-
-// Feedback System
-function initializeFeedback() {
-    const feedbackTrigger = document.getElementById('feedbackTrigger');
-    const feedbackSection = document.getElementById('feedbackSection');
-    const closeFeedback = document.getElementById('closeFeedback');
-    const feedbackForm = document.getElementById('feedbackForm');
-
-    // Show feedback modal
-    feedbackTrigger.addEventListener('click', () => {
-        feedbackSection.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    });
-
-    // Close feedback modal
-    closeFeedback.addEventListener('click', closeFeedbackModal);
-    
-    // Close on backdrop click
-    feedbackSection.addEventListener('click', (e) => {
-        if (e.target === feedbackSection) {
-            closeFeedbackModal();
-        }
-    });
-
-    // Close on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && feedbackSection.style.display === 'flex') {
-            closeFeedbackModal();
-        }
-    });
-
-    function closeFeedbackModal() {
-        feedbackSection.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    // Handle feedback form submission
-    feedbackForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        submitFeedback();
-    });
-
-    function submitFeedback() {
-        const formData = {
-            type: document.getElementById('feedbackType').value,
-            title: document.getElementById('feedbackTitle').value,
-            message: document.getElementById('feedbackMessage').value,
-            email: document.getElementById('feedbackEmail').value,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            url: window.location.href
-        };
-
-        // Show loading state
-        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-        submitBtn.disabled = true;
-
-        // Submit to backend API
-        fetch(`${API_BASE_URL}/api/feedback`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                showFeedbackSuccess();
-                feedbackForm.reset();
-                setTimeout(() => {
-                    closeFeedbackModal();
-                }, 2000);
-            } else {
-                throw new Error(data.error || 'Failed to submit feedback');
-            }
-        })
-        .catch(error => {
-            console.error('Feedback submission error:', error);
-            showFeedbackError();
-        })
-        .finally(() => {
-            setTimeout(() => {
-                submitBtn.innerHTML = originalText;
-                submitBtn.style.background = '';
-                submitBtn.disabled = false;
-            }, 2000);
-        });
-    }
-
-    function showFeedbackSuccess() {
-        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
-        
-        submitBtn.innerHTML = '<i class="fas fa-check"></i> Feedback Sent!';
-        submitBtn.style.background = 'var(--accent-color)';
-        submitBtn.disabled = true;
-    }
-
-    function showFeedbackError() {
-        const submitBtn = feedbackForm.querySelector('button[type="submit"]');
-        
-        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed to Send';
-        submitBtn.style.background = 'var(--danger-color)';
-        submitBtn.disabled = true;
-    }
-}
-
-// Lightweight homepage feedback prompt
-function initializeFeedbackPrompt() {
-    const prompt = document.getElementById('feedbackPrompt');
-    if (!prompt) return;
-
-    const openBtn = document.getElementById('openFeedbackFromPrompt');
-    const closeX = document.getElementById('closeFeedbackPrompt');
-    const dismissBtn = document.getElementById('dismissFeedbackPrompt');
-    const feedbackTrigger = document.getElementById('feedbackTrigger');
-
-    const closePrompt = () => {
-        prompt.style.display = 'none';
-        document.body.style.overflow = 'auto';
-        try { localStorage.setItem('acg_feedback_prompt_dismissed', '1'); } catch (e) {}
-    };
-
-    // Show once per session/user (persist in localStorage)
-    const dismissed = (() => { try { return localStorage.getItem('acg_feedback_prompt_dismissed') === '1'; } catch (e) { return false; } })();
-    if (!dismissed) {
-        setTimeout(() => {
-            prompt.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        }, 800);
-    }
-
-    // Wire actions
-    if (openBtn) {
-        openBtn.addEventListener('click', () => {
-            closePrompt();
-            // Open existing feedback modal via header trigger
-            if (feedbackTrigger) {
-                feedbackTrigger.click();
-            }
-        });
-    }
-    if (dismissBtn) dismissBtn.addEventListener('click', closePrompt);
-    if (closeX) closeX.addEventListener('click', closePrompt);
-
-    // Close on backdrop click
-    prompt.addEventListener('click', (e) => {
-        if (e.target === prompt) closePrompt();
-    });
 }

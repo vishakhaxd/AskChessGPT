@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AskChessGPT Gameplay</title>
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-grotesk@600,700&f[]=general-sans@400,500,600&display=swap">
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container gameplay-page">
+        <div class="noise-overlay" aria-hidden="true"></div>
+
+        <nav class="editorial-nav gameplay-nav">
+            <a class="nav-brand nav-link" href="/">AskChessGPT</a>
+            <div class="nav-line" aria-hidden="true"></div>
+            <div class="nav-status">GAMEPLAY</div>
+        </nav>
+
+        <section class="studio-shell gameplay-shell" id="learningStudio">
+            <div class="studio-header" id="gameplayIntro">
+                <div>
+                    <div class="studio-kicker">Analysis Studio</div>
+                    <h1>Play, ask, inspect, repeat.</h1>
+                    <p>Use the board as a study surface. Play moves, ask why ideas work, and compare candidate plans without leaving the position.</p>
+                </div>
+                <div class="studio-actions">
+                    <a href="/" class="btn btn-secondary btn-inline">Back Home</a>
+                    <button id="newGame" class="btn btn-secondary btn-inline"><i class="fas fa-plus"></i> New Session</button>
+                    <div class="elo-display">AI Strength <span id="eloValue">1500</span></div>
+                </div>
+            </div>
+
+            <div class="game-setup" id="gameSetup">
+                <div class="setup-card">
+                    <h2>Session Setup</h2>
+                    <div class="setting">
+                        <label for="playerColor">Your Color</label>
+                        <select id="playerColor">
+                            <option value="white">White</option>
+                            <option value="black">Black</option>
+                        </select>
+                    </div>
+                    <div class="setting">
+                        <label for="stockfishElo">AI Strength</label>
+                        <input type="range" id="stockfishElo" min="400" max="3000" value="1500" step="100">
+                        <div class="elo-labels">
+                            <span>Question-friendly</span>
+                            <span>Brutal</span>
+                        </div>
+                    </div>
+                    <button id="startGame" class="btn btn-start">Start Session</button>
+                </div>
+            </div>
+
+            <div class="game-layout" id="gameArea" style="display: none;">
+                <div class="sidebar left">
+                    <div class="panel ai-logic-panel">
+                        <h3>AI Logic</h3>
+                        <div class="ai-logic-content" id="aiLogicContent">
+                            Play a move to see the AI's reasoning.
+                        </div>
+                    </div>
+                    <div class="panel move-history-panel">
+                        <h3>Moves</h3>
+                        <div class="move-history-list" id="moveList"></div>
+                    </div>
+                </div>
+
+                <div class="main-board">
+                    <div class="board-toolbar">
+                        <div class="status" id="gameStatus">Your turn</div>
+                        <button id="undoMove" class="btn btn-toolbar"><i class="fas fa-undo"></i> Undo</button>
+                    </div>
+                    <div class="board-container">
+                        <div id="chessboard"></div>
+                    </div>
+                </div>
+
+                <div class="sidebar right">
+                    <div class="chat-container">
+                        <h3>AskChessGPT</h3>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message ai-message">
+                                <div class="message-content">
+                                    Ask about the current position or the move that was just played. I can explain what changed, compare candidate ideas, or point out what you missed.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" placeholder="Ask about the position or last move..." />
+                            <button id="sendMessage" class="btn btn-chat" aria-label="Send question">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="lastMoveText" style="display:none"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="game.js?v=16"></script>
+</body>
+</html>
