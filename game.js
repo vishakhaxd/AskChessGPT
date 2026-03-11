@@ -27,23 +27,78 @@ class ChessGame {
 
         this.initializeEventListeners();
         this.initializeChat();
+        this.initializeMobile();
         this.tryRestoreGame();
     }
 
     initializeEventListeners() {
-        document.getElementById('stockfishElo').addEventListener('input', (e) => {
+        document.getElementById('stockfishElo')?.addEventListener('input', (e) => {
             document.querySelectorAll('#eloValue').forEach(s => s.textContent = e.target.value);
             this.aiElo = parseInt(e.target.value);
         });
-        document.getElementById('startGame').addEventListener('click', () => this.startNewGame());
-        document.getElementById('newGame').addEventListener('click', () => this.showGameSetup());
-        document.getElementById('undoMove').addEventListener('click', () => this.undoLastMove());
+        document.getElementById('startGame')?.addEventListener('click', () => this.startNewGame());
+        document.getElementById('newGame')?.addEventListener('click', () => this.showGameSetup());
+        document.getElementById('newGameInline')?.addEventListener('click', () => this.showGameSetup());
+        document.getElementById('undoMove')?.addEventListener('click', () => this.undoLastMove());
     }
 
     initializeChat() {
         const input = document.getElementById('chatInput');
         document.getElementById('sendMessage').addEventListener('click', () => this.sendChatMessage());
         input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendChatMessage(); });
+    }
+
+    // -- Mobile: Swipe cards (AI Logic / Chat) --------------------------------
+
+    get isMobile() { return window.matchMedia('(max-width: 1200px)').matches; }
+
+    initializeMobile() {
+        const track = document.getElementById('swipeTrack');
+        if (!track) return;
+
+        // Dot indicators on scroll
+        track.addEventListener('scroll', () => {
+            const idx = Math.round(track.scrollLeft / track.offsetWidth);
+            document.querySelectorAll('.swipe-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+        }, { passive: true });
+
+        // Dot click to scroll
+        document.querySelectorAll('.swipe-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const i = parseInt(dot.dataset.index);
+                track.scrollTo({ left: i * track.offsetWidth, behavior: 'smooth' });
+            });
+        });
+
+        // Mobile chat send
+        const input = document.getElementById('mobileChatInput');
+        const send = document.getElementById('mobileChatSend');
+        send?.addEventListener('click', () => this.sendMobileChat());
+        input?.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendMobileChat(); });
+    }
+
+    sendMobileChat() {
+        const input = document.getElementById('mobileChatInput');
+        const msg = input?.value.trim();
+        if (!msg) return;
+        input.value = '';
+        this.addChatMessage(msg, 'user');
+        this.generateAIResponse(msg);
+    }
+
+    syncMobileContent() {
+        if (!this.isMobile || !this.gameActive) return;
+        // Sync AI Logic
+        const logic = document.getElementById('aiLogicContent');
+        const swipeLogic = document.getElementById('swipeLogicContent');
+        if (logic && swipeLogic) swipeLogic.innerHTML = logic.innerHTML;
+        // Sync chat messages
+        const chat = document.getElementById('chatMessages');
+        const mobileChat = document.getElementById('mobileChatMessages');
+        if (chat && mobileChat) {
+            mobileChat.innerHTML = chat.innerHTML;
+            mobileChat.scrollTop = mobileChat.scrollHeight;
+        }
     }
 
     sendChatMessage() {
@@ -65,6 +120,7 @@ class ChessGame {
         div.appendChild(content);
         chatMessages.appendChild(div);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        this.syncMobileContent();
         return content;
     }
 
@@ -191,6 +247,7 @@ class ChessGame {
             const prefix = this._playerAnalysisHtml ? `<div class="player-analysis">${this._playerAnalysisHtml}</div><hr class="logic-divider">` : '';
             panel.innerHTML = `${prefix}<div class="ai-analysis">${html}</div>`;
         }
+        this.syncMobileContent();
     }
 
     async readStream(resp, contentEl, isProactive = false) {
@@ -230,6 +287,7 @@ class ChessGame {
         } else {
             contentEl.closest('.message')?.remove();
         }
+        this.syncMobileContent();
     }
 
     showTypingIndicator(isProactive = false) {
@@ -264,7 +322,7 @@ class ChessGame {
         history.replaceState(null, '', `/gameplay/${this.sessionId}`);
 
         document.getElementById('gameSetup').style.display = 'none';
-        document.getElementById('gameArea').style.display = 'grid';
+        document.getElementById('gameArea').classList.add('active');
         document.getElementById('gameplayIntro').style.display = 'none';
         document.querySelector('.gameplay-shell').classList.add('session-live');
 
@@ -279,6 +337,7 @@ class ChessGame {
             this.deselectSquare();
             const lp = document.getElementById('aiLogicContent');
             if (lp) lp.textContent = 'Play a move to see the AI\'s reasoning.';
+            this.syncMobileContent();
             if (this.playerColor === 'black') setTimeout(() => this.makeAIMove(), 500);
             this.updateMoveHistory();
         }, 50);
@@ -526,6 +585,7 @@ class ChessGame {
             html += `<div class="move-pair"><span class="move-number">${n}.</span><span class="move">${h[i]}</span>${h[i+1] ? `<span class="move">${h[i+1]}</span>` : ''}</div>`;
         }
         el.innerHTML = html;
+        this.syncMobileContent();
     }
 
     updateLastMoveDisplay() {
@@ -567,12 +627,19 @@ class ChessGame {
         this.gameActive = false;
         this.pendingAI = false;
         this.lastMoveContext = null;
+        this._playerAnalysisHtml = '';
         this.clearGameState();
         history.replaceState(null, '', '/gameplay');
         document.getElementById('gameSetup').style.display = 'block';
-        document.getElementById('gameArea').style.display = 'none';
+        document.getElementById('gameArea').classList.remove('active');
         document.getElementById('gameplayIntro').style.display = 'flex';
         document.querySelector('.gameplay-shell').classList.remove('session-live');
+        document.getElementById('moveList').innerHTML = '';
+        const chat = document.getElementById('chatMessages');
+        chat.innerHTML = '<div class="message ai-message"><div class="message-content">Ask about the current position or the move that was just played. I can explain what changed, compare candidate ideas, or point out what you missed.</div></div>';
+        const lp = document.getElementById('aiLogicContent');
+        if (lp) lp.textContent = '';
+        this.syncMobileContent();
         document.getElementById('learningStudio').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -633,7 +700,7 @@ class ChessGame {
         history.replaceState(null, '', `/gameplay/${this.sessionId}`);
 
         document.getElementById('gameSetup').style.display = 'none';
-        document.getElementById('gameArea').style.display = 'grid';
+        document.getElementById('gameArea').classList.add('active');
         document.getElementById('gameplayIntro').style.display = 'none';
         document.querySelector('.gameplay-shell').classList.add('session-live');
         document.querySelectorAll('#eloValue').forEach(s => s.textContent = this.aiElo);
@@ -649,6 +716,7 @@ class ChessGame {
             this.updateLastMoveDisplay();
             const lp = document.getElementById('aiLogicContent');
             if (lp) lp.textContent = 'Game restored. Play a move to see analysis.';
+            this.syncMobileContent();
 
             if (this.chess.game_over()) { this.handleGameEnd(); return; }
             if (!this.isPlayerTurn) {

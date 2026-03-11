@@ -535,7 +535,7 @@ body {
 /* Game Layout */
 .game-layout {
     flex: 1;
-    display: grid;
+    display: none;
     grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(320px, 400px);
     grid-template-areas: "left center right";
     gap: 0.75rem;
@@ -545,6 +545,10 @@ body {
     width: 100%;
     height: calc(100vh - 5.5rem);
     min-height: 0;
+}
+
+.game-layout.active {
+    display: grid;
 }
 
 .sidebar {
@@ -674,9 +678,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: nowrap;
     width: 100%;
     max-width: min(100%, calc(100vh - 7.5rem));
     padding: 0.3rem 0;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
 }
 
 .btn-toolbar {
@@ -1276,18 +1287,219 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .game-layout {
-        grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(280px, 360px);
-        gap: 0.75rem;
+    /* Gameplay: lock to viewport, no scroll */
+    .gameplay-page {
+        height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .gameplay-shell.session-live {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        padding: 0.25rem 0.75rem 0;
+    }
+
+    .gameplay-shell.session-live .studio-header {
+        display: none;
+    }
+
+    .game-layout.active {
+        display: flex !important;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        height: auto;
+        gap: 0;
+        padding: 0;
+    }
+
+    /* Hide sidebars — content goes into swipe cards */
+    .sidebar.left,
+    .sidebar.right {
+        display: none;
+    }
+
+    .main-board {
+        flex-shrink: 0;
+    }
+
+    .board-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Board sized to leave room for bottom panel */
+    #chessboard {
+        width: min(calc(100vw - 24px), calc(100dvh - 220px)) !important;
+        height: min(calc(100vw - 24px), calc(100dvh - 220px)) !important;
+    }
+
+    .board-toolbar {
+        max-width: min(calc(100vw - 24px), calc(100dvh - 220px));
+        margin: 0 auto;
+    }
+
+    /* Move history hidden on mobile */
+    .move-history-panel {
+        display: none !important;
+    }
+
+    /* Swipe container takes remaining space */
+    .mobile-swipe-wrap {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .swipe-dots {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        padding: 6px 0 4px;
+        flex-shrink: 0;
+    }
+
+    .swipe-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--border-primary);
+        transition: background 0.2s;
+    }
+
+    .swipe-dot.active {
+        background: var(--accent-coral);
+    }
+
+    .swipe-track {
+        flex: 1;
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        min-height: 0;
+        scrollbar-width: none;
+    }
+
+    .swipe-track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .swipe-card {
+        flex: 0 0 100%;
+        width: 100%;
+        scroll-snap-align: start;
+        overflow-y: auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* AI Logic card */
+    .swipe-card-logic {
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        line-height: 1.55;
+        color: var(--text-secondary);
+    }
+
+    .swipe-card-logic h3 {
+        font-family: 'Clash Grotesk', 'General Sans', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin: 0 0 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--border-primary);
+    }
+
+    /* Chat card */
+    .swipe-card-chat {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .swipe-card-chat h3 {
+        font-family: 'Clash Grotesk', 'General Sans', sans-serif;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin: 0;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border-primary);
+        flex-shrink: 0;
+    }
+
+    .swipe-card-chat .mobile-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+        min-height: 0;
+    }
+
+    .swipe-card-chat .mobile-chat-input {
+        display: flex;
+        gap: 0;
+        padding: 6px 8px;
+        border-top: 1px solid var(--border-primary);
+        flex-shrink: 0;
+    }
+
+    .swipe-card-chat .mobile-chat-input input {
+        flex: 1;
+        padding: 0.6rem 0.8rem;
+        border: 1px solid var(--border-primary);
+        border-radius: var(--border-radius) 0 0 var(--border-radius);
+        font-size: 16px;
+        font-family: inherit;
+        background: var(--bg-accent);
+        color: var(--text-primary);
+        outline: none;
+    }
+
+    .swipe-card-chat .mobile-chat-input input:focus {
+        border-color: var(--accent-coral);
+    }
+
+    .swipe-card-chat .mobile-chat-input .btn-chat {
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    }
+
+    /* Setup/intro pages: allow scroll */
+    .gameplay-shell:not(.session-live) {
+        overflow-y: auto;
+        height: auto;
+    }
+}
+
+@media (min-width: 1201px) {
+    .mobile-swipe-wrap {
+        display: none;
     }
 }
 
 @media (max-width: 968px) {
     .editorial-nav,
     .landing-page,
-    .studio-shell {
-        padding-left: 1rem;
-        padding-right: 1rem;
+    .studio-shell:not(.session-live) {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
     }
 
     .studio-header {
@@ -1298,61 +1510,24 @@ body {
     .studio-actions {
         width: 100%;
     }
-
-    .game-layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        grid-template-areas: 
-            "center"
-            "left"
-            "right";
-        gap: 0.75rem;
-    }
-
-    .sidebar.left {
-        flex-direction: row;
-        gap: 0.75rem;
-    }
-
-    .sidebar.left .panel {
-        flex: 1;
-        max-height: 250px;
-    }
-
-    .move-history-panel {
-        max-height: 250px;
-    }
-    
-    .chat-container {
-        height: 420px;
-    }
-
-    .board-container {
-        width: 100%;
-    }
-
-    #chessboard {
-        width: min(92vw, 620px);
-        height: min(92vw, 620px);
-    }
 }
 
 @media (max-width: 640px) {
     .editorial-nav {
-        padding-top: 1rem;
-        gap: 0.75rem;
+        padding-top: 0.5rem;
+        gap: 0.4rem;
     }
-    
+
     .nav-brand,
     .nav-status {
         font-size: 0.62rem;
     }
-    
+
     .landing-page {
         padding-top: 2rem;
         padding-bottom: 2rem;
     }
-    
+
     .hero-title {
         font-size: 21vw;
     }
@@ -1361,30 +1536,13 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .game-layout {
-        padding: 0.25rem 0 1rem;
-    }
-
     .setup-card {
         padding: 1.25rem;
     }
 
-    .chat-container {
-        min-height: 360px;
-        height: 360px;
-    }
-
-    .chat-input-container {
-        padding: 0.75rem;
-    }
-
-    #chatInput {
+    #chatInput,
+    .swipe-card-chat .mobile-chat-input input {
         font-size: 16px;
-    }
-
-    #chessboard {
-        width: min(94vw, 420px);
-        height: min(94vw, 420px);
     }
 }
 

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://api.fontshare.com">
     <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-grotesk@600,700&f[]=general-sans@400,500,600&display=swap">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=27">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="game-layout" id="gameArea" style="display: none;">
+            <div class="game-layout" id="gameArea">
                 <div class="sidebar left">
                     <div class="panel ai-logic-panel">
                         <h3>AI Logic</h3>
@@ -73,7 +73,10 @@
                 <div class="main-board">
                     <div class="board-toolbar">
                         <div class="status" id="gameStatus">Your turn</div>
-                        <button id="undoMove" class="btn btn-toolbar"><i class="fas fa-undo"></i> Undo</button>
+                        <div class="toolbar-actions">
+                            <button id="undoMove" class="btn btn-toolbar"><i class="fas fa-undo"></i> Undo</button>
+                            <button id="newGameInline" class="btn btn-toolbar"><i class="fas fa-plus"></i> New Game</button>
+                        </div>
                     </div>
                     <div class="board-container">
                         <div id="chessboard"></div>
@@ -99,6 +102,28 @@
                     </div>
                 </div>
                 <div id="lastMoveText" style="display:none"></div>
+
+                <!-- Mobile: swipe between AI Logic and Chat -->
+                <div class="mobile-swipe-wrap" id="mobileSwipeWrap">
+                    <div class="swipe-dots">
+                        <span class="swipe-dot active" data-index="0"></span>
+                        <span class="swipe-dot" data-index="1"></span>
+                    </div>
+                    <div class="swipe-track" id="swipeTrack">
+                        <div class="swipe-card swipe-card-logic" id="swipeLogic">
+                            <h3>AI Logic</h3>
+                            <div id="swipeLogicContent">Play a move to see the AI's reasoning.</div>
+                        </div>
+                        <div class="swipe-card swipe-card-chat">
+                            <h3>AskChessGPT</h3>
+                            <div class="mobile-chat-messages" id="mobileChatMessages"></div>
+                            <div class="mobile-chat-input">
+                                <input type="text" id="mobileChatInput" placeholder="Ask about the position..." />
+                                <button class="btn btn-chat" id="mobileChatSend" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </div>
@@ -106,6 +131,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    <script src="/game.js?v=20"></script>
+    <script src="/game.js?v=27"></script>
 </body>
 </html>

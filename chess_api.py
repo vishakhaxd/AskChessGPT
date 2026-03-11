@@ -601,7 +601,9 @@ def index():
 @app.route('/gameplay')
 @app.route('/gameplay/<session_id>')
 def gameplay(session_id=None):
-    return app.send_static_file('gameplay.html')
+    resp = app.send_static_file('gameplay.html')
+    resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return resp
 
 @app.route('/api/session/save', methods=['POST'])
 def session_save():
