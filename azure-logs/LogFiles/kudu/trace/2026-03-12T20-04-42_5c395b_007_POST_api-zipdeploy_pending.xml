@@ -1,0 +1,17 @@
+<step title="Incoming Request" date="2026-03-12T20:04:42.453" instance="5c395b" url="/api/zipdeploy?isAsync=true" method="POST" type="request" pid="772,1,19" Accept="*/*" Host="askchessgpt.scm.azurewebsites.net" User-Agent="AZURECLI/2.78.0 (HOMEBREW)" Accept-Encoding="gzip, deflate" Authorization="Bea..." Cache-Control="no-cache" Content-Type="application/octet-stream" Content-Length="73056072" x-ms-client-request-id="b2fe9f9a-1e4e-11f1-abac-5ee34273c383" x-ms-artifact-checksum="1496cede83ab4393f07b42baa8fe0053d2ff85601b665a32a3d50483ffa0fef5" X-ARR-LOG-ID="b2fe9f9a-1e4e-11f1-abac-5ee34273c383" CLIENT-IP="66.75.246.163:58106" X-SITE-DEPLOYMENT-ID="askchessgpt" WAS-DEFAULT-HOSTNAME="askchessgpt.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/zipdeploy?isAsync=true" X-Client-IP="66.75.246.163" X-Client-Port="58106" >
+  <step title="Cleanup Xml Logs" date="2026-03-12T20:04:42.479" /><!-- duration: 22ms -->
+  <step title="ZipPushDeploy" date="2026-03-12T20:04:43.037" >
+    <step title="ZipDeploy. Extract zip." date="2026-03-12T20:04:43.085" /><!-- duration: 13ms -->
+    <step title="Starting PushDeployAsync" date="2026-03-12T20:04:43.144" /><!-- duration: 3ms -->
+    <step title="Removing antenv symlink" date="2026-03-12T20:04:43.434" >
+      <step title="Writing artifact to /tmp/zipdeploy/32374b24-a582-4f6e-a6a6-f73e41ee1695.zip" date="2026-03-12T20:04:43.851" >
+        <step title="Writing multipart request body to /tmp/zipdeploy/32374b24-a582-4f6e-a6a6-f73e41ee1695.zip" date="2026-03-12T20:04:43.889" /><!-- duration: 12ms -->
+      </step><!-- duration: 26643ms -->
+      <step title="Removing previous build artifact&apos;s manifest file" date="2026-03-12T20:05:10.700" >
+        <step title="Start deployment in the background" date="2026-03-12T20:05:11.054" >
+          <step title="Acquiring Deployment Lock" date="2026-03-12T20:05:11.548" /><!-- duration: 130ms -->
+          <step title="Acquired Deployment Lock" date="2026-03-12T20:05:11.889" /><!-- duration: 20ms -->
+        </step><!-- duration: 1402ms -->
+      </step><!-- duration: 1995ms -->
+      <step title="Outgoing response" date="2026-03-12T20:05:12.814" type="response" statusCode="202" statusText="Accepted" /><!-- duration: 20ms -->
+    </step><!-- duration: 29489ms -->

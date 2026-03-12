@@ -1,0 +1,20 @@
+<step title="BackgroundTrace" date="2026-03-12T20:05:11.112" instance="5c395b" url="/api/zipdeploy" method="POST" >
+  <step title="Cleanup Xml Logs" date="2026-03-12T20:05:11.192" /><!-- duration: 124ms -->
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2026-03-12T20:05:11.947" /><!-- duration: 20ms -->
+  <step title="Creating temporary deployment" date="2026-03-12T20:05:12.009" /><!-- duration: 337ms -->
+  <step title="Performing fetch based deployment" date="2026-03-12T20:05:13.100" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/32374b24-a582-4f6e-a6a6-f73e41ee1695.zip (69.67 MB) to /tmp/zipdeploy/extracted" date="2026-03-12T20:05:15.224" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 760" date="2026-03-12T20:05:58.658" /><!-- duration: 74ms -->
+    </step><!-- duration: 43547ms -->
+    <step title="Deployment timer started" date="2026-03-12T20:06:00.890" >
+      <step title="DeploymentManager.Deploy(id:0ce10e1b-2eaa-4f0e-912b-10a70bb7fbd5)" date="2026-03-12T20:06:00.918" >
+        <step title="Collecting changeset information" date="2026-03-12T20:06:01.088" /><!-- duration: 436ms -->
+        <step title="Updating submodules" date="2026-03-12T20:06:01.633" /><!-- duration: 1409ms -->
+        <step title="Determining deployment builder" date="2026-03-12T20:06:04.892" >
+          <step title="Builder is BasicBuilder" date="2026-03-12T20:06:05.308" /><!-- duration: 193ms -->
+        </step><!-- duration: 722ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2026-03-12T20:06:06.042" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2026-03-12T20:06:07.006" >
+            <step title="Building" date="2026-03-12T20:06:08.660" >
+              <step title="Executing external process" date="2026-03-12T20:06:10.412" type="process" path="starter.sh" arguments="/opt/Kudu/Scripts/absoluteTar.sh /tmp/zipdeploy/extracted/antenv /tmp/zipdeploy/extracted/antenv.tar.gz" /><!-- duration: 16784ms -->
+              <step title="Executing external process" date="2026-03-12T20:06:27.769" type="process" path="starter.sh" arguments="/opt/Kudu/Scripts/parallel_rsync.sh /tmp/zipdeploy/extracted /home/site/wwwroot 8 /tmp/ False True antenv " 

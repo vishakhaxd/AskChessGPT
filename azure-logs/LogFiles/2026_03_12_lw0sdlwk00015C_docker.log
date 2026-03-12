@@ -1,0 +1,890 @@
+2026-03-12T19:35:09.8716539Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-03-12T19:35:12.6118644Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-03-12T19:35:12.6120175Z Container start method called.
+2026-03-12T19:35:12.6120723Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:35:12.6121883Z Establishing network.
+2026-03-12T19:35:12.6123388Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:35:13.6066321Z Container is starting.
+2026-03-12T19:35:13.6076189Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:35:13.6081299Z Establishing user namespace if not established already.
+2026-03-12T19:35:13.6083281Z Establishing network if not established already.
+2026-03-12T19:35:13.6169817Z Mounting volumes.
+2026-03-12T19:35:13.6178366Z Nested mountpoint 
+2026-03-12T19:35:13.6966350Z Nested mountpoint volatile/logs
+2026-03-12T19:35:13.7425025Z Nested mountpoint 
+2026-03-12T19:35:13.9876055Z Nested mountpoint 
+2026-03-12T19:35:14.0612113Z Nested mountpoint 
+2026-03-12T19:35:14.6366348Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:35:14.6368370Z Creating container.
+2026-03-12T19:35:14.6446917Z Creating pipes for streaming container io.
+2026-03-12T19:35:14.6448971Z Creating stdout named pipe at /podr/container/pipe/25200c1792d2_askchessgpt/stdout_9efe46b308a642288bc4bffc42a3d9b6.
+2026-03-12T19:35:14.6548724Z Successfully created stdout named pipe at: /podr/container/pipe/25200c1792d2_askchessgpt/stdout_9efe46b308a642288bc4bffc42a3d9b6.
+2026-03-12T19:35:14.6552042Z Opening named pipe /podr/container/pipe/25200c1792d2_askchessgpt/stdout_9efe46b308a642288bc4bffc42a3d9b6 for reading in non-blocking mode.
+2026-03-12T19:35:14.6556615Z Successfully opened named pipe: /podr/container/pipe/25200c1792d2_askchessgpt/stdout_9efe46b308a642288bc4bffc42a3d9b6.
+2026-03-12T19:35:14.6561092Z Successfully removed non-blocking flag from /podr/container/pipe/25200c1792d2_askchessgpt/stdout_9efe46b308a642288bc4bffc42a3d9b6.
+2026-03-12T19:35:14.6575889Z Creating stderr named pipe at /podr/container/pipe/25200c1792d2_askchessgpt/stderr_08b4c3ff1be240438c5ef33d8bbe5009.
+2026-03-12T19:35:14.6579520Z Successfully created stderr named pipe at: /podr/container/pipe/25200c1792d2_askchessgpt/stderr_08b4c3ff1be240438c5ef33d8bbe5009.
+2026-03-12T19:35:14.6650055Z Opening named pipe /podr/container/pipe/25200c1792d2_askchessgpt/stderr_08b4c3ff1be240438c5ef33d8bbe5009 for reading in non-blocking mode.
+2026-03-12T19:35:14.6656865Z Successfully opened named pipe: /podr/container/pipe/25200c1792d2_askchessgpt/stderr_08b4c3ff1be240438c5ef33d8bbe5009.
+2026-03-12T19:35:14.6666033Z Successfully removed non-blocking flag from /podr/container/pipe/25200c1792d2_askchessgpt/stderr_08b4c3ff1be240438c5ef33d8bbe5009.
+2026-03-12T19:35:14.6752065Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:35:16.1125919Z Starting container: 25200c1792d2_askchessgpt.
+2026-03-12T19:35:16.3751851Z Starting watchers and probes.
+2026-03-12T19:35:16.3841818Z Starting metrics collection.
+2026-03-12T19:35:16.3844190Z Container is running.
+2026-03-12T19:35:16.3845096Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:35:16.6418368Z Container start method finished after 4011 ms.
+2026-03-12T19:35:16.6434587Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:35:16.6435018Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:35:46.1659237Z Container has finished running with exit code: 3.
+2026-03-12T19:35:46.1870195Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:35:46.2267108Z Stop and delete container. Retry count = 0
+2026-03-12T19:35:46.2362297Z Stopping container: 25200c1792d2_askchessgpt.
+2026-03-12T19:35:46.3840021Z Deleting container: 25200c1792d2_askchessgpt. Retry count = 0
+2026-03-12T19:35:46.7582736Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:35:46.7678641Z Container is terminated. Total time elapsed: 571 ms.
+2026-03-12T19:35:46.7756880Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:35:46.7844131Z State: Stopping, Action: CancellingStartup, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:46.8361424Z Site startup probe failed after 30.1818914 seconds.
+2026-03-12T19:35:47.0283543Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:47.0758760Z Failed to start site. Revert by stopping site.
+2026-03-12T19:35:47.0946723Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:47.1078367Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:47.1156179Z Site: askchessgpt stopped.
+2026-03-12T19:35:47.1459063Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:47.8117038Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:35:48.1355836Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:35:48 (UTC), DetailsLevel: ERR
+2026-03-12T19:35:48.3632240Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:35:48 (UTC), DetailsLevel: ERR
+2026-03-12T19:35:53.8255155Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:35:48 (UTC), DetailsLevel: ERR
+2026-03-12T19:35:55.6450885Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:35:48 (UTC), DetailsLevel: ERR
+2026-03-12T19:35:55.6528203Z Container start method called.
+2026-03-12T19:35:55.6529071Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:35:55.6530587Z Establishing network.
+2026-03-12T19:35:55.6535941Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:35:56.1427712Z Container is starting.
+2026-03-12T19:35:56.1432193Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:35:56.1524471Z Establishing user namespace if not established already.
+2026-03-12T19:35:56.1529009Z Establishing network if not established already.
+2026-03-12T19:35:56.1531148Z Mounting volumes.
+2026-03-12T19:35:56.1539969Z Nested mountpoint 
+2026-03-12T19:35:56.2043285Z Nested mountpoint volatile/logs
+2026-03-12T19:35:56.2469984Z Nested mountpoint 
+2026-03-12T19:35:56.2866802Z Nested mountpoint 
+2026-03-12T19:35:56.4693554Z Nested mountpoint 
+2026-03-12T19:35:56.8479278Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:35:56.8551133Z Creating container.
+2026-03-12T19:35:56.8553811Z Creating pipes for streaming container io.
+2026-03-12T19:35:56.8562195Z Creating stdout named pipe at /podr/container/pipe/f517b177a48b_askchessgpt/stdout_f3ebb7df6dca482b93a347273828046f.
+2026-03-12T19:35:56.8567228Z Successfully created stdout named pipe at: /podr/container/pipe/f517b177a48b_askchessgpt/stdout_f3ebb7df6dca482b93a347273828046f.
+2026-03-12T19:35:56.8570855Z Opening named pipe /podr/container/pipe/f517b177a48b_askchessgpt/stdout_f3ebb7df6dca482b93a347273828046f for reading in non-blocking mode.
+2026-03-12T19:35:56.8573826Z Successfully opened named pipe: /podr/container/pipe/f517b177a48b_askchessgpt/stdout_f3ebb7df6dca482b93a347273828046f.
+2026-03-12T19:35:56.8577279Z Successfully removed non-blocking flag from /podr/container/pipe/f517b177a48b_askchessgpt/stdout_f3ebb7df6dca482b93a347273828046f.
+2026-03-12T19:35:56.8643279Z Creating stderr named pipe at /podr/container/pipe/f517b177a48b_askchessgpt/stderr_09a9b085e1874891ab99d1523124a92b.
+2026-03-12T19:35:56.8647765Z Successfully created stderr named pipe at: /podr/container/pipe/f517b177a48b_askchessgpt/stderr_09a9b085e1874891ab99d1523124a92b.
+2026-03-12T19:35:56.8651025Z Opening named pipe /podr/container/pipe/f517b177a48b_askchessgpt/stderr_09a9b085e1874891ab99d1523124a92b for reading in non-blocking mode.
+2026-03-12T19:35:56.8672760Z Successfully opened named pipe: /podr/container/pipe/f517b177a48b_askchessgpt/stderr_09a9b085e1874891ab99d1523124a92b.
+2026-03-12T19:35:56.8674866Z Successfully removed non-blocking flag from /podr/container/pipe/f517b177a48b_askchessgpt/stderr_09a9b085e1874891ab99d1523124a92b.
+2026-03-12T19:35:56.8739974Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:35:57.5433390Z Starting container: f517b177a48b_askchessgpt.
+2026-03-12T19:35:57.6545869Z Starting watchers and probes.
+2026-03-12T19:35:57.6607894Z Starting metrics collection.
+2026-03-12T19:35:57.6707347Z Container is running.
+2026-03-12T19:35:57.6712832Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:35:57.7729152Z Container start method finished after 2091 ms.
+2026-03-12T19:35:57.7733840Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:35:57.7734654Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:36:33.2261540Z Container has finished running with exit code: 3.
+2026-03-12T19:36:33.2266449Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:36:33.2351612Z Stop and delete container. Retry count = 0
+2026-03-12T19:36:33.2352969Z Stopping container: f517b177a48b_askchessgpt.
+2026-03-12T19:36:33.3215189Z Deleting container: f517b177a48b_askchessgpt. Retry count = 0
+2026-03-12T19:36:33.6227022Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:36:33.6235817Z Container is terminated. Total time elapsed: 396 ms.
+2026-03-12T19:36:33.6238373Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:36:33.6240553Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:35:47, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:33.6539992Z Site startup probe failed after 35.8794878 seconds.
+2026-03-12T19:36:33.9020923Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:33.9118179Z Failed to start site. Revert by stopping site.
+2026-03-12T19:36:33.9122318Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:33.9134172Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:33.9134734Z Site: askchessgpt stopped.
+2026-03-12T19:36:33.9438674Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:34.3535589Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:36:34.5127706Z Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:37:34
+2026-03-12T19:36:34.5141845Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:36:34.5836291Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:36:34 (UTC), DetailsLevel: WARN
+2026-03-12T19:36:34.9091932Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:36:34 (UTC), DetailsLevel: WARN
+2026-03-12T19:36:39.8712861Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:36:39.8714080Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:36:45.0352700Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:36:45.0353035Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:36:50.2573172Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:36:50.2575967Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:36:55.6895882Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:36:55.6897896Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:00.9172691Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:00.9173056Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:06.2499168Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:06.2505220Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:11.5806213Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:11.5806569Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:16.8204632Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:16.8205027Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:22.3804174Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:22.3804502Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:28.4266578Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:28.4267493Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:33.6647672Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:33.6648037Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:37:34.5178480Z Site: askchessgpt is unblocked.
+2026-03-12T19:37:39.0213660Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:42.6859685Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:37:34, DetailsLevel: WARN
+2026-03-12T19:37:42.6861084Z Container start method called.
+2026-03-12T19:37:42.6861673Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:37:42.6862790Z Establishing network.
+2026-03-12T19:37:42.6886311Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:37:43.6059275Z Container is starting.
+2026-03-12T19:37:43.6060180Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:37:43.6459775Z Establishing user namespace if not established already.
+2026-03-12T19:37:43.6462620Z Establishing network if not established already.
+2026-03-12T19:37:43.6465540Z Mounting volumes.
+2026-03-12T19:37:43.6468273Z Nested mountpoint 
+2026-03-12T19:37:43.7140966Z Nested mountpoint volatile/logs
+2026-03-12T19:37:43.8043937Z Nested mountpoint 
+2026-03-12T19:37:43.8052815Z Nested mountpoint 
+2026-03-12T19:37:43.9151377Z Nested mountpoint 
+2026-03-12T19:37:45.4073782Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:37:45.4075802Z Creating container.
+2026-03-12T19:37:45.4077071Z Creating pipes for streaming container io.
+2026-03-12T19:37:45.4169577Z Creating stdout named pipe at /podr/container/pipe/aae1b76970fa_askchessgpt/stdout_ce3df1f7ec234f3da398aa2807605f05.
+2026-03-12T19:37:45.4175148Z Successfully created stdout named pipe at: /podr/container/pipe/aae1b76970fa_askchessgpt/stdout_ce3df1f7ec234f3da398aa2807605f05.
+2026-03-12T19:37:45.4339885Z Opening named pipe /podr/container/pipe/aae1b76970fa_askchessgpt/stdout_ce3df1f7ec234f3da398aa2807605f05 for reading in non-blocking mode.
+2026-03-12T19:37:45.4348886Z Successfully opened named pipe: /podr/container/pipe/aae1b76970fa_askchessgpt/stdout_ce3df1f7ec234f3da398aa2807605f05.
+2026-03-12T19:37:45.4352115Z Successfully removed non-blocking flag from /podr/container/pipe/aae1b76970fa_askchessgpt/stdout_ce3df1f7ec234f3da398aa2807605f05.
+2026-03-12T19:37:45.4361818Z Creating stderr named pipe at /podr/container/pipe/aae1b76970fa_askchessgpt/stderr_e914d2d766294c49afa6813a9272f9f3.
+2026-03-12T19:37:45.4443058Z Successfully created stderr named pipe at: /podr/container/pipe/aae1b76970fa_askchessgpt/stderr_e914d2d766294c49afa6813a9272f9f3.
+2026-03-12T19:37:45.4455237Z Opening named pipe /podr/container/pipe/aae1b76970fa_askchessgpt/stderr_e914d2d766294c49afa6813a9272f9f3 for reading in non-blocking mode.
+2026-03-12T19:37:45.4460773Z Successfully opened named pipe: /podr/container/pipe/aae1b76970fa_askchessgpt/stderr_e914d2d766294c49afa6813a9272f9f3.
+2026-03-12T19:37:45.4471728Z Successfully removed non-blocking flag from /podr/container/pipe/aae1b76970fa_askchessgpt/stderr_e914d2d766294c49afa6813a9272f9f3.
+2026-03-12T19:37:45.4542035Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:37:46.2557637Z Starting container: aae1b76970fa_askchessgpt.
+2026-03-12T19:37:46.3770358Z Starting watchers and probes.
+2026-03-12T19:37:46.3774606Z Starting metrics collection.
+2026-03-12T19:37:46.3870056Z Container is running.
+2026-03-12T19:37:46.3870919Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:37:46.7064924Z Container start method finished after 3938 ms.
+2026-03-12T19:37:46.7069913Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:37:46.7864658Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:38:38.8133383Z Container has finished running with exit code: 3.
+2026-03-12T19:38:38.8151967Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:38:38.8447762Z Stop and delete container. Retry count = 0
+2026-03-12T19:38:38.8449301Z Stopping container: aae1b76970fa_askchessgpt.
+2026-03-12T19:38:38.9921109Z Deleting container: aae1b76970fa_askchessgpt. Retry count = 0
+2026-03-12T19:38:39.3322767Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:38:39.3498660Z Container is terminated. Total time elapsed: 534 ms.
+2026-03-12T19:38:39.3511222Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:38:39.3913098Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:36:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:39.4612349Z Site startup probe failed after 52.673383 seconds.
+2026-03-12T19:38:39.7280779Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:39.7776101Z Failed to start site. Revert by stopping site.
+2026-03-12T19:38:39.7779131Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:39.7782263Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:39.7782713Z Site: askchessgpt stopped.
+2026-03-12T19:38:39.7979558Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:40.3360197Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:38:40.8834308Z Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:39:40
+2026-03-12T19:38:40.8837609Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:38:40.8842079Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:38:40 (UTC), DetailsLevel: WARN
+2026-03-12T19:38:41.3427505Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:38:40 (UTC), DetailsLevel: WARN
+2026-03-12T19:38:46.9242128Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:38:46.9264394Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:38:52.7263340Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:38:52.7273511Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:38:57.9693226Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:38:57.9693501Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:03.2345295Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:03.2345820Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:08.5377823Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:08.5381215Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:13.7795690Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:13.7795994Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:18.9421872Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:18.9701677Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:24.1004786Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:24.1008310Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:29.2977017Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:29.2978601Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:34.4496439Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:34.4497431Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:39.5776162Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:39.5776456Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:39:40.8789965Z Site: askchessgpt is unblocked.
+2026-03-12T19:39:44.7867741Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:46.7927502Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:39:40, DetailsLevel: WARN
+2026-03-12T19:39:46.7929738Z Container start method called.
+2026-03-12T19:39:46.7931318Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:39:46.7932961Z Establishing network.
+2026-03-12T19:39:46.7935667Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:39:48.0094860Z Container is starting.
+2026-03-12T19:39:48.0098176Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:39:48.0157623Z Establishing user namespace if not established already.
+2026-03-12T19:39:48.0172658Z Establishing network if not established already.
+2026-03-12T19:39:48.0178905Z Mounting volumes.
+2026-03-12T19:39:48.0191060Z Nested mountpoint 
+2026-03-12T19:39:48.0354754Z Nested mountpoint volatile/logs
+2026-03-12T19:39:48.1236494Z Nested mountpoint 
+2026-03-12T19:39:48.1244266Z Nested mountpoint 
+2026-03-12T19:39:48.1441455Z Nested mountpoint 
+2026-03-12T19:39:48.7583855Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:39:48.7585647Z Creating container.
+2026-03-12T19:39:48.7587388Z Creating pipes for streaming container io.
+2026-03-12T19:39:48.7588877Z Creating stdout named pipe at /podr/container/pipe/aff12acf10c6_askchessgpt/stdout_f9ffbc83745d4b63b7f6ab9902f00822.
+2026-03-12T19:39:48.7875578Z Successfully created stdout named pipe at: /podr/container/pipe/aff12acf10c6_askchessgpt/stdout_f9ffbc83745d4b63b7f6ab9902f00822.
+2026-03-12T19:39:48.7877463Z Opening named pipe /podr/container/pipe/aff12acf10c6_askchessgpt/stdout_f9ffbc83745d4b63b7f6ab9902f00822 for reading in non-blocking mode.
+2026-03-12T19:39:48.7878748Z Successfully opened named pipe: /podr/container/pipe/aff12acf10c6_askchessgpt/stdout_f9ffbc83745d4b63b7f6ab9902f00822.
+2026-03-12T19:39:48.7879679Z Successfully removed non-blocking flag from /podr/container/pipe/aff12acf10c6_askchessgpt/stdout_f9ffbc83745d4b63b7f6ab9902f00822.
+2026-03-12T19:39:48.7896547Z Creating stderr named pipe at /podr/container/pipe/aff12acf10c6_askchessgpt/stderr_17a0bceaee8c43099e1d1f3b87638d3d.
+2026-03-12T19:39:48.7898526Z Successfully created stderr named pipe at: /podr/container/pipe/aff12acf10c6_askchessgpt/stderr_17a0bceaee8c43099e1d1f3b87638d3d.
+2026-03-12T19:39:48.7899445Z Opening named pipe /podr/container/pipe/aff12acf10c6_askchessgpt/stderr_17a0bceaee8c43099e1d1f3b87638d3d for reading in non-blocking mode.
+2026-03-12T19:39:48.7900613Z Successfully opened named pipe: /podr/container/pipe/aff12acf10c6_askchessgpt/stderr_17a0bceaee8c43099e1d1f3b87638d3d.
+2026-03-12T19:39:48.7901697Z Successfully removed non-blocking flag from /podr/container/pipe/aff12acf10c6_askchessgpt/stderr_17a0bceaee8c43099e1d1f3b87638d3d.
+2026-03-12T19:39:48.7983238Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:39:50.0402507Z Starting container: aff12acf10c6_askchessgpt.
+2026-03-12T19:39:50.1147848Z Starting watchers and probes.
+2026-03-12T19:39:50.1151396Z Starting metrics collection.
+2026-03-12T19:39:50.1331930Z Container is running.
+2026-03-12T19:39:50.1333078Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:39:50.4327265Z Container start method finished after 3639 ms.
+2026-03-12T19:39:50.4933358Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:39:50.4936654Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:40:23.3842850Z Container has finished running with exit code: 3.
+2026-03-12T19:40:23.3844335Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:40:23.3931888Z Stop and delete container. Retry count = 0
+2026-03-12T19:40:23.3933296Z Stopping container: aff12acf10c6_askchessgpt.
+2026-03-12T19:40:23.6220001Z Deleting container: aff12acf10c6_askchessgpt. Retry count = 0
+2026-03-12T19:40:23.9923114Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:40:23.9935557Z Container is terminated. Total time elapsed: 608 ms.
+2026-03-12T19:40:23.9937430Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:40:24.0110413Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:38:39, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:24.0408588Z Site startup probe failed after 33.527053 seconds.
+2026-03-12T19:40:24.2718527Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:24.3205439Z Failed to start site. Revert by stopping site.
+2026-03-12T19:40:24.3222673Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:24.3234771Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:24.3235029Z Site: askchessgpt stopped.
+2026-03-12T19:40:24.3331324Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:24.8410077Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:40:25.1237745Z Site: askchessgpt will be blocked for 2 minutes till 03/12/2026 19:42:25
+2026-03-12T19:40:25.1302241Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 2 minutes till 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:25.1330258Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:40:25 (UTC), DetailsLevel: WARN
+2026-03-12T19:40:25.4706840Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:40:25 (UTC), DetailsLevel: WARN
+2026-03-12T19:40:30.5026238Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:30.5026558Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:40:35.7478392Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:35.7834996Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:40:40.9550679Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:40.9550984Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:40:46.1088428Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:46.1089472Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:40:51.2892582Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:51.2895232Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:40:56.6654092Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:40:56.6654809Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:01.7989014Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:01.8278060Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:06.9714783Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:06.9715060Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:12.2114945Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:12.2119960Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:17.3694371Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:17.3694890Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:22.4406108Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:22.4406460Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:27.5167033Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:27.5167899Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:32.6669610Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:32.6669967Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:37.7308405Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:37.7311932Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:42.8245097Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:42.8246108Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:47.9897660Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:47.9898573Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:53.1046693Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:53.1048580Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:55.9553381Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:55.9557313Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:41:58.2463678Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:41:58.2465663Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:03.4429579Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:03.4432743Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:08.7061559Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:08.7062788Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:13.8732920Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:13.8734143Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:19.1120642Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:19.1123118Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:24.2293010Z State: Blocked, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:24.2293520Z Start site prohibitted because the site is being blocked.
+2026-03-12T19:42:25.1270152Z Site: askchessgpt is unblocked.
+2026-03-12T19:42:29.4529010Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:31.7214582Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site is blocked due to multiple, consecutive cold start failures. Site scheduled to be unblocked at 03/12/2026 19:42:25, DetailsLevel: WARN
+2026-03-12T19:42:31.7216090Z Container start method called.
+2026-03-12T19:42:31.7290764Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:42:31.7293221Z Establishing network.
+2026-03-12T19:42:31.7294754Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:42:32.3288986Z Container is starting.
+2026-03-12T19:42:32.3289952Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:42:32.3291164Z Establishing user namespace if not established already.
+2026-03-12T19:42:32.3292520Z Establishing network if not established already.
+2026-03-12T19:42:32.3384752Z Mounting volumes.
+2026-03-12T19:42:32.3387697Z Nested mountpoint 
+2026-03-12T19:42:32.3665863Z Nested mountpoint volatile/logs
+2026-03-12T19:42:32.4365310Z Nested mountpoint 
+2026-03-12T19:42:32.4459463Z Nested mountpoint 
+2026-03-12T19:42:32.4657789Z Nested mountpoint 
+2026-03-12T19:42:33.1537809Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:42:33.1544370Z Creating container.
+2026-03-12T19:42:33.1632166Z Creating pipes for streaming container io.
+2026-03-12T19:42:33.1635433Z Creating stdout named pipe at /podr/container/pipe/b5d15b662d75_askchessgpt/stdout_44d4b401ce6e4ff4a2b77de96b50d520.
+2026-03-12T19:42:33.1640775Z Successfully created stdout named pipe at: /podr/container/pipe/b5d15b662d75_askchessgpt/stdout_44d4b401ce6e4ff4a2b77de96b50d520.
+2026-03-12T19:42:33.1642479Z Opening named pipe /podr/container/pipe/b5d15b662d75_askchessgpt/stdout_44d4b401ce6e4ff4a2b77de96b50d520 for reading in non-blocking mode.
+2026-03-12T19:42:33.1644929Z Successfully opened named pipe: /podr/container/pipe/b5d15b662d75_askchessgpt/stdout_44d4b401ce6e4ff4a2b77de96b50d520.
+2026-03-12T19:42:33.1649742Z Successfully removed non-blocking flag from /podr/container/pipe/b5d15b662d75_askchessgpt/stdout_44d4b401ce6e4ff4a2b77de96b50d520.
+2026-03-12T19:42:33.1653745Z Creating stderr named pipe at /podr/container/pipe/b5d15b662d75_askchessgpt/stderr_228f4b094e20449f86d36856a9f216af.
+2026-03-12T19:42:33.1764744Z Successfully created stderr named pipe at: /podr/container/pipe/b5d15b662d75_askchessgpt/stderr_228f4b094e20449f86d36856a9f216af.
+2026-03-12T19:42:33.1860455Z Opening named pipe /podr/container/pipe/b5d15b662d75_askchessgpt/stderr_228f4b094e20449f86d36856a9f216af for reading in non-blocking mode.
+2026-03-12T19:42:33.1861952Z Successfully opened named pipe: /podr/container/pipe/b5d15b662d75_askchessgpt/stderr_228f4b094e20449f86d36856a9f216af.
+2026-03-12T19:42:33.1864453Z Successfully removed non-blocking flag from /podr/container/pipe/b5d15b662d75_askchessgpt/stderr_228f4b094e20449f86d36856a9f216af.
+2026-03-12T19:42:33.2035054Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:42:34.5035277Z Starting container: b5d15b662d75_askchessgpt.
+2026-03-12T19:42:34.6522278Z Starting watchers and probes.
+2026-03-12T19:42:34.6525294Z Starting metrics collection.
+2026-03-12T19:42:34.6526921Z Container is running.
+2026-03-12T19:42:34.6528158Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:42:34.9001141Z Container start method finished after 3161 ms.
+2026-03-12T19:42:34.9088705Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:42:34.9105415Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:43:25.9204562Z Container has finished running with exit code: 3.
+2026-03-12T19:43:25.9209032Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:43:25.9508475Z Stop and delete container. Retry count = 0
+2026-03-12T19:43:25.9509818Z Stopping container: b5d15b662d75_askchessgpt.
+2026-03-12T19:43:26.1483522Z Deleting container: b5d15b662d75_askchessgpt. Retry count = 0
+2026-03-12T19:43:26.6451004Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:43:26.6750309Z Container is terminated. Total time elapsed: 753 ms.
+2026-03-12T19:43:26.6767599Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:43:26.7151774Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:40:24, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:43:26.8247561Z Site startup probe failed after 51.846627 seconds.
+2026-03-12T19:43:27.3938292Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:43:27.4438816Z Failed to start site. Revert by stopping site.
+2026-03-12T19:43:27.4807980Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:43:27.5111916Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:43:27.5112613Z Site: askchessgpt stopped.
+2026-03-12T19:43:55.5302008Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:43:28 (UTC), DetailsLevel: WARN
+2026-03-12T19:43:58.4514784Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:43:28 (UTC), DetailsLevel: WARN
+2026-03-12T19:43:58.4516259Z Container start method called.
+2026-03-12T19:43:58.4516883Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:43:58.4518688Z Establishing network.
+2026-03-12T19:43:58.4520836Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:44:00.0983337Z Image appsvc/python:3.11_20260203.2.tuxprod is pulled from registry 10.1.0.4:13209
+2026-03-12T19:44:00.1060850Z Container is starting.
+2026-03-12T19:44:00.1085309Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:44:00.1087731Z Establishing user namespace if not established already.
+2026-03-12T19:44:00.1089489Z Establishing network if not established already.
+2026-03-12T19:44:00.1093044Z Mounting volumes.
+2026-03-12T19:44:00.1096911Z Nested mountpoint 
+2026-03-12T19:44:00.1796392Z Nested mountpoint volatile/logs
+2026-03-12T19:44:00.3049692Z Nested mountpoint 
+2026-03-12T19:44:00.4419768Z Nested mountpoint 
+2026-03-12T19:44:00.5702430Z Nested mountpoint 
+2026-03-12T19:44:02.2016747Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:44:02.2018195Z Creating container.
+2026-03-12T19:44:02.2019480Z Creating pipes for streaming container io.
+2026-03-12T19:44:02.2020628Z Creating stdout named pipe at /podr/container/pipe/49a68fd6d60e_askchessgpt/stdout_7289417d06fe42418c6f1f473e266dbe.
+2026-03-12T19:44:02.2034176Z Successfully created stdout named pipe at: /podr/container/pipe/49a68fd6d60e_askchessgpt/stdout_7289417d06fe42418c6f1f473e266dbe.
+2026-03-12T19:44:02.2317161Z Opening named pipe /podr/container/pipe/49a68fd6d60e_askchessgpt/stdout_7289417d06fe42418c6f1f473e266dbe for reading in non-blocking mode.
+2026-03-12T19:44:02.2592137Z Successfully opened named pipe: /podr/container/pipe/49a68fd6d60e_askchessgpt/stdout_7289417d06fe42418c6f1f473e266dbe.
+2026-03-12T19:44:02.2610853Z Successfully removed non-blocking flag from /podr/container/pipe/49a68fd6d60e_askchessgpt/stdout_7289417d06fe42418c6f1f473e266dbe.
+2026-03-12T19:44:02.2613218Z Creating stderr named pipe at /podr/container/pipe/49a68fd6d60e_askchessgpt/stderr_762d4158609340dc80cc3d934af7905e.
+2026-03-12T19:44:02.2615911Z Successfully created stderr named pipe at: /podr/container/pipe/49a68fd6d60e_askchessgpt/stderr_762d4158609340dc80cc3d934af7905e.
+2026-03-12T19:44:02.2617353Z Opening named pipe /podr/container/pipe/49a68fd6d60e_askchessgpt/stderr_762d4158609340dc80cc3d934af7905e for reading in non-blocking mode.
+2026-03-12T19:44:02.2618665Z Successfully opened named pipe: /podr/container/pipe/49a68fd6d60e_askchessgpt/stderr_762d4158609340dc80cc3d934af7905e.
+2026-03-12T19:44:02.2619703Z Successfully removed non-blocking flag from /podr/container/pipe/49a68fd6d60e_askchessgpt/stderr_762d4158609340dc80cc3d934af7905e.
+2026-03-12T19:44:02.2621679Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:44:04.8176993Z Starting container: 49a68fd6d60e_askchessgpt.
+2026-03-12T19:44:05.0680978Z Starting watchers and probes.
+2026-03-12T19:44:05.0688687Z Starting metrics collection.
+2026-03-12T19:44:05.1270421Z Container is running.
+2026-03-12T19:44:05.1272354Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:44:05.4692225Z Container start method finished after 7017 ms.
+2026-03-12T19:44:05.4694426Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:44:05.4695034Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:44:49.4510567Z Container has finished running with exit code: 3.
+2026-03-12T19:44:49.4516123Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:44:49.4585518Z Stop and delete container. Retry count = 0
+2026-03-12T19:44:49.4588070Z Stopping container: 49a68fd6d60e_askchessgpt.
+2026-03-12T19:44:49.5762968Z Deleting container: 49a68fd6d60e_askchessgpt. Retry count = 0
+2026-03-12T19:44:49.8051759Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:44:49.8061424Z Container is terminated. Total time elapsed: 353 ms.
+2026-03-12T19:44:49.8068086Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:44:49.8078745Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:43:27, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:49.8171713Z Site startup probe failed after 44.3108518 seconds.
+2026-03-12T19:44:50.0822652Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:50.0842500Z Failed to start site. Revert by stopping site.
+2026-03-12T19:44:50.0843434Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:50.1511375Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:50.1511761Z Site: askchessgpt stopped.
+2026-03-12T19:44:50.1533031Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:50.5969566Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:44:50.8132523Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:44:50 (UTC), DetailsLevel: ERR
+2026-03-12T19:44:51.1040554Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:44:50 (UTC), DetailsLevel: ERR
+2026-03-12T19:44:56.1129666Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:44:50 (UTC), DetailsLevel: ERR
+2026-03-12T19:44:58.1399717Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:44:50 (UTC), DetailsLevel: ERR
+2026-03-12T19:44:58.1473278Z Container start method called.
+2026-03-12T19:44:58.1483684Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:44:58.1488625Z Establishing network.
+2026-03-12T19:44:58.1494813Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:44:58.4525840Z Container is starting.
+2026-03-12T19:44:58.4535128Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:44:58.4540232Z Establishing user namespace if not established already.
+2026-03-12T19:44:58.4605756Z Establishing network if not established already.
+2026-03-12T19:44:58.4607931Z Mounting volumes.
+2026-03-12T19:44:58.4611772Z Nested mountpoint 
+2026-03-12T19:44:58.4644005Z Nested mountpoint volatile/logs
+2026-03-12T19:44:58.4737965Z Nested mountpoint 
+2026-03-12T19:44:58.4809486Z Nested mountpoint 
+2026-03-12T19:44:58.4832252Z Nested mountpoint 
+2026-03-12T19:44:58.9081340Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:44:58.9085293Z Creating container.
+2026-03-12T19:44:58.9087702Z Creating pipes for streaming container io.
+2026-03-12T19:44:58.9089303Z Creating stdout named pipe at /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stdout_9ed2e09fa3194b98a5e143099cbfdc6e.
+2026-03-12T19:44:58.9091883Z Successfully created stdout named pipe at: /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stdout_9ed2e09fa3194b98a5e143099cbfdc6e.
+2026-03-12T19:44:58.9092979Z Opening named pipe /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stdout_9ed2e09fa3194b98a5e143099cbfdc6e for reading in non-blocking mode.
+2026-03-12T19:44:58.9094207Z Successfully opened named pipe: /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stdout_9ed2e09fa3194b98a5e143099cbfdc6e.
+2026-03-12T19:44:58.9095269Z Successfully removed non-blocking flag from /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stdout_9ed2e09fa3194b98a5e143099cbfdc6e.
+2026-03-12T19:44:58.9097710Z Creating stderr named pipe at /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stderr_0da5b2c103f1434badd6f4e629167722.
+2026-03-12T19:44:58.9099772Z Successfully created stderr named pipe at: /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stderr_0da5b2c103f1434badd6f4e629167722.
+2026-03-12T19:44:58.9101003Z Opening named pipe /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stderr_0da5b2c103f1434badd6f4e629167722 for reading in non-blocking mode.
+2026-03-12T19:44:58.9102170Z Successfully opened named pipe: /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stderr_0da5b2c103f1434badd6f4e629167722.
+2026-03-12T19:44:58.9303631Z Successfully removed non-blocking flag from /podr/container/pipe/5b1f24cf2ef2_askchessgpt/stderr_0da5b2c103f1434badd6f4e629167722.
+2026-03-12T19:44:58.9860252Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:44:59.5048683Z Starting container: 5b1f24cf2ef2_askchessgpt.
+2026-03-12T19:44:59.5915610Z Starting watchers and probes.
+2026-03-12T19:44:59.5921096Z Starting metrics collection.
+2026-03-12T19:44:59.5922858Z Container is running.
+2026-03-12T19:44:59.5923905Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:45:00.0861955Z Container start method finished after 1931 ms.
+2026-03-12T19:45:00.0906010Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:45:00.0908408Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:45:32.4092702Z Container has finished running with exit code: 3.
+2026-03-12T19:45:32.4097428Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:45:32.4197658Z Stop and delete container. Retry count = 0
+2026-03-12T19:45:32.4199082Z Stopping container: 5b1f24cf2ef2_askchessgpt.
+2026-03-12T19:45:32.4805238Z Deleting container: 5b1f24cf2ef2_askchessgpt. Retry count = 0
+2026-03-12T19:45:32.7274433Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:45:32.7280786Z Container is terminated. Total time elapsed: 317 ms.
+2026-03-12T19:45:32.7298076Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:45:32.7376124Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:44:50, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:32.8267818Z Site startup probe failed after 32.699083 seconds.
+2026-03-12T19:45:33.1036557Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:33.1129595Z Failed to start site. Revert by stopping site.
+2026-03-12T19:45:33.1139089Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:33.1141768Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:33.1141944Z Site: askchessgpt stopped.
+2026-03-12T19:45:33.1426397Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:33.6277906Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:45:33.9729867Z Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:46:33
+2026-03-12T19:45:33.9739266Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 19:46:33, DetailsLevel: WARN
+2026-03-12T19:45:33.9837533Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:45:33 (UTC), DetailsLevel: WARN
+2026-03-12T19:45:34.4024126Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:45:33 (UTC), DetailsLevel: WARN
+2026-03-12T19:46:33.9751894Z Site: askchessgpt is unblocked.
+2026-03-12T19:46:59.7228904Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:45:33 (UTC), DetailsLevel: WARN
+2026-03-12T19:47:02.5602366Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:45:33 (UTC), DetailsLevel: WARN
+2026-03-12T19:47:02.5603714Z Container start method called.
+2026-03-12T19:47:02.5604378Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:47:02.5605582Z Establishing network.
+2026-03-12T19:47:02.5710260Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:47:02.8713252Z Container is starting.
+2026-03-12T19:47:02.8714077Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:47:02.8715214Z Establishing user namespace if not established already.
+2026-03-12T19:47:02.8716373Z Establishing network if not established already.
+2026-03-12T19:47:02.8717538Z Mounting volumes.
+2026-03-12T19:47:02.9201099Z Nested mountpoint 
+2026-03-12T19:47:03.0790243Z Nested mountpoint volatile/logs
+2026-03-12T19:47:03.1373263Z Nested mountpoint 
+2026-03-12T19:47:03.1382260Z Nested mountpoint 
+2026-03-12T19:47:03.2876698Z Nested mountpoint 
+2026-03-12T19:47:04.1111686Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:47:04.1114278Z Creating container.
+2026-03-12T19:47:04.1120501Z Creating pipes for streaming container io.
+2026-03-12T19:47:04.1127442Z Creating stdout named pipe at /podr/container/pipe/ffe5ca0ab843_askchessgpt/stdout_4c32eb9c9ece42028963d542d898fc55.
+2026-03-12T19:47:04.1203708Z Successfully created stdout named pipe at: /podr/container/pipe/ffe5ca0ab843_askchessgpt/stdout_4c32eb9c9ece42028963d542d898fc55.
+2026-03-12T19:47:04.1212442Z Opening named pipe /podr/container/pipe/ffe5ca0ab843_askchessgpt/stdout_4c32eb9c9ece42028963d542d898fc55 for reading in non-blocking mode.
+2026-03-12T19:47:04.1219591Z Successfully opened named pipe: /podr/container/pipe/ffe5ca0ab843_askchessgpt/stdout_4c32eb9c9ece42028963d542d898fc55.
+2026-03-12T19:47:04.1227053Z Successfully removed non-blocking flag from /podr/container/pipe/ffe5ca0ab843_askchessgpt/stdout_4c32eb9c9ece42028963d542d898fc55.
+2026-03-12T19:47:04.1294793Z Creating stderr named pipe at /podr/container/pipe/ffe5ca0ab843_askchessgpt/stderr_70ee759194154e58b35e9246436b15ce.
+2026-03-12T19:47:04.1296947Z Successfully created stderr named pipe at: /podr/container/pipe/ffe5ca0ab843_askchessgpt/stderr_70ee759194154e58b35e9246436b15ce.
+2026-03-12T19:47:04.1298038Z Opening named pipe /podr/container/pipe/ffe5ca0ab843_askchessgpt/stderr_70ee759194154e58b35e9246436b15ce for reading in non-blocking mode.
+2026-03-12T19:47:04.1299427Z Successfully opened named pipe: /podr/container/pipe/ffe5ca0ab843_askchessgpt/stderr_70ee759194154e58b35e9246436b15ce.
+2026-03-12T19:47:04.1300475Z Successfully removed non-blocking flag from /podr/container/pipe/ffe5ca0ab843_askchessgpt/stderr_70ee759194154e58b35e9246436b15ce.
+2026-03-12T19:47:04.1302104Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:47:04.8364753Z Starting container: ffe5ca0ab843_askchessgpt.
+2026-03-12T19:47:04.9742430Z Starting watchers and probes.
+2026-03-12T19:47:04.9911292Z Starting metrics collection.
+2026-03-12T19:47:05.0016010Z Container is running.
+2026-03-12T19:47:05.0021208Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:47:05.3193342Z Container start method finished after 2730 ms.
+2026-03-12T19:47:05.3512144Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:47:05.3513600Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:48:03.0173665Z Container has finished running with exit code: 3.
+2026-03-12T19:48:03.0175424Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T19:48:03.0179746Z Stop and delete container. Retry count = 0
+2026-03-12T19:48:03.0354026Z Stopping container: ffe5ca0ab843_askchessgpt.
+2026-03-12T19:48:03.1833504Z Deleting container: ffe5ca0ab843_askchessgpt. Retry count = 0
+2026-03-12T19:48:03.7694399Z Container spec TerminationMessagePolicy  path 
+2026-03-12T19:48:03.7698368Z Container is terminated. Total time elapsed: 751 ms.
+2026-03-12T19:48:03.7702377Z Site container: askchessgpt terminated during site startup.
+2026-03-12T19:48:03.7704284Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:45:33, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:48:03.8000161Z Site startup probe failed after 58.411384 seconds.
+2026-03-12T19:48:04.2476001Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:48:04.2682498Z Failed to start site. Revert by stopping site.
+2026-03-12T19:48:04.2684671Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:48:04.2753246Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T19:48:04.2753476Z Site: askchessgpt stopped.
+2026-03-12T19:57:48.5269305Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:48:05 (UTC), DetailsLevel: WARN
+2026-03-12T19:57:51.1165872Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 19:48:05 (UTC), DetailsLevel: WARN
+2026-03-12T19:57:51.1168304Z Container start method called.
+2026-03-12T19:57:51.1177869Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:57:51.1180436Z Establishing network.
+2026-03-12T19:57:51.1185353Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T19:57:51.7174626Z Container is starting.
+2026-03-12T19:57:51.7238178Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T19:57:51.7242506Z Establishing user namespace if not established already.
+2026-03-12T19:57:51.7246900Z Establishing network if not established already.
+2026-03-12T19:57:51.7250896Z Mounting volumes.
+2026-03-12T19:57:51.7255832Z Nested mountpoint 
+2026-03-12T19:57:51.7852317Z Nested mountpoint volatile/logs
+2026-03-12T19:57:51.8038900Z Nested mountpoint 
+2026-03-12T19:57:51.8160998Z Nested mountpoint 
+2026-03-12T19:57:51.8734311Z Nested mountpoint 
+2026-03-12T19:57:53.0923293Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T19:57:53.1015226Z Creating container.
+2026-03-12T19:57:53.1016613Z Creating pipes for streaming container io.
+2026-03-12T19:57:53.1017688Z Creating stdout named pipe at /podr/container/pipe/d20bcb5b22d7_askchessgpt/stdout_59ec9d2ff0d94077a14285538910ca49.
+2026-03-12T19:57:53.1139180Z Successfully created stdout named pipe at: /podr/container/pipe/d20bcb5b22d7_askchessgpt/stdout_59ec9d2ff0d94077a14285538910ca49.
+2026-03-12T19:57:53.1224986Z Opening named pipe /podr/container/pipe/d20bcb5b22d7_askchessgpt/stdout_59ec9d2ff0d94077a14285538910ca49 for reading in non-blocking mode.
+2026-03-12T19:57:53.1232177Z Successfully opened named pipe: /podr/container/pipe/d20bcb5b22d7_askchessgpt/stdout_59ec9d2ff0d94077a14285538910ca49.
+2026-03-12T19:57:53.1238012Z Successfully removed non-blocking flag from /podr/container/pipe/d20bcb5b22d7_askchessgpt/stdout_59ec9d2ff0d94077a14285538910ca49.
+2026-03-12T19:57:53.1417553Z Creating stderr named pipe at /podr/container/pipe/d20bcb5b22d7_askchessgpt/stderr_139354bf64af4f7e9f70c17ab1835752.
+2026-03-12T19:57:53.1419491Z Successfully created stderr named pipe at: /podr/container/pipe/d20bcb5b22d7_askchessgpt/stderr_139354bf64af4f7e9f70c17ab1835752.
+2026-03-12T19:57:53.1420582Z Opening named pipe /podr/container/pipe/d20bcb5b22d7_askchessgpt/stderr_139354bf64af4f7e9f70c17ab1835752 for reading in non-blocking mode.
+2026-03-12T19:57:53.1421758Z Successfully opened named pipe: /podr/container/pipe/d20bcb5b22d7_askchessgpt/stderr_139354bf64af4f7e9f70c17ab1835752.
+2026-03-12T19:57:53.1422749Z Successfully removed non-blocking flag from /podr/container/pipe/d20bcb5b22d7_askchessgpt/stderr_139354bf64af4f7e9f70c17ab1835752.
+2026-03-12T19:57:53.1532032Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T19:57:54.5846435Z Starting container: d20bcb5b22d7_askchessgpt.
+2026-03-12T19:57:54.6920766Z Starting watchers and probes.
+2026-03-12T19:57:54.6987937Z Starting metrics collection.
+2026-03-12T19:57:54.6994285Z Container is running.
+2026-03-12T19:57:54.6995237Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:57:54.8978064Z Container start method finished after 3780 ms.
+2026-03-12T19:57:54.8980621Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T19:57:54.8980873Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T19:59:07.9048076Z Site startup probe succeeded after 72.9471329 seconds.
+2026-03-12T19:59:08.0739539Z State: Starting, Action: WarmUpProbeSucceeded, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site startup probe succeeded after 72.9471329 seconds., DetailsLevel: INFO
+2026-03-12T19:59:08.1561928Z Site is running with deployment version: 154cd65f-81bc-47a0-990a-943d88109a61
+2026-03-12T19:59:08.1622020Z Site started.
+2026-03-12T19:59:08.1628917Z State: Started, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 03/12/2026 19:59:08 (UTC), DetailsLevel: INFO
+2026-03-12T19:59:08.1949261Z Site is running with patch version PYTHON 3.11.14
+2026-03-12T20:04:38.6958600Z State: Starting, Action: EstablishingSiteNetworks, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-03-12T20:04:43.1547365Z State: Starting, Action: StartingSiteContainers, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-03-12T20:04:43.1549534Z Container start method called.
+2026-03-12T20:04:43.1550241Z State: Starting, Action: PullingImage, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:04:43.1551574Z Establishing network.
+2026-03-12T20:04:43.1650348Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T20:04:43.7728017Z Container is starting.
+2026-03-12T20:04:43.7827033Z State: Starting, Action: MountingVolumes, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:04:43.7829330Z Establishing user namespace if not established already.
+2026-03-12T20:04:43.7831733Z Establishing network if not established already.
+2026-03-12T20:04:43.7833624Z Mounting volumes.
+2026-03-12T20:04:43.7916503Z Nested mountpoint 
+2026-03-12T20:04:43.8923482Z Nested mountpoint volatile/logs
+2026-03-12T20:04:44.0204822Z Nested mountpoint 
+2026-03-12T20:04:44.3164852Z Nested mountpoint 
+2026-03-12T20:04:44.3179400Z Nested mountpoint 
+2026-03-12T20:04:46.2556448Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T20:04:46.2559025Z Creating container.
+2026-03-12T20:04:46.2560346Z Creating pipes for streaming container io.
+2026-03-12T20:04:46.2561439Z Creating stdout named pipe at /podr/container/pipe/f0338afe47ca_askchessgpt/stdout_2026af8f3d2d4d499606c2a1337ee3c7.
+2026-03-12T20:04:46.2563701Z Successfully created stdout named pipe at: /podr/container/pipe/f0338afe47ca_askchessgpt/stdout_2026af8f3d2d4d499606c2a1337ee3c7.
+2026-03-12T20:04:46.2564715Z Opening named pipe /podr/container/pipe/f0338afe47ca_askchessgpt/stdout_2026af8f3d2d4d499606c2a1337ee3c7 for reading in non-blocking mode.
+2026-03-12T20:04:46.2567741Z Successfully opened named pipe: /podr/container/pipe/f0338afe47ca_askchessgpt/stdout_2026af8f3d2d4d499606c2a1337ee3c7.
+2026-03-12T20:04:46.2569207Z Successfully removed non-blocking flag from /podr/container/pipe/f0338afe47ca_askchessgpt/stdout_2026af8f3d2d4d499606c2a1337ee3c7.
+2026-03-12T20:04:46.2571866Z Creating stderr named pipe at /podr/container/pipe/f0338afe47ca_askchessgpt/stderr_3481073ca2b648c083b14b2035a3f414.
+2026-03-12T20:04:46.2573646Z Successfully created stderr named pipe at: /podr/container/pipe/f0338afe47ca_askchessgpt/stderr_3481073ca2b648c083b14b2035a3f414.
+2026-03-12T20:04:46.2574581Z Opening named pipe /podr/container/pipe/f0338afe47ca_askchessgpt/stderr_3481073ca2b648c083b14b2035a3f414 for reading in non-blocking mode.
+2026-03-12T20:04:46.2575770Z Successfully opened named pipe: /podr/container/pipe/f0338afe47ca_askchessgpt/stderr_3481073ca2b648c083b14b2035a3f414.
+2026-03-12T20:04:46.2576944Z Successfully removed non-blocking flag from /podr/container/pipe/f0338afe47ca_askchessgpt/stderr_3481073ca2b648c083b14b2035a3f414.
+2026-03-12T20:04:46.2578709Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T20:04:48.9192731Z Starting container: f0338afe47ca_askchessgpt.
+2026-03-12T20:04:49.0792010Z Starting watchers and probes.
+2026-03-12T20:04:49.0800205Z Starting metrics collection.
+2026-03-12T20:04:49.0802058Z Container is running.
+2026-03-12T20:04:49.0978145Z State: Starting, Action: CreatingContainer, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:04:49.4541798Z Container start method finished after 6299 ms.
+2026-03-12T20:04:49.5100320Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:04:49.5101293Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T20:07:04.8456318Z Site startup probe succeeded after 135.322966 seconds.
+2026-03-12T20:07:05.0633359Z State: Starting, Action: WarmUpProbeSucceeded, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site startup probe succeeded after 135.322966 seconds., DetailsLevel: INFO
+2026-03-12T20:07:05.1498810Z Site is running with deployment version: 154cd65f-81bc-47a0-990a-943d88109a61
+2026-03-12T20:07:05.1556288Z Site started.
+2026-03-12T20:07:05.1572268Z State: Started, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: Site started at 03/12/2026 20:07:05 (UTC), DetailsLevel: INFO
+2026-03-12T20:07:05.1586821Z Site is running with patch version PYTHON 3.11.14
+2026-03-12T20:07:26.0258511Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 03/12/2026 19:59:08 (UTC), DetailsLevel: INFO
+2026-03-12T20:07:26.0341394Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 03/12/2026 19:59:08 (UTC), DetailsLevel: INFO
+2026-03-12T20:07:26.0348322Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:07:26.2645517Z Stop and delete container. Retry count = 0
+2026-03-12T20:07:26.2653394Z Stopping container: d20bcb5b22d7_askchessgpt.
+2026-03-12T20:07:31.4645974Z Deleting container: d20bcb5b22d7_askchessgpt. Retry count = 0
+2026-03-12T20:07:32.6615775Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:07:32.6707328Z Container is terminated. Total time elapsed: 6614 ms.
+2026-03-12T20:07:32.6719851Z Site: askchessgpt stopped.
+2026-03-12T20:10:51.7208029Z State: Blocked, Action: None, LastError: , LastErrorTimestamp: 01/01/0001 00:00:00, LastErrorDetails: , Details: , DetailsLevel: INFO
+2026-03-12T20:11:12.3598354Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 03/12/2026 20:07:05 (UTC), DetailsLevel: INFO
+2026-03-12T20:11:12.3681076Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site started at 03/12/2026 20:07:05 (UTC), DetailsLevel: INFO
+2026-03-12T20:11:12.3683329Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:11:12.3883540Z Stop and delete container. Retry count = 0
+2026-03-12T20:11:12.3886211Z Stopping container: f0338afe47ca_askchessgpt.
+2026-03-12T20:11:18.3124970Z Deleting container: f0338afe47ca_askchessgpt. Retry count = 0
+2026-03-12T20:11:19.1924624Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:11:19.1934520Z Container is terminated. Total time elapsed: 6824 ms.
+2026-03-12T20:11:19.1936821Z Site: askchessgpt stopped.
+2026-03-12T20:13:29.4973432Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: , DetailsLevel: INFO
+2026-03-12T20:13:31.6926720Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: , DetailsLevel: INFO
+2026-03-12T20:13:31.6994460Z Container start method called.
+2026-03-12T20:13:31.6995920Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:13:31.7003739Z Establishing network.
+2026-03-12T20:13:31.7005392Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T20:13:32.2076205Z Container is starting.
+2026-03-12T20:13:32.2077952Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:13:32.2081140Z Establishing user namespace if not established already.
+2026-03-12T20:13:32.2087284Z Establishing network if not established already.
+2026-03-12T20:13:32.2090195Z Mounting volumes.
+2026-03-12T20:13:32.2094420Z Nested mountpoint 
+2026-03-12T20:13:32.2482159Z Nested mountpoint volatile/logs
+2026-03-12T20:13:32.3060863Z Nested mountpoint 
+2026-03-12T20:13:32.4451727Z Nested mountpoint 
+2026-03-12T20:13:32.4560195Z Nested mountpoint 
+2026-03-12T20:13:32.8074356Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T20:13:32.8150208Z Creating container.
+2026-03-12T20:13:32.8161923Z Creating pipes for streaming container io.
+2026-03-12T20:13:32.8170798Z Creating stdout named pipe at /podr/container/pipe/1ddc70ed56df_askchessgpt/stdout_ebdd3f7dc973460a8e0ee78a3b870349.
+2026-03-12T20:13:32.8247922Z Successfully created stdout named pipe at: /podr/container/pipe/1ddc70ed56df_askchessgpt/stdout_ebdd3f7dc973460a8e0ee78a3b870349.
+2026-03-12T20:13:32.8274243Z Opening named pipe /podr/container/pipe/1ddc70ed56df_askchessgpt/stdout_ebdd3f7dc973460a8e0ee78a3b870349 for reading in non-blocking mode.
+2026-03-12T20:13:32.8468760Z Successfully opened named pipe: /podr/container/pipe/1ddc70ed56df_askchessgpt/stdout_ebdd3f7dc973460a8e0ee78a3b870349.
+2026-03-12T20:13:32.8533904Z Successfully removed non-blocking flag from /podr/container/pipe/1ddc70ed56df_askchessgpt/stdout_ebdd3f7dc973460a8e0ee78a3b870349.
+2026-03-12T20:13:32.8537717Z Creating stderr named pipe at /podr/container/pipe/1ddc70ed56df_askchessgpt/stderr_3b9fa55b8c6f4610b7e62445c7446c8e.
+2026-03-12T20:13:32.8542664Z Successfully created stderr named pipe at: /podr/container/pipe/1ddc70ed56df_askchessgpt/stderr_3b9fa55b8c6f4610b7e62445c7446c8e.
+2026-03-12T20:13:32.8546129Z Opening named pipe /podr/container/pipe/1ddc70ed56df_askchessgpt/stderr_3b9fa55b8c6f4610b7e62445c7446c8e for reading in non-blocking mode.
+2026-03-12T20:13:32.8554295Z Successfully opened named pipe: /podr/container/pipe/1ddc70ed56df_askchessgpt/stderr_3b9fa55b8c6f4610b7e62445c7446c8e.
+2026-03-12T20:13:32.8556766Z Successfully removed non-blocking flag from /podr/container/pipe/1ddc70ed56df_askchessgpt/stderr_3b9fa55b8c6f4610b7e62445c7446c8e.
+2026-03-12T20:13:32.8560806Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T20:13:34.2025003Z Starting container: 1ddc70ed56df_askchessgpt.
+2026-03-12T20:13:34.2805425Z Starting watchers and probes.
+2026-03-12T20:13:34.2810374Z Starting metrics collection.
+2026-03-12T20:13:34.2832273Z Container is running.
+2026-03-12T20:13:34.2907343Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:13:34.4700538Z Container start method finished after 2770 ms.
+2026-03-12T20:13:34.4702570Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:13:34.5109119Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T20:14:08.7579861Z Container has finished running with exit code: 3.
+2026-03-12T20:14:08.7586455Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:14:08.7768281Z Stop and delete container. Retry count = 0
+2026-03-12T20:14:08.7780709Z Stopping container: 1ddc70ed56df_askchessgpt.
+2026-03-12T20:14:08.8384483Z Deleting container: 1ddc70ed56df_askchessgpt. Retry count = 0
+2026-03-12T20:14:09.0793863Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:14:09.0802435Z Container is terminated. Total time elapsed: 320 ms.
+2026-03-12T20:14:09.0867600Z Site container: askchessgpt terminated during site startup.
+2026-03-12T20:14:09.0882212Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 19:48:04, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:09.1276340Z Site startup probe failed after 34.5585871 seconds.
+2026-03-12T20:14:09.4447689Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:09.4728999Z Failed to start site. Revert by stopping site.
+2026-03-12T20:14:09.4731149Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:09.4735819Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:09.4735987Z Site: askchessgpt stopped.
+2026-03-12T20:14:09.4941711Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:10.0264001Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:10.2982839Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:14:10 (UTC), DetailsLevel: ERR
+2026-03-12T20:14:10.5787113Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:14:10 (UTC), DetailsLevel: ERR
+2026-03-12T20:14:11.0660110Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:14:10 (UTC), DetailsLevel: ERR
+2026-03-12T20:14:12.8129367Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:14:10 (UTC), DetailsLevel: ERR
+2026-03-12T20:14:12.8314669Z Container start method called.
+2026-03-12T20:14:12.8316031Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:14:12.8317888Z Establishing network.
+2026-03-12T20:14:12.8319373Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T20:14:13.1244177Z Container is starting.
+2026-03-12T20:14:13.1299088Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:14:13.1307560Z Establishing user namespace if not established already.
+2026-03-12T20:14:13.1386918Z Establishing network if not established already.
+2026-03-12T20:14:13.1409259Z Mounting volumes.
+2026-03-12T20:14:13.1492001Z Nested mountpoint 
+2026-03-12T20:14:13.1799548Z Nested mountpoint volatile/logs
+2026-03-12T20:14:13.2896981Z Nested mountpoint 
+2026-03-12T20:14:13.3076707Z Nested mountpoint 
+2026-03-12T20:14:13.4491470Z Nested mountpoint 
+2026-03-12T20:14:14.0059543Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T20:14:14.0070310Z Creating container.
+2026-03-12T20:14:14.0078201Z Creating pipes for streaming container io.
+2026-03-12T20:14:14.0280093Z Creating stdout named pipe at /podr/container/pipe/60a03034f0f3_askchessgpt/stdout_5e805be198c240bbb8040a8c04981f38.
+2026-03-12T20:14:14.0443866Z Successfully created stdout named pipe at: /podr/container/pipe/60a03034f0f3_askchessgpt/stdout_5e805be198c240bbb8040a8c04981f38.
+2026-03-12T20:14:14.0463772Z Opening named pipe /podr/container/pipe/60a03034f0f3_askchessgpt/stdout_5e805be198c240bbb8040a8c04981f38 for reading in non-blocking mode.
+2026-03-12T20:14:14.0474367Z Successfully opened named pipe: /podr/container/pipe/60a03034f0f3_askchessgpt/stdout_5e805be198c240bbb8040a8c04981f38.
+2026-03-12T20:14:14.0549449Z Successfully removed non-blocking flag from /podr/container/pipe/60a03034f0f3_askchessgpt/stdout_5e805be198c240bbb8040a8c04981f38.
+2026-03-12T20:14:14.0552097Z Creating stderr named pipe at /podr/container/pipe/60a03034f0f3_askchessgpt/stderr_3c4376f8999f41299038f9fa92e56346.
+2026-03-12T20:14:14.0558803Z Successfully created stderr named pipe at: /podr/container/pipe/60a03034f0f3_askchessgpt/stderr_3c4376f8999f41299038f9fa92e56346.
+2026-03-12T20:14:14.0559973Z Opening named pipe /podr/container/pipe/60a03034f0f3_askchessgpt/stderr_3c4376f8999f41299038f9fa92e56346 for reading in non-blocking mode.
+2026-03-12T20:14:14.0561280Z Successfully opened named pipe: /podr/container/pipe/60a03034f0f3_askchessgpt/stderr_3c4376f8999f41299038f9fa92e56346.
+2026-03-12T20:14:14.0562418Z Successfully removed non-blocking flag from /podr/container/pipe/60a03034f0f3_askchessgpt/stderr_3c4376f8999f41299038f9fa92e56346.
+2026-03-12T20:14:14.0564010Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T20:14:14.7024136Z Starting container: 60a03034f0f3_askchessgpt.
+2026-03-12T20:14:14.7930101Z Starting watchers and probes.
+2026-03-12T20:14:14.7933808Z Starting metrics collection.
+2026-03-12T20:14:14.7935998Z Container is running.
+2026-03-12T20:14:14.7936805Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:14:15.0026784Z Container start method finished after 2171 ms.
+2026-03-12T20:14:15.0028696Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:14:15.0028983Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T20:14:58.3999284Z Container has finished running with exit code: 3.
+2026-03-12T20:14:58.4006145Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:14:58.4292000Z Stop and delete container. Retry count = 0
+2026-03-12T20:14:58.4359572Z Stopping container: 60a03034f0f3_askchessgpt.
+2026-03-12T20:14:58.5037019Z Deleting container: 60a03034f0f3_askchessgpt. Retry count = 0
+2026-03-12T20:14:58.7532173Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:14:58.7540986Z Container is terminated. Total time elapsed: 337 ms.
+2026-03-12T20:14:58.7549450Z Site container: askchessgpt terminated during site startup.
+2026-03-12T20:14:58.7554629Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:09, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:58.8051101Z Site startup probe failed after 43.8016409 seconds.
+2026-03-12T20:14:59.1094329Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:59.1200983Z Failed to start site. Revert by stopping site.
+2026-03-12T20:14:59.1202148Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:59.1205177Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:59.1205334Z Site: askchessgpt stopped.
+2026-03-12T20:14:59.1414316Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:14:59.6486082Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:15:00.0800155Z Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 20:16:00
+2026-03-12T20:15:00.0803163Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 20:16:00, DetailsLevel: WARN
+2026-03-12T20:15:00.0833007Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:15:00 (UTC), DetailsLevel: WARN
+2026-03-12T20:15:00.3526934Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:15:00 (UTC), DetailsLevel: WARN
+2026-03-12T20:16:00.0784836Z Site: askchessgpt is unblocked.
+2026-03-12T20:17:41.3046029Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:15:00 (UTC), DetailsLevel: WARN
+2026-03-12T20:17:43.9207562Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:15:00 (UTC), DetailsLevel: WARN
+2026-03-12T20:17:43.9210948Z Container start method called.
+2026-03-12T20:17:43.9211623Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:17:43.9212797Z Establishing network.
+2026-03-12T20:17:43.9214277Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T20:17:44.4927660Z Container is starting.
+2026-03-12T20:17:44.4928639Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:17:44.4929929Z Establishing user namespace if not established already.
+2026-03-12T20:17:44.4931017Z Establishing network if not established already.
+2026-03-12T20:17:44.4932410Z Mounting volumes.
+2026-03-12T20:17:44.5408165Z Nested mountpoint 
+2026-03-12T20:17:44.7288891Z Nested mountpoint volatile/logs
+2026-03-12T20:17:44.7395744Z Nested mountpoint 
+2026-03-12T20:17:44.7405177Z Nested mountpoint 
+2026-03-12T20:17:44.7992718Z Nested mountpoint 
+2026-03-12T20:17:46.0987459Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T20:17:46.0990233Z Creating container.
+2026-03-12T20:17:46.0991471Z Creating pipes for streaming container io.
+2026-03-12T20:17:46.0992588Z Creating stdout named pipe at /podr/container/pipe/a10fba8260e6_askchessgpt/stdout_4db5838d23044edcaa7ea4abe9b3de62.
+2026-03-12T20:17:46.1083677Z Successfully created stdout named pipe at: /podr/container/pipe/a10fba8260e6_askchessgpt/stdout_4db5838d23044edcaa7ea4abe9b3de62.
+2026-03-12T20:17:46.1086745Z Opening named pipe /podr/container/pipe/a10fba8260e6_askchessgpt/stdout_4db5838d23044edcaa7ea4abe9b3de62 for reading in non-blocking mode.
+2026-03-12T20:17:46.1089430Z Successfully opened named pipe: /podr/container/pipe/a10fba8260e6_askchessgpt/stdout_4db5838d23044edcaa7ea4abe9b3de62.
+2026-03-12T20:17:46.1091275Z Successfully removed non-blocking flag from /podr/container/pipe/a10fba8260e6_askchessgpt/stdout_4db5838d23044edcaa7ea4abe9b3de62.
+2026-03-12T20:17:46.1266964Z Creating stderr named pipe at /podr/container/pipe/a10fba8260e6_askchessgpt/stderr_2dbdc114cf034b96bccc90a036e37579.
+2026-03-12T20:17:46.1270532Z Successfully created stderr named pipe at: /podr/container/pipe/a10fba8260e6_askchessgpt/stderr_2dbdc114cf034b96bccc90a036e37579.
+2026-03-12T20:17:46.1276493Z Opening named pipe /podr/container/pipe/a10fba8260e6_askchessgpt/stderr_2dbdc114cf034b96bccc90a036e37579 for reading in non-blocking mode.
+2026-03-12T20:17:46.1278558Z Successfully opened named pipe: /podr/container/pipe/a10fba8260e6_askchessgpt/stderr_2dbdc114cf034b96bccc90a036e37579.
+2026-03-12T20:17:46.1281950Z Successfully removed non-blocking flag from /podr/container/pipe/a10fba8260e6_askchessgpt/stderr_2dbdc114cf034b96bccc90a036e37579.
+2026-03-12T20:17:46.1553036Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T20:17:47.5137373Z Starting container: a10fba8260e6_askchessgpt.
+2026-03-12T20:17:47.6601936Z Starting watchers and probes.
+2026-03-12T20:17:47.6631552Z Starting metrics collection.
+2026-03-12T20:17:47.7127640Z Container is running.
+2026-03-12T20:17:47.7129413Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:17:48.1440415Z Container start method finished after 4025 ms.
+2026-03-12T20:17:48.1533607Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:17:48.1534094Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T20:18:22.3954753Z Container has finished running with exit code: 3.
+2026-03-12T20:18:22.4034577Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:18:22.4038199Z Stop and delete container. Retry count = 0
+2026-03-12T20:18:22.4039472Z Stopping container: a10fba8260e6_askchessgpt.
+2026-03-12T20:18:22.5013108Z Deleting container: a10fba8260e6_askchessgpt. Retry count = 0
+2026-03-12T20:18:22.7825193Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:18:22.7987195Z Container is terminated. Total time elapsed: 386 ms.
+2026-03-12T20:18:22.7992386Z Site container: askchessgpt terminated during site startup.
+2026-03-12T20:18:22.7998051Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:14:59, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:22.8398418Z Site startup probe failed after 34.656588 seconds.
+2026-03-12T20:18:23.4029439Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:23.4322232Z Failed to start site. Revert by stopping site.
+2026-03-12T20:18:23.4324978Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:23.4421040Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:23.4421294Z Site: askchessgpt stopped.
+2026-03-12T20:18:23.4607675Z State: Stopping, Action: UnmountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:24.2680554Z State: Stopping, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:18:24.5938989Z Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 20:19:24
+2026-03-12T20:18:24.5940949Z State: Blocked, Action: StoppingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site: askchessgpt will be blocked for 1 minutes till 03/12/2026 20:19:24, DetailsLevel: WARN
+2026-03-12T20:18:24.6116135Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:18:24 (UTC), DetailsLevel: WARN
+2026-03-12T20:18:25.0333869Z State: Stopped, Action: None, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:18:24 (UTC), DetailsLevel: WARN
+2026-03-12T20:19:24.5967014Z Site: askchessgpt is unblocked.
+2026-03-12T20:19:41.5917497Z State: Starting, Action: EstablishingSiteNetworks, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:18:24 (UTC), DetailsLevel: WARN
+2026-03-12T20:19:43.8165250Z State: Starting, Action: StartingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site stopped at 03/12/2026 20:18:24 (UTC), DetailsLevel: WARN
+2026-03-12T20:19:43.8167443Z Container start method called.
+2026-03-12T20:19:43.8292803Z State: Starting, Action: PullingImage, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pulling image 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:19:43.8299135Z Establishing network.
+2026-03-12T20:19:43.8301046Z Pulling image: appsvc/python:3.11_20260203.2.tuxprod.
+2026-03-12T20:19:44.1794519Z Container is starting.
+2026-03-12T20:19:44.1798363Z State: Starting, Action: MountingVolumes, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Mounting volumes for askchessgpt., DetailsLevel: INFO
+2026-03-12T20:19:44.1803533Z Establishing user namespace if not established already.
+2026-03-12T20:19:44.1872501Z Establishing network if not established already.
+2026-03-12T20:19:44.1881461Z Mounting volumes.
+2026-03-12T20:19:44.1886749Z Nested mountpoint 
+2026-03-12T20:19:44.2287322Z Nested mountpoint volatile/logs
+2026-03-12T20:19:44.2570620Z Nested mountpoint 
+2026-03-12T20:19:44.2603701Z Nested mountpoint 
+2026-03-12T20:19:44.3173943Z Nested mountpoint 
+2026-03-12T20:19:44.9339114Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Finished pulling container image and mounting volumes for askchessgpt. Allocatinng the rest of the container resources to finish container creation., DetailsLevel: INFO
+2026-03-12T20:19:44.9340716Z Creating container.
+2026-03-12T20:19:44.9341885Z Creating pipes for streaming container io.
+2026-03-12T20:19:44.9355431Z Creating stdout named pipe at /podr/container/pipe/e1db1357e27c_askchessgpt/stdout_1a7221bd16024ead9c4218a81785763e.
+2026-03-12T20:19:44.9359011Z Successfully created stdout named pipe at: /podr/container/pipe/e1db1357e27c_askchessgpt/stdout_1a7221bd16024ead9c4218a81785763e.
+2026-03-12T20:19:44.9536318Z Opening named pipe /podr/container/pipe/e1db1357e27c_askchessgpt/stdout_1a7221bd16024ead9c4218a81785763e for reading in non-blocking mode.
+2026-03-12T20:19:44.9541496Z Successfully opened named pipe: /podr/container/pipe/e1db1357e27c_askchessgpt/stdout_1a7221bd16024ead9c4218a81785763e.
+2026-03-12T20:19:44.9545370Z Successfully removed non-blocking flag from /podr/container/pipe/e1db1357e27c_askchessgpt/stdout_1a7221bd16024ead9c4218a81785763e.
+2026-03-12T20:19:44.9634452Z Creating stderr named pipe at /podr/container/pipe/e1db1357e27c_askchessgpt/stderr_4ecf63e9581745b6a1f750d70c538eb3.
+2026-03-12T20:19:44.9636351Z Successfully created stderr named pipe at: /podr/container/pipe/e1db1357e27c_askchessgpt/stderr_4ecf63e9581745b6a1f750d70c538eb3.
+2026-03-12T20:19:44.9637402Z Opening named pipe /podr/container/pipe/e1db1357e27c_askchessgpt/stderr_4ecf63e9581745b6a1f750d70c538eb3 for reading in non-blocking mode.
+2026-03-12T20:19:44.9638756Z Successfully opened named pipe: /podr/container/pipe/e1db1357e27c_askchessgpt/stderr_4ecf63e9581745b6a1f750d70c538eb3.
+2026-03-12T20:19:44.9639807Z Successfully removed non-blocking flag from /podr/container/pipe/e1db1357e27c_askchessgpt/stderr_4ecf63e9581745b6a1f750d70c538eb3.
+2026-03-12T20:19:44.9747107Z Creating container with image: appsvc/python:3.11_20260203.2.tuxprod from registry: 10.1.0.4:13209 and fully qualified image name: 10.1.0.4:13209/appsvc/python:3.11_20260203.2.tuxprod
+2026-03-12T20:19:45.6083709Z Starting container: e1db1357e27c_askchessgpt.
+2026-03-12T20:19:45.7178076Z Starting watchers and probes.
+2026-03-12T20:19:45.7272707Z Starting metrics collection.
+2026-03-12T20:19:45.7358180Z Container is running.
+2026-03-12T20:19:45.7371469Z State: Starting, Action: CreatingContainer, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:19:46.0149765Z Container start method finished after 2179 ms.
+2026-03-12T20:19:46.0237097Z State: Starting, Action: InitiatingSiteWarmUpProbe, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Container askchessgpt successfully created and is running., DetailsLevel: INFO
+2026-03-12T20:19:46.0238123Z State: Starting, Action: WaitingForSiteWarmUpProbeSuccess, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Pinging warmup path to ensure container is ready to receive requests., DetailsLevel: INFO
+2026-03-12T20:20:21.8963982Z Container has finished running with exit code: 3.
+2026-03-12T20:20:21.8965382Z Container is terminating. Grace period: 5 seconds.
+2026-03-12T20:20:21.8969699Z Stop and delete container. Retry count = 0
+2026-03-12T20:20:21.8970701Z Stopping container: e1db1357e27c_askchessgpt.
+2026-03-12T20:20:21.9590734Z Deleting container: e1db1357e27c_askchessgpt. Retry count = 0
+2026-03-12T20:20:22.3861231Z Container spec TerminationMessagePolicy  path 
+2026-03-12T20:20:22.3867567Z Container is terminated. Total time elapsed: 490 ms.
+2026-03-12T20:20:22.3868912Z Site container: askchessgpt terminated during site startup.
+2026-03-12T20:20:22.3869776Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:18:23, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:20:22.4853535Z Site startup probe failed after 36.4530199 seconds.
+2026-03-12T20:20:22.8747748Z State: Stopping, Action: CancellingStartup, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:20:22, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:20:22.8766853Z Failed to start site. Revert by stopping site.
+2026-03-12T20:20:22.8772121Z State: Stopping, Action: StoppingSite, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:20:22, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:20:22.8775071Z State: Stopping, Action: StoppingSiteContainers, LastError: ContainerTimeout, LastErrorTimestamp: 03/12/2026 20:20:22, LastErrorDetails: Container did not start within expected time limit of 230s. Please inspect your container logs for more details., Details: Site container: askchessgpt terminated during site startup. Cancelling site startup., DetailsLevel: ERR
+2026-03-12T20:20:22.9157064Z Site: askchessgpt stopped.

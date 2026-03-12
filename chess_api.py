@@ -460,22 +460,41 @@ def init_openai():
         print(f"[chat] Init error: {e}")
         return False
 
+_stockfish_errors = []
+
 def init_stockfish():
     global engine
+    _stockfish_errors.clear()
     try:
         import platform
         system = platform.system().lower()
-        paths = {'linux': ['./stockfish-linux', './stockfish', 'stockfish'],
-                 'darwin': ['./stockfish-macos-m1-apple-silicon', './stockfish', 'stockfish']
-                 }.get(system, ['./stockfish.exe', './stockfish', 'stockfish'])
+        paths = {
+            'linux': ['/home/site/bin/stockfish-linux', './stockfish-linux',
+                      '/usr/games/stockfish', '/usr/bin/stockfish',
+                      './stockfish', 'stockfish'],
+            'darwin': ['./stockfish-macos-m1-apple-silicon', './stockfish', 'stockfish']
+        }.get(system, ['./stockfish.exe', './stockfish', 'stockfish'])
         for p in paths:
+            exists = os.path.exists(p)
+            print(f'[stockfish] Trying {p!r} exists={exists}')
             try:
-                if os.path.exists(p) or p == 'stockfish':
+                if exists or p == 'stockfish':
                     engine = chess.engine.SimpleEngine.popen_uci(p)
+                    print(f'[stockfish] Loaded from {p!r}')
                     return True
-            except Exception: continue
+            except Exception as e:
+                err = f'{p}: {e}'
+                _stockfish_errors.append(err)
+                print(f'[stockfish] Failed {err}')
         return False
-    except Exception: return False
+    except Exception as e:
+        _stockfish_errors.append(str(e))
+        return False
+
+# Initialize services for WSGI servers (e.g., gunicorn on Azure).
+# In local debug mode, __main__ below just starts Flask.
+init_stockfish()
+init_openai()
 
 # -- Routes ---------------------------------------------------------------
 
@@ -636,6 +655,35 @@ def health():
     return jsonify({'status': 'ok', 'engine': 'Stockfish' if engine else 'Random',
                     'stockfish': engine is not None, 'llm': bool(openai_client)})
 
+@app.route('/api/debug/stockfish', methods=['GET'])
+def debug_stockfish():
+    import platform, subprocess
+    system = platform.system().lower()
+    paths = {
+        'linux': ['/home/site/bin/stockfish-linux', './stockfish-linux',
+                  '/usr/games/stockfish', '/usr/bin/stockfish',
+                  './stockfish', 'stockfish'],
+        'darwin': ['./stockfish-macos-m1-apple-silicon', './stockfish', 'stockfish']
+    }.get(system, ['./stockfish.exe', './stockfish', 'stockfish'])
+    path_info = {p: {'exists': os.path.exists(p), 'size': os.path.getsize(p) if os.path.exists(p) else None} for p in paths}
+    ldd_out = ''
+    for p in paths:
+        if os.path.exists(p):
+            try:
+                ldd_out = subprocess.check_output(['ldd', p], stderr=subprocess.STDOUT, timeout=5).decode()
+            except Exception as e:
+                ldd_out = str(e)
+            break
+    os_release = ''
+    try:
+        with open('/etc/os-release') as f:
+            os_release = f.read()
+    except Exception:
+        pass
+    return jsonify({'cwd': os.getcwd(), 'system': system, 'engine_loaded': engine is not None,
+                    'paths': path_info, 'errors': _stockfish_errors, 'ldd': ldd_out[:1000],
+                    'os_release': os_release[:400]})
+
 def cleanup():
     global engine
     if engine:
@@ -643,8 +691,6 @@ def cleanup():
         except Exception: pass
 
 if __name__ == '__main__':
-    init_stockfish()
-    init_openai()
     try:
         app.run(debug=True, host='0.0.0.0', port=5100)
     finally:

@@ -1,0 +1,30 @@
+<step title="Incoming Request" date="2026-03-12T19:53:04.586" instance="5c395b" url="/api/publish?type=zip" method="POST" type="request" pid="770,1,16" Accept="*/*" Host="askchessgpt.scm.azurewebsites.net" User-Agent="AZURECLI/2.78.0 (HOMEBREW)" Accept-Encoding="gzip, deflate" Authorization="Bea..." Cache-Control="no-cache" Content-Type="application/octet-stream" Cookie="ARRAffinity=5c395bac9af7a360b7f41bfc5f7c41538d290e70c5e467720f7b4c4ba75d1d5d; ARRAffinitySameSite=5c395bac9af7a360b7f41bfc5f7c41538d290e70c5e467720f7b4c4ba75d1d5d" Content-Length="73056072" x-ms-client-request-id="0311e142-1e4d-11f1-8305-5ee34273c383" x-ms-artifact-checksum="2d02e1d888a967c862aeb608a67ae1ce47b533b90693c212e72b4512a04b4639" X-ARR-LOG-ID="0311e142-1e4d-11f1-8305-5ee34273c383" CLIENT-IP="66.75.246.163:57843" X-SITE-DEPLOYMENT-ID="askchessgpt" WAS-DEFAULT-HOSTNAME="askchessgpt.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/publish?type=zip" X-Client-IP="66.75.246.163" X-Client-Port="57843" >
+  <step title="Cleanup Xml Logs" date="2026-03-12T19:53:04.604" /><!-- duration: 77ms -->
+  <step title="OneDeploy" date="2026-03-12T19:53:05.281" >
+    <step title="None repository commit" date="2026-03-12T19:53:05.507" >
+      <step title="Commit id: 68723da2-6a2c-43e6-8c4c-b60b1b5a9c21" date="2026-03-12T19:53:05.565" Message="N/A" AuthorName="N/A" AuthorEmail="N/A" /><!-- duration: 32ms -->
+    </step><!-- duration: 117ms -->
+    <step title="Starting PushDeployAsync" date="2026-03-12T19:53:05.666" /><!-- duration: 27ms -->
+    <step title="Writing artifact to /tmp/zipdeploy/dd95c407-e99c-4a5e-bec4-657b12d760bb.zip" date="2026-03-12T19:53:05.831" >
+      <step title="Writing multipart request body to /tmp/zipdeploy/dd95c407-e99c-4a5e-bec4-657b12d760bb.zip" date="2026-03-12T19:53:05.852" /><!-- duration: 10ms -->
+    </step><!-- duration: 18919ms -->
+    <step title="Attempting to fetch target branch HEAD" date="2026-03-12T19:53:24.771" /><!-- duration: 4ms -->
+    <step title="Acquiring Deployment Lock" date="2026-03-12T19:53:24.780" /><!-- duration: 10ms -->
+    <step title="Acquired Deployment Lock" date="2026-03-12T19:53:24.846" /><!-- duration: 3ms -->
+    <step title="Performing fetch based deployment" date="2026-03-12T19:53:24.857" >
+      <step title="Creating temporary deployment" date="2026-03-12T19:53:24.862" /><!-- duration: 67ms -->
+      <step title="Releasing Deployment Lock" date="2026-03-12T19:53:26.174" /><!-- duration: 20ms -->
+      <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/dd95c407-e99c-4a5e-bec4-657b12d760bb.zip (69.67 MB) to /tmp/zipdeploy/extracted" date="2026-03-12T19:53:26.274" >
+        <step title="ChmodRecursive Process exited with total time taken in ms: 194" date="2026-03-12T19:53:34.105" /><!-- duration: 7ms -->
+      </step><!-- duration: 7868ms -->
+      <step title="None repository commit" date="2026-03-12T19:53:34.148" >
+        <step title="Commit id: 68723da2-6a2c-43e6-8c4c-b60b1b5a9c21" date="2026-03-12T19:53:34.158" Message="OneDeploy" AuthorName="N/A" AuthorEmail="N/A" /><!-- duration: 4ms -->
+      </step><!-- duration: 17ms -->
+      <step title="Deployment timer started" date="2026-03-12T19:53:36.171" >
+        <step title="DeploymentManager.Deploy(id:68723da2-6a2c-43e6-8c4c-b60b1b5a9c21)" date="2026-03-12T19:53:36.177" >
+          <step title="Collecting changeset information" date="2026-03-12T19:53:36.206" /><!-- duration: 97ms -->
+          <step title="Updating submodules" date="2026-03-12T19:53:36.310" /><!-- duration: 1158ms -->
+          <step title="Determining deployment builder" date="2026-03-12T19:53:37.712" >
+            <step title="Builder is OryxBuilder" date="2026-03-12T19:53:37.733" /><!-- duration: 4ms -->
+          </step><!-- duration: 29ms -->
+          <step title="PreDeployment: context.CleanOutputPath False" date="2026-03-12T19:53:37.829" 

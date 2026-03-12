@@ -1,0 +1,28 @@
+2026-03-12T19:50:27.3448977Z,Updating submodules.,f7625b0a-3436-48e8-9b58-7e779524c665,0
+2026-03-12T19:50:28.5056651Z,Preparing deployment for commit id '6e95282a-3'.,f715af21-81a1-443d-a26e-1187a0e31bae,0
+2026-03-12T19:50:28.9184635Z,PreDeployment: context.CleanOutputPath False,36025a40-61eb-4070-9aac-0f601e6dcd14,0
+2026-03-12T19:50:29.0880685Z,PreDeployment: context.OutputPath /home/site/wwwroot,d76a7f57-ebf7-4971-b55a-60edaba333f7,0
+2026-03-12T19:50:29.2821831Z,Repository path is /tmp/zipdeploy/extracted,d6f45728-805c-419b-8806-a3049f85e79e,0
+2026-03-12T19:50:29.4550231Z,Running oryx build...,cd65ebe4-ecce-4f71-bac2-fcf5f2f27785,0
+	2026-03-12T19:50:29.4909832Z,Command: oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.11 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de80709cb8fff4 --compress-destination-dir | tee /tmp/oryx-build.log,,0
+	2026-03-12T19:50:32.6912333Z,Operation performed by Microsoft Oryx&comma; https://github.com/Microsoft/Oryx,,0
+	2026-03-12T19:50:32.7611173Z,You can report issues at https://github.com/Microsoft/Oryx/issues,,0
+	2026-03-12T19:50:32.8018886Z,,,0
+	2026-03-12T19:50:32.8433602Z,Oryx Version: 0.2.20260204.1+0fdbe200b286be083841ff7fa201c6c2316dc6b9&comma; Commit: 0fdbe200b286be083841ff7fa201c6c2316dc6b9&comma; ReleaseTagName: 20260204.1,,0
+	2026-03-12T19:50:32.8915832Z,,,0
+	2026-03-12T19:50:32.9823712Z,Build Operation ID: 3c8789427a6756ae,,0
+	2026-03-12T19:50:33.0874877Z,Repository Commit : 6e95282a-3261-43ef-83f6-d9d7e233a88b,,0
+	2026-03-12T19:50:33.2186443Z,OS Type           : bullseye,,0
+	2026-03-12T19:50:33.2685107Z,Image Type        : githubactions,,0
+	2026-03-12T19:50:33.3242103Z,,,0
+	2026-03-12T19:50:33.3734617Z,Primary SDK Storage URL: https://oryx-cdn.microsoft.io,,0
+	2026-03-12T19:50:33.4511949Z,Backup SDK Storage URL: ,,0
+	2026-03-12T19:50:33.5527351Z,Detecting platforms...,,0
+	2026-03-12T19:50:33.5987829Z,External SDK provider is enabled.,,0
+	2026-03-12T19:50:33.6321874Z,Requesting metadata for platform python from external SDK provider,,0
+	2026-03-12T19:50:34.3930232Z,Requesting metadata for platform python from external SDK provider,,0
+	2026-03-12T19:50:35.4005907Z,Successfully requested blob for platform python&comma; blobName defaultVersion.bullseye.txt&comma; available at /var/OryxSdks/python/defaultVersion.bullseye.txt,,0
+	2026-03-12T19:50:35.4327249Z,Detected following platforms:,,0
+	2026-03-12T19:50:35.4515540Z,  python: 3.11.14,,0
+	2026-03-12T19:50:35.5020250Z,Requesting metadata for platform python from external SDK provider,,0
+	2026-03-12T19:50:41.8940923Z,Successfully requested blob for platform python&comma; blobName python-bullseye-3.11.14.tar.gz&comma; available at /var/OryxSdks/python/python-bullseye-3.11.14.tar.gz,,0

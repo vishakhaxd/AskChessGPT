@@ -1,0 +1,9 @@
+<step title="Incoming Request" date="2026-03-12T19:52:47.000" instance="5c395b" url="/api/deployments?warmup=true" method="GET" type="request" pid="770,1,16" Accept="*/*" Host="askchessgpt.scm.azurewebsites.net" User-Agent="AZURECLI/2.78.0 (HOMEBREW)" Accept-Encoding="gzip, deflate" Authorization="Bea..." Cookie="ARRAffinity=5c395bac9af7a360b7f41bfc5f7c41538d290e70c5e467720f7b4c4ba75d1d5d; ARRAffinitySameSite=5c395bac9af7a360b7f41bfc5f7c41538d290e70c5e467720f7b4c4ba75d1d5d" x-ms-client-request-id="0311e142-1e4d-11f1-8305-5ee34273c383" X-ARR-LOG-ID="0311e142-1e4d-11f1-8305-5ee34273c383" CLIENT-IP="66.75.246.163:57836" X-SITE-DEPLOYMENT-ID="askchessgpt" WAS-DEFAULT-HOSTNAME="askchessgpt.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/deployments?warmup=true" X-Client-IP="66.75.246.163" X-Client-Port="57836" >
+  <step title="DeploymentService.GetCurrentEtag" date="2026-03-12T19:52:58.651" >
+    <step title="Current Etag: &quot;f7217f8f56e56ee1&quot;, Cached Etag: " date="2026-03-12T19:53:00.499" /><!-- duration: 53ms -->
+  </step><!-- duration: 1959ms -->
+  <step title="DeploymentService.GetDeployResults" date="2026-03-12T19:53:00.652" >
+    <step title="DeploymentManager.GetResults" date="2026-03-12T19:53:00.693" /><!-- duration: 2679ms -->
+  </step><!-- duration: 2859ms -->
+  <step title="Outgoing response" date="2026-03-12T19:53:03.951" type="response" statusCode="200" statusText="OK" /><!-- duration: 26ms -->
+</step><!-- duration: 16990ms -->

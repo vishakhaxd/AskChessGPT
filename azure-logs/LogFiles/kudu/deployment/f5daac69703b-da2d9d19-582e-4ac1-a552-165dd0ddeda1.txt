@@ -1,0 +1,5 @@
+2026-03-12T19:53:26  Fetching changes.
+2026-03-12T19:53:26    Starting  LocalZipHandler
+2026-03-12T19:53:26    Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/dd95c407-e99c-4a5e-bec4-657b12d760bb.zip (69.67 MB) to /tmp/zipdeploy/extracted
+2026-03-12T19:53:37  Updating submodules.
+2026-03-12T19:53:37  Preparing deployment for commit id '68723da2-6'.

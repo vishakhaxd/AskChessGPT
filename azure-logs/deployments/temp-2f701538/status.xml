@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<deployment>
+  <id>temp-2f701538</id>
+  <author>Deploying from pushed zip file</author>
+  <deployer>Push-Deployer</deployer>
+  <authorEmail>N/A</authorEmail>
+  <message>N/A</message>
+  <progress></progress>
+  <status>Failed</status>
+  <statusText>Deployment has been stopped due to SCM container restart. The restart can happen due to a management operation on site. Do not perform a management operation and a deployment operation in quick succession. Adding a small delay can help avoid any conflicts.</statusText>
+  <lastSuccessEndTime />
+  <receivedTime>2026-03-12T20:05:12.0975049Z</receivedTime>
+  <startTime>2026-03-12T20:05:12.0975049Z</startTime>
+  <endTime>2026-03-12T20:23:17.5050347Z</endTime>
+  <complete>True</complete>
+  <is_temp>True</is_temp>
+  <is_readonly>False</is_readonly>
+  <containerId>9b4691359984</containerId>
+  <buildSummary />
+</deployment>
