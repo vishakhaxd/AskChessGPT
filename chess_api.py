@@ -18,7 +18,9 @@ openai_client = None
 load_dotenv()
 
 # -- Game state persistence (file-based) ----------------------------------------
-GAMES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'games')
+# /home is persistent on Azure App Service; fallback to local for dev
+_home = '/home' if os.path.isdir('/home') and os.access('/home', os.W_OK) else os.path.dirname(os.path.abspath(__file__))
+GAMES_DIR = os.path.join(_home, 'games')
 os.makedirs(GAMES_DIR, exist_ok=True)
 
 import re
