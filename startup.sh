@@ -45,9 +45,13 @@ else
 fi
 
 # Install packages if required by runtime environment.
+# Install packages to /home/site/pylibs (persists across container restarts).
+export PYTHONPATH="/home/site/pylibs/lib/python$(python -c 'import sys; print("%d.%d"%sys.version_info[:2])')/site-packages:${PYTHONPATH:-}"
 if ! python -c "import flask_cors" >/dev/null 2>&1; then
-  echo "[startup] Installing packages..."
-  pip install --no-cache-dir --root-user-action=ignore -r /home/site/wwwroot/requirements.txt
+  echo "[startup] Installing packages to /home/site/pylibs..."
+  pip install --no-cache-dir --root-user-action=ignore \
+    --target /home/site/pylibs/lib/python$(python -c 'import sys; print("%d.%d"%sys.version_info[:2])')/site-packages \
+    -r /home/site/wwwroot/requirements.txt
   echo "[startup] Packages installed."
 fi
 

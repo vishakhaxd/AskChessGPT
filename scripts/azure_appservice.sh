@@ -143,6 +143,10 @@ configure_webapp() {
     --resource-group "$RESOURCE_GROUP" \
     --linux-fx-version "PYTHON|3.11" \
     --startup-file "bash startup.sh" >/dev/null
+    az webapp config set \
+      --name "$APP_NAME" \
+      --resource-group "$RESOURCE_GROUP" \
+      --always-on true >/dev/null
 
   az webapp config appsettings set \
     --name "$APP_NAME" \
